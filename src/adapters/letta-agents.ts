@@ -73,7 +73,7 @@ class AgentManager {
         },
         {
           label: "persona",
-          value: templates.agentMemory
+          value: templates.p33lPersona
         }
       ],
       blockIds: [templates.sharedMemoryBlockId],
@@ -180,7 +180,7 @@ class AgentManager {
           },
           {
             label: "persona",
-            value: templates.agentMemory
+            value: templates.p33lPersona
           }
         ],
         blockIds: [templates.sharedMemoryBlockId],
