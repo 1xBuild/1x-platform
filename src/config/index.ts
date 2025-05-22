@@ -183,9 +183,9 @@ export const config = {
     botId: envVars.data.TELEGRAM_BOT_ID,
     groupId: envVars.data.TELEGRAM_GROUP_ID,
     chatIdForTimer: envVars.data.TELEGRAM_CHAT_ID_FOR_TIMER,
-    respondToDms: envVars.data.TELEGRAM_RESPOND_TO_DMS,
-    respondToMentions: envVars.data.TELEGRAM_RESPOND_TO_MENTIONS,
-    respondToGeneric: envVars.data.TELEGRAM_RESPOND_TO_GENERIC,
+    respondToDms: envVars.data.RESPOND_TO_DMS,
+    respondToMentions: envVars.data.RESPOND_TO_MENTIONS,
+    respondToGeneric: envVars.data.RESPOND_TO_GENERIC,
   }
 };
 
