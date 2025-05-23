@@ -65,7 +65,11 @@ const envSchema = z.object({
   TELEGRAM_RESPOND_TO_GENERIC: z.preprocess(
     (val: unknown) => val === 'true',
     z.boolean()
-  ).default(false), // Default to false for groups, to avoid too much noise
+  ).default(true), // Default to false for groups, to avoid too much noise
+  TELEGRAM_LLM_DECIDES_GROUP_RESPONSE: z.preprocess(
+    (val: unknown) => val === 'true',
+    z.boolean()
+  ).default(true), // Default to false
 
   // Timer Configuration
   ENABLE_TIMER: z.preprocess(
@@ -183,9 +187,10 @@ export const config = {
     botId: envVars.data.TELEGRAM_BOT_ID,
     groupId: envVars.data.TELEGRAM_GROUP_ID,
     chatIdForTimer: envVars.data.TELEGRAM_CHAT_ID_FOR_TIMER,
-    respondToDms: envVars.data.RESPOND_TO_DMS,
-    respondToMentions: envVars.data.RESPOND_TO_MENTIONS,
-    respondToGeneric: envVars.data.RESPOND_TO_GENERIC,
+    respondToDms: envVars.data.TELEGRAM_RESPOND_TO_DMS,
+    respondToMentions: envVars.data.TELEGRAM_RESPOND_TO_MENTIONS,
+    respondToGeneric: envVars.data.TELEGRAM_RESPOND_TO_GENERIC,
+    llmDecidesGroupResponse: envVars.data.TELEGRAM_LLM_DECIDES_GROUP_RESPONSE,
   }
 };
 

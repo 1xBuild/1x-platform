@@ -3,10 +3,19 @@ import { message } from 'telegraf/filters';
 import { config } from '../config/index';
 import { getOrCreatePersonalAgent } from './agents';
 import { sendMessage, sendTimerMessage, MessageType, MessagePayload } from './message-service';
+import { openaiAdapter } from '../adapters/openai';
+import { p33lyShouldAnswerPromptTemplate, parseTemplate } from '../data/template';
+
+// Define the expected JSON structure from the LLM
+interface ShouldAnswerResponse {
+  answer: 'yes' | 'no';
+  reason: string;
+}
 
 export class TelegramBot {
   private bot: Telegraf<Context>;
   private mainAgentId: string = '';
+  private messageHistory: Map<string, Array<{text: string, sender: string}>> = new Map(); // chatId -> message history with sender info
 
   constructor() {
     if (!config.telegram || !config.telegram.token) {
@@ -60,10 +69,38 @@ export class TelegramBot {
   }
 
   /**
+   * Add a message to the history for a specific chat
+   */
+  private addMessageToHistory(chatId: string, message: string, senderId: string): void {
+    if (!this.messageHistory.has(chatId)) {
+      this.messageHistory.set(chatId, []);
+    }
+    const history = this.messageHistory.get(chatId)!;
+    
+    // Determine if the sender is P33ly (the bot)
+    const sender = config.telegram.botId && senderId === config.telegram.botId 
+      ? "P33ly" 
+      : `User_${senderId}`;
+
+    history.push({ text: message, sender });
+    // Keep only the last 10 messages
+    if (history.length > 10) {
+      history.shift();
+    }
+  }
+
+  /**
+   * Get recent messages for a specific chat
+   */
+  private getRecentMessages(chatId: string, limit: number = 3): string[] {
+    const history = this.messageHistory.get(chatId) || [];
+    return history.slice(-limit).map(msg => `${msg.sender}: ${msg.text}`);
+  }
+
+  /**
    * Handle incoming text messages
    */
   private async handleTextMessage(ctx: Context): Promise<void> {
-
     console.log(`📩 Received message from ${ctx.from?.username}: ${ctx.message?.chat.id}`);
 
     // Ensure 'message' and 'text' properties exist
@@ -126,9 +163,37 @@ export class TelegramBot {
     // Handle generic messages in groups (if the bot is part of the group and configured to respond)
     // This would typically be for groups where the bot is explicitly added and configured to listen.
     // The config.telegram.groupId could be used here.
+    console.log(`🤖 Responding to generic messages in group ${ctx.chat?.id}`);
+    console.log(`🤖 RespondToGeneric: ${config.telegram.respondToGeneric}`);
+    console.log(`🤖 GroupId: ${config.telegram.groupId}`);
+    console.log(`🤖 ChatId: ${ctx.chat?.id}`);
+    console.log(`🤖 Message: ${ctx.message.text}`);
     if (config.telegram.respondToGeneric && ctx.chat && ctx.chat.id.toString() === config.telegram.groupId) {
-        await this.handleGenericMessage(ctx);
-        return;
+      console.log(`🤖 Handling generic message in group ${ctx.chat.id}`);
+        // If LLM should decide, call shouldAnswer
+        if (config.telegram.llmDecidesGroupResponse) {
+            // Add current message to history
+            if (ctx.message && 'text' in ctx.message && ctx.from) {
+                this.addMessageToHistory(ctx.chat.id.toString(), ctx.message.text, ctx.from.id.toString());
+            }
+
+            // Get recent messages
+            const messageHistory = this.getRecentMessages(ctx.chat.id.toString(), 3);
+
+            console.log(`🤖 Message history: ${messageHistory}`);
+            const decision = await this.shouldAnswer(ctx.message.text, messageHistory.reverse());
+            if (decision.answer === 'yes') {
+                console.log(`🤖 LLM says YES to responding: ${decision.reason}`);
+                await this.handleGenericMessage(ctx);
+            } else {
+                console.log(`🤖 LLM says NO to responding: ${decision.reason}`);
+            }
+            return;
+        } else {
+            // Fallback to original generic message handling if LLM decision is disabled
+            await this.handleGenericMessage(ctx);
+            return;
+        }
     }
 
     console.log(`📩 Received message from ${username} in chat ${ctx.chat?.id}, but no specific handler matched.`);
@@ -221,28 +286,24 @@ export class TelegramBot {
         console.log(`🤖 Using agent: ${agentId} for user: ${ctx.from.username || ctx.from.id}`);
       }
 
-      // We need to adapt sendMessage to work with Telegraf's Context object
-      // or extract the necessary information from ctx to pass to sendMessage.
-      // For now, let's assume sendMessage can be adapted or is generic enough.
-      // If sendMessage expects a Discord.js Message object, this will need significant refactoring.
-      // Assuming sendMessage is adapted to take a more generic message object or parts of it.
-
       // Construct MessagePayload from Telegraf context
       if (!ctx.message || !('text' in ctx.message) || !ctx.from || !ctx.chat) {
         console.error('🛑 Error: Missing critical message, user, or chat information in context for processAndSendMessage.');
-        // Potentially send a reply if possible, though ctx might be too compromised
         return;
       }
       const payload: MessagePayload = {
         content: ctx.message.text,
         senderId: ctx.from.id.toString(),
         senderName: ctx.from.username || `User_${ctx.from.id}`,
-        // channelId: ctx.chat.id.toString()
       };
       const responseText = await sendMessage(payload, messageType, agentId);
       
       if (responseText !== "") {
         await ctx.reply(responseText);
+        // Add bot's response to message history
+        if (config.telegram.botId) {
+          this.addMessageToHistory(ctx.chat.id.toString(), responseText, config.telegram.botId);
+        }
         console.log(`Message sent: ${responseText}`);
       }
     } catch (error: any) {
@@ -256,6 +317,10 @@ export class TelegramBot {
       const errorMessage = '❌ Sorry, I encountered an error processing your request. Please try again later.';
       try {
         await ctx.reply(errorMessage);
+        // Add error message to history as well
+        if (config.telegram.botId && ctx.chat) {
+          this.addMessageToHistory(ctx.chat.id.toString(), errorMessage, config.telegram.botId);
+        }
       } catch (replyError) {
         console.error('🛑 Failed to send error message to user:', replyError)
       }
@@ -308,6 +373,31 @@ export class TelegramBot {
         this.startRandomEventTimer(); 
       }, 1000);
     }, delay);
+  }
+
+  private async shouldAnswer(currentMessageText: string, history: string[]): Promise<ShouldAnswerResponse> {
+    const promptValues = {
+      current_message: currentMessageText,
+      history_message_1: history[0] || "",
+      history_message_2: history[1] || "",
+      history_message_3: history[2] || "",
+    };
+
+    const filledPrompt = parseTemplate(p33lyShouldAnswerPromptTemplate, promptValues);
+
+    try {
+      console.log('🤖 Asking LLM if P33ly should answer...');
+      const response = await openaiAdapter.createJsonCompletion<ShouldAnswerResponse>(
+        filledPrompt,
+        // config.openai.model, // Or your preferred model for this task
+        // You might want to use a faster/cheaper model for this if available
+      );
+      console.log(`🤖 LLM decision: ${response.answer}, Reason: ${response.reason}`);
+      return response;
+    } catch (error) {
+      console.error('Error getting LLM decision for shouldAnswer:', error);
+      return { answer: 'no', reason: 'Error in LLM decision process.' }; // Default to no on error
+    }
   }
 
   // We might not need getRecentMessages and truncateMessage here if `sendMessage` and services handle this.
