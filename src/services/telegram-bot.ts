@@ -187,6 +187,8 @@ export class TelegramBot {
             const decision = await this.shouldAnswer(ctx.message.text, messageHistory.reverse());
             if (decision.answer === 'yes') {
                 console.log(`🤖 LLM says YES to responding: ${decision.reason}`);
+                // Small delay to avoid rate limiting 0.8 seconds
+                await new Promise(resolve => setTimeout(resolve, 500));
                 await this.handleGenericMessage(ctx);
             } else {
                 console.log(`🤖 LLM says NO to responding: ${decision.reason}`);
