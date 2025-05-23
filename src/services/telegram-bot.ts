@@ -165,13 +165,11 @@ export class TelegramBot {
     
     // Handle generic messages in groups (if the bot is part of the group and configured to respond)
     // This would typically be for groups where the bot is explicitly added and configured to listen.
-    // The config.telegram.groupId could be used here.
     console.log(`🤖 Responding to generic messages in group ${ctx.chat?.id}`);
     console.log(`🤖 RespondToGeneric: ${config.telegram.respondToGeneric}`);
-    console.log(`🤖 GroupId: ${config.telegram.groupId}`);
     console.log(`🤖 ChatId: ${ctx.chat?.id}`);
     console.log(`🤖 Message: ${ctx.message.text}`);
-    if (config.telegram.respondToGeneric && ctx.chat && ctx.chat.id.toString() === config.telegram.groupId) {
+    if (config.telegram.respondToGeneric && ctx.chat) {
       console.log(`🤖 Handling generic message in group ${ctx.chat.id}`);
         // If LLM should decide, call shouldAnswer
         if (config.telegram.llmDecidesGroupResponse) {
@@ -187,7 +185,7 @@ export class TelegramBot {
             const decision = await this.shouldAnswer(ctx.message.text, messageHistory.reverse());
             if (decision.answer === 'yes') {
                 console.log(`🤖 LLM says YES to responding: ${decision.reason}`);
-                // Small delay to avoid rate limiting 0.8 seconds
+                // Small delay to avoid rate limiting 0.5 seconds
                 await new Promise(resolve => setTimeout(resolve, 500));
                 await this.handleGenericMessage(ctx);
             } else {
