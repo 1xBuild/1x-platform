@@ -154,10 +154,13 @@ export class TelegramBot {
         entity.type === 'mention' && messageText.substring(entity.offset, entity.offset + entity.length) === `@${botUsername}`
     ) || (ctx.message.reply_to_message && ctx.message.reply_to_message.from?.username === botUsername);
 
-
-    if (config.telegram.respondToMentions && isMentioned) {
-        await this.handleMentionOrReply(ctx);
-        return;
+    // BYPASS: Always respond if mentioned or reply to bot
+    if (
+      (config.telegram.respondToMentions && isMentioned) ||
+      (ctx.message.reply_to_message && ctx.message.reply_to_message.from?.username === botUsername)
+    ) {
+      await this.handleMentionOrReply(ctx);
+      return;
     }
     
     // Handle generic messages in groups (if the bot is part of the group and configured to respond)
