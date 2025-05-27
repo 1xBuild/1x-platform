@@ -91,6 +91,10 @@ const envSchema = z.object({
     z.number().positive()
   ).default(3000),
 
+  // Webhook Configuration
+  DISCORD_WEBHOOK_URL: z.string().url().optional(),
+  SLACK_WEBHOOK_URL: z.string().url().optional(),
+
   // Langfuse Configuration
   LANGFUSE_SECRET_KEY: z.string().optional(),
   LANGFUSE_PUBLIC_KEY: z.string().optional(),
@@ -161,6 +165,8 @@ export const config = {
   },
   app: {
     port: envVars.data.PORT,
+    discordWebhookUrl: envVars.data.DISCORD_WEBHOOK_URL,
+    slackWebhookUrl: envVars.data.SLACK_WEBHOOK_URL,
   },
   langfuse: {
     secretKey: envVars.data.LANGFUSE_SECRET_KEY,

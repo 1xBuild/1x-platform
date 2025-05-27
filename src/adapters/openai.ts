@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
 import { config } from '../config/index';
-import { ApiCache } from '../utils/apiCache';
+import { ApiCache } from '../utils/api-cache';
 
 // Initialize the OpenAI client
 const client = new OpenAI({
