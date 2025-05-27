@@ -1,6 +1,7 @@
 import { Message } from "discord.js";
 import { lettaMessageAdapter } from '../adapters/letta-messages';
 import { config } from '../config/index';
+import { sendAlertToAdmins } from "../utils/alert-handler";
 
 export enum MessageType {
   DM = "DM",
@@ -99,6 +100,7 @@ export const sendMessage = async (
     return "";
   } catch (error) {
     console.error(error);
+    await sendAlertToAdmins(error instanceof Error ? error.message : `Error sending message to Letta server: ${JSON.stringify(error)}`);
     return SURFACE_ERRORS ? 'Beep boop. An error occurred while communicating with the Letta server. Please message me again later 👾' : "";
   }
 };
