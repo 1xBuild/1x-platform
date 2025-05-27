@@ -73,7 +73,8 @@ class AgentManager {
         },
         {
           label: "persona",
-          value: templates.p33lPersona
+          value: templates.p33lPersona,
+          limit: 6000
         }
       ],
       blockIds: [templates.sharedMemoryBlockId],
@@ -180,7 +181,8 @@ class AgentManager {
           },
           {
             label: "persona",
-            value: templates.p33lPersona
+            value: templates.p33lPersona,
+            limit: 6000
           }
         ],
         blockIds: [templates.sharedMemoryBlockId],
