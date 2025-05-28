@@ -1,0 +1,53 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+OBJECTIF
+- Permettre à une équipe marketing de mettre à jour dynamiquement les prompts et versions de modèles IA à travers une interface simple.
+- Exploiter une base de données légère (SQLite) et une interface React admin pour orchestrer les modifications.
+- Déployer une plateforme complète sur Vercel (admin) et héberger une API Express dédiée à la gestion des agents.
+- Préparer une architecture modulaire pour versionner les prompts, simuler les changements, et visualiser les effets côté API letta.
+
+
+FONCTIONNALITES CLES
+- Connexion admin (ID/PW simple) pour accès restreint à l’interface.
+- Affichage des agents : nom, description, modèle, version, prompt actif.
+- Édition JSON enrichi : formulaire ou éditeur brut du prompt avec contrôle de validation.
+- Déploiement rapide : mettre une nouvelle version "active" via simple toggle ou bouton.
+- Synchronisation avec API letta via `lettaClient.agents.modify`.
+- Historique optionnel des changements (via un champ `createdAt` ou une table dédiée).
+- Reset possible à une version précédente (sauvegardée ou encodée).
+
+
+PHASE DE DEVELOPPEMENT
+
+- Initialisation
+    - Scaffold double projet :
+    - Backend : Express + SQLite
+    - Frontend : React + Vite + Tailwind
+    - Configuration TypeScript, ESLint + Prettier
+    - Création des tables `User` et `Agent`
+    - Mise en place de la structure d’agent : `agent_details: json[]`
+- Module import/export
+    - Route `GET /agents` : récupérer tous les agents
+    - Route `POST /agents/:id/update` : mettre à jour un prompt/version
+    - Route `POST /agents/:id/reset` : revenir à la version précédente
+    - Middleware auth simple (rick:ricksanchez)
+- Intégration OpenAI
+    - Page de login (auth simplifiée)
+- Page /admin :
+  - Chargement des agents
+  - Édition des prompts (JSON editor ou textarea)
+  - Bouton "déployer"
+  - Feedback de succès ou rollback
+- UI MVP
+    - Appel à `lettaClient.agents.modify` à chaque mise à jour effective
+    - Vérification de la propagation via app.letta.com
+- Tests & Qualité
+    - Tests backend (Jest + Supertest)
+    - Tests frontend (Vitest + Testing Library)
+    - Linting + format automatique
+    - Type-check strict (`tsc --noEmit`)
+- Optimisation & Scalabilité
+    - Caching des réponses
