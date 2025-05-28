@@ -4,13 +4,21 @@ import { config } from './config/index';
 import { getOrCreateMainAgent } from './services/agents';
 import { discordBot } from './services/discord-bot';
 import { telegramBot } from './services/telegram-bot';
+import authRoutes from './routes/auth.routes';
 
 // Initialize express app
 const app = express();
 const PORT = config.app.port;
 
+// --- Middlewares globaux ---
+//app.use(cors());
+app.use(express.json());
+
+// --- Routes API ---
+app.use('/api', authRoutes);
+
 // Main function to initialize all services
-async function init() {
+async function initServices() {
   try {
     console.log('🚀 Starting application...');
 
@@ -34,5 +42,5 @@ async function init() {
 // Start the server
 app.listen(PORT, () => {
   console.log(`🌐 Server listening on port ${PORT}`);
-  init();
+  initServices();
 });
