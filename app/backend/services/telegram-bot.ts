@@ -1,7 +1,7 @@
 import { Telegraf, Context } from 'telegraf';
 import { message } from 'telegraf/filters';
 import { config } from '../config/index';
-import { getOrCreatePersonalAgent } from './agents';
+import { agentManager } from './letta/letta-agents';
 import { sendMessage, sendTimerMessage, MessageType, MessagePayload } from './message-service';
 import { openaiService } from './openai';
 import { p33lyShouldAnswerPromptTemplate, parseTemplate } from '../data/template';
@@ -282,7 +282,7 @@ export class TelegramBot {
       let agentId = existingAgentId || this.mainAgentId;
       
       if (messageType === MessageType.DM) {
-        agentId = await getOrCreatePersonalAgent(
+        agentId = await agentManager.getOrCreateDmAgent(
           ctx.from.id.toString(), // Telegram user ID
           ctx.chat.id.toString(), // Telegram chat ID
           ctx.from.username || `User_${ctx.from.id}`

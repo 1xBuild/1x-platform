@@ -3,7 +3,7 @@ import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import { config } from './config/index';
-import { getOrCreateMainAgent } from './services/agents';
+import { agentManager } from './services/letta/letta-agents';
 import { discordBot } from './services/discord-bot';
 import { telegramBot } from './services/telegram-bot';
 import authRoutes from './routes/auth.routes';
@@ -40,7 +40,7 @@ async function initServices() {
     console.log('🚀 Starting bots services...');
 
     // Initialize the main agent
-    const mainAgentId = await getOrCreateMainAgent();
+    const mainAgentId = await agentManager.getOrCreateMainAgent();
     console.log(`🤖 Main agent ID: ${mainAgentId}`);
 
     // Initialize the telegram bot
