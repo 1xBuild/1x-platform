@@ -1,5 +1,5 @@
 // __tests__/datasource.test.ts
-import { DataSourceManager } from '../app/backend/adapters/letta-datasource';
+import { DataSourceManager } from '../app/backend/services/letta/letta-datasource';
 import { createReadStream } from 'fs';
 // No need to import jest types directly
 

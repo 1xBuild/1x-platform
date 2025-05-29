@@ -2,10 +2,10 @@ import { lettaClient } from './letta-client';
 import { LettaClient } from '@letta-ai/letta-client';
 import path from 'path';
 import fs from 'fs';
-import * as templates from '../data/template';
-import { AgentType, AgentName } from '../types';
-import { parseTemplate } from '../data/template';
-import { config } from '../config/index';
+import * as templates from '../../data/template';
+import { AgentType, AgentName } from '../../types';
+import { parseTemplate } from '../../data/template';
+import { config } from '../../config/index';
 /**
  * Manages Letta agent mappings for Discord conversations.
  */

@@ -90,6 +90,11 @@ const envSchema = z.object({
     (val: unknown) => parseInt(String(val), 10),
     z.number().positive()
   ).default(3000),
+  CORS_ORIGIN: z.string().url().optional(),
+  UPLOAD_MAX_JSON_SIZE: z.preprocess(
+    (val: unknown) => parseInt(String(val), 10),
+    z.number().positive()
+  ).default(1024 * 1024 * 10), // 10MB default limit
 
   // Webhook Configuration
   DISCORD_WEBHOOK_URL: z.string().url().optional(),
@@ -136,6 +141,7 @@ if (!envVars.success) {
 
 // Export typed and validated config
 export const config = {
+  env: process.env.NODE_ENV,
   letta: {
     token: envVars.data.LETTA_TOKEN,
     baseUrl: envVars.data.LETTA_BASE_URL,
@@ -167,6 +173,8 @@ export const config = {
     port: envVars.data.PORT,
     discordWebhookUrl: envVars.data.DISCORD_WEBHOOK_URL,
     slackWebhookUrl: envVars.data.SLACK_WEBHOOK_URL,
+    corsOrigin: envVars.data.CORS_ORIGIN,
+    uploadMaxJsonSize: envVars.data.UPLOAD_MAX_JSON_SIZE,
   },
   langfuse: {
     secretKey: envVars.data.LANGFUSE_SECRET_KEY,

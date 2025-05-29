@@ -1,5 +1,5 @@
 import { LettaClient } from "@letta-ai/letta-client";
-import { config } from "../config";
+import { config } from "../../config";
 
 class LettaManager {
   private static readonly client = new LettaClient({

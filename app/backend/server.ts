@@ -1,14 +1,27 @@
 import 'dotenv/config';
 import express from 'express';
+import helmet from 'helmet';
+import cors from 'cors';
 import { config } from './config/index';
 import { getOrCreateMainAgent } from './services/agents';
 import { discordBot } from './services/discord-bot';
 import { telegramBot } from './services/telegram-bot';
 import authRoutes from './routes/auth.routes';
+import { errorHandler } from './middlewares/error.middleware';
+import { notFoundHandler } from './middlewares/not-found.middleware';
+import { createApiLimiter } from './config/rateLimiter';
 
 // Initialize express app
 const app = express();
 const PORT = config.app.port;
+// Trust proxy - required when running behind a reverse proxy (like Docker)
+app.set('trust proxy', 1);
+
+// Middlewares Security & Parsing
+app.use(helmet());
+app.use(cors({ origin: config.app.corsOrigin }));
+app.use(express.json({ limit: config.app.uploadMaxJsonSize }));
+app.use(createApiLimiter);
 
 // --- Middlewares globaux ---
 //app.use(cors());
@@ -17,10 +30,14 @@ app.use(express.json());
 // --- Routes API ---
 app.use('/api', authRoutes);
 
-// Main function to initialize all services
+// --- Middlewares ---
+app.use(notFoundHandler);
+app.use(errorHandler);
+
+// Main function to initialize all bots services
 async function initServices() {
   try {
-    console.log('🚀 Starting application...');
+    console.log('🚀 Starting bots services...');
 
     // Initialize the main agent
     const mainAgentId = await getOrCreateMainAgent();

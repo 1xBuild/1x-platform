@@ -1,5 +1,5 @@
 import { Message } from "discord.js";
-import { lettaMessageAdapter } from '../adapters/letta-messages';
+import { lettaMessageAdapter } from './letta/letta-messages';
 import { config } from '../config/index';
 import { sendAlertToAdmins } from "../utils/alert-handler";
 

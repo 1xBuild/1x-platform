@@ -3,7 +3,7 @@ import { message } from 'telegraf/filters';
 import { config } from '../config/index';
 import { getOrCreatePersonalAgent } from './agents';
 import { sendMessage, sendTimerMessage, MessageType, MessagePayload } from './message-service';
-import { openaiAdapter } from '../adapters/openai';
+import { openaiService } from './openai';
 import { p33lyShouldAnswerPromptTemplate, parseTemplate } from '../data/template';
 
 // Define the expected JSON structure from the LLM
@@ -50,6 +50,7 @@ export class TelegramBot {
 
     // Handle incoming text messages
     this.bot.on(message('text'), this.handleTextMessage.bind(this));
+    console.log('🤖 Telegram bot setup complete');
 
     // TODO: Add more handlers as needed (e.g., for other commands, different message types)
   }
@@ -390,7 +391,7 @@ export class TelegramBot {
 
     try {
       console.log('🤖 Asking LLM if P33ly should answer...');
-      const response = await openaiAdapter.createJsonCompletion<ShouldAnswerResponse>(
+      const response = await openaiService.createJsonCompletion<ShouldAnswerResponse>(
         filledPrompt,
         // config.openai.model, // Or your preferred model for this task
         // You might want to use a faster/cheaper model for this if available
