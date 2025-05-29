@@ -4,8 +4,8 @@ import { Separator } from "@/components/ui/separator";
 
 export default function MainContent() {
     return (
-      <ScrollArea className="flex-1 p-6">
-        <div className="max-w-4xl">
+      <ScrollArea className="flex-1 h-full p-6">
+        <div className="max-w-4xl mx-auto">
           <div className="mb-6">
             <p className="text-gray-700 mb-4">
               You are Agy, a telegram bot tasked with managing telegram chat interactions for crypto, memes, and web3 culture.

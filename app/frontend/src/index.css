@@ -61,8 +61,8 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
+  display: block;
+  width: 100vw;
   min-width: 320px;
   min-height: 100vh;
 }
@@ -99,7 +99,8 @@ button:focus-visible {
   a:hover {
     color: #747bff;
   }
-  button {
+  /* Only apply background-color to buttons except the Publish changes button */
+  button:not([data-publish]) {
     background-color: #f9f9f9;
   }
 }

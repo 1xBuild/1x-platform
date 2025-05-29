@@ -17,7 +17,7 @@ export default function Sidebar({ selectedSection, setSelectedSection }: { selec
               <div className="w-6 h-6 bg-cyan-100 rounded flex items-center justify-center">
                 <span className="text-cyan-600 text-xs font-bold">A</span>
               </div>
-              <span className="font-medium">Agy, the telegram bot</span>
+              <span className="font-medium">P33ly</span>
               <ChevronDown className="w-4 h-4" />
             </div>
           </div>

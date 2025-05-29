@@ -25,9 +25,8 @@ export default function Header() {
               <option>v0.9.2</option>
               <option>v0.9.1</option>
             </select>
-            <Button size="sm">
+            <Button data-publish>
               Publish changes
-              <ChevronDown className="w-4 h-4 ml-2" />
             </Button>
           </div>
         </div>

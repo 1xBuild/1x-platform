@@ -16,11 +16,6 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="relative min-h-screen">
-      <div className="absolute top-4 right-4 z-50">
-        <Button variant="outline" onClick={handleLogout}>
-          Logout
-        </Button>
-      </div>
       {children}
     </div>
   );
