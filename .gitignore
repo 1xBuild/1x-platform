@@ -5,7 +5,7 @@ node_modules
 
 .cache
 
-src/data/uploaded_files.db
+app/backend/data/*.db
 
 .DS_Store
 .vercel

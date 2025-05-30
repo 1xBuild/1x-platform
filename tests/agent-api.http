@@ -1,0 +1,48 @@
+@host = http://localhost:8000
+# TODO: change the agentId to the one you want to get (create a new one if you need)
+@agentId = agent-56efc20b-4b7d-418c-be0c-001822223d39
+
+### List all agents
+GET {{host}}/api/agents
+Accept: application/json
+
+### Create a new agent
+POST {{host}}/api/agents
+Content-Type: application/json
+Accept: application/json
+
+{
+  "version": 1,
+  "details": {
+    "name": "Test Agent",
+    "description": "A test agent for API testing.",
+    "systemPrompt": "Test system prompt.",
+    "persona": "Test persona.",
+    "model": "google_ai/gemini-2.0-flash-001"
+  }
+}
+
+### Get agent by id
+GET {{host}}/api/agents/{{agentId}}
+Accept: application/json
+
+### Update agent
+PUT {{host}}/api/agents/{{agentId}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "id": "{{agentId}}",
+  "version": 2,
+  "details": {
+    "name": "Test Agent",
+    "description": "Updated description.",
+    "systemPrompt": "Updated system prompt.",
+    "persona": "Updated persona.",
+    "model": "google_ai/gemini-2.0-flash-001"
+  }
+}
+
+### Delete agent
+DELETE {{host}}/api/agents/{{agentId}}
+Accept: application/json 

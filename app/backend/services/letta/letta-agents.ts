@@ -2,11 +2,10 @@ import { lettaClient } from './letta-client';
 import { LettaClient } from '@letta-ai/letta-client';
 import path from 'path';
 import fs from 'fs';
-import * as templates from '../../data/template';
-import { AgentType, AgentName } from '../../types';
-import { parseTemplate } from '../../data/template';
+import { IAgentName } from '../../types';
 import { config } from '../../config/index';
-import { dataSourceManager } from './letta-datasource';
+import { AgentState } from '@letta-ai/letta-client/api';
+
 /**
  * Manages Letta agent mappings for Discord conversations.
  */
@@ -26,16 +25,16 @@ class AgentManager {
   /**
    * Generates a unique and meaningful agent name combining user and channel information
    */
-  public generateAgentName(userId: string, channelId: string): AgentName {
-    return `${AgentManager.AGENT_PREFIX}_${userId}_${channelId}` as AgentName;
+  public generateAgentName(userId: string, channelId: string): IAgentName {
+    return `${AgentManager.AGENT_PREFIX}_${userId}_${channelId}` as IAgentName;
   }
 
   /**
    * Checks if an agent exists by name
    * @param name - The name of the agent to check
-   * @returns Promise<AgentType | null> - The agent if found, null otherwise
+   * @returns Promise<AgentState | null> - The agent if found, null otherwise
    */
-  private async findAgent(name: string): Promise<AgentType | null> {
+  private async findAgent(name: string): Promise<AgentState | null> {
     try {
       const agents = await this.lettaClient.agents.list({
         name: name,
@@ -50,92 +49,21 @@ class AgentManager {
   }
 
   /**
-   * Retrieves an existing main agent (the one in the public channel) 
-   * or creates a new one if it doesn't exist
-   * @returns Promise<string> - The agent ID for the main agent
-   */
-  async getOrCreateMainAgent(): Promise<string> {
-    const agentName = "main-agent";
-    let agent = await this.getAgent(agentName);
-
-    if (agent) {
-      console.log(`🤖 Main agent already exists: ${agentName}`);
-      return agent.id;
-    }
-
-    console.log(`🤖 Creating new main agent: ${agentName}`);
-    agent = await this.lettaClient.agents.create({
-      name: agentName,
-      system: templates.systemPrompt,
-      description: templates.mainAgentDescription,
-      memoryBlocks: [
-        {
-          label: "human",
-          value: templates.mainAgentHumanMemory
-        },
-        {
-          label: "persona",
-          value: templates.p33lPersona,
-          limit: 6000
-        }
-      ],
-      blockIds: [templates.sharedMemoryBlockId],
-      model: this.MODEL,
-      contextWindowLimit: this.MAX_CONTEXT_WINDOW_LIMIT,
-      embedding: this.EMBEDDING,
-    });
-
-    // Attach data source to agent
-    if (config.dataSource.mainDataSourceName && config.dataSource.mainDataSourceFilePath) {
-      const mainDataSourceId = await dataSourceManager.getOrCreateMainDataSource(
-        config.dataSource.mainDataSourceName, 
-        config.dataSource.mainDataSourceFilePath
-      );
-      await dataSourceManager.attachSourceToAgent(agent.id, mainDataSourceId);
-      console.log(`🤖 Main data source initialized: ${mainDataSourceId}`);
-    }
-    
-    return agent.id;
-  }
-
-  /**
-   * Retrieves an existing agent or creates a new one for a DM conversation.
-   * 
-   * @param userId - The Discord user's ID
-   * @param channelId - The Discord DM channel ID (used as unique key)
-   * @returns Promise<string> - The agent ID for this conversation
-   */
-  public async getOrCreateDmAgent(userId: string, channelId: string, username: string): Promise<string> {
-    const agentName = this.generateAgentName(userId, channelId);
-    const agent = await this.getAgent(agentName);
-
-    if (agent) {
-      console.log(`🤖 Agent already exists: ${agentName}`);
-      return agent.id;
-    }
-
-    console.log(`🤖 Creating new agent: ${agentName}`);
-    const agentId = await this.createAgent(agentName, userId, username);
-
-    // Attach data source to the agent if it's a new agent
-    if (config.dataSource.mainDataSourceName && config.dataSource.mainDataSourceFilePath && agent) {
-      const mainDataSourceId = await dataSourceManager.getOrCreateMainDataSource(
-        config.dataSource.mainDataSourceName,
-        config.dataSource.mainDataSourceFilePath
-      );
-      await dataSourceManager.attachSourceToAgent(agentId, mainDataSourceId);
-    }
-
-    return agentId;
-  }
-
-  /**
    * Retrieves an existing agent by name
    * @param agentName - The name of the agent to retrieve
-   * @returns Promise<AgentType> - The agent if found, null otherwise
+   * @returns Promise<AgentState | null> - The agent if found, null otherwise
    */
-  public async getAgent(agentName: string): Promise<AgentType | null> {
+  public async getAgent(agentName: string): Promise<AgentState | null> {
     return await this.findAgent(agentName);
+  }
+
+  /**
+   * Retrieves an existing agent by ID
+   * @param agentId - The ID of the agent to retrieve
+   * @returns Promise<AgentState | null> - The agent if found, null otherwise
+   */
+  public async getAgentById(agentId: string): Promise<AgentState | null> {
+    return await this.lettaClient.agents.retrieve(agentId);
   }
 
   /**
@@ -177,49 +105,62 @@ class AgentManager {
   }
 
   /**
-   * Creates a new agent on the Letta server with associated user identity
-   * 
-   * @param agentName - The name of the agent to create
-   * @param userId - The Discord user's ID
-   * @param username - The Discord username to use as identity name
-   * @returns Promise<string> - The agent ID for this conversation
+   * Gets an existing Letta agent by name, or creates a new one if it doesn't exist.
+   * If userId and username are provided, associates identity. Otherwise, creates a generic agent.
+   *
+   * @param params - Either { agentName, userId, username, ...fields } or { name, description, systemPrompt, model, memoryBlocks }
+   * @returns Promise<string> - The agent ID
    */
-  private async createAgent(agentName: string, userId: string, username: string): Promise<string> {
-    try {
-      // Get or create user identity
-      const identityId = await this.getOrCreateUserIdentity(userId, username);
-      if (!identityId) {
-        throw new Error('Failed to get or create user identity');
-      }
-
-      // Then create the agent with the identity and template + shared memory block
+  public async getOrCreateAgent(params: {
+    agentName?: string;
+    userId?: string;
+    username?: string;
+    name?: string;
+    description?: string;
+    systemPrompt?: string;
+    model?: string;
+    memoryBlocks?: any[];
+    blockIds?: string[];
+    contextWindowLimit?: number;
+    embedding?: string;
+  }): Promise<string> {
+    const agentName = params.agentName || params.name;
+    if (!agentName) throw new Error('Agent name is required');
+    const existing = await this.getAgent(agentName);
+    if (existing) {
+      return existing.id;
+    }
+    if (params.agentName && params.userId && params.username) {
+      // DM agent creation with identity
+      const identityId = await this.getOrCreateUserIdentity(params.userId, params.username);
+      if (!identityId) throw new Error('Failed to get or create user identity');
       const lettaAgent = await this.lettaClient.agents.create({
-        name: agentName,
-        system: templates.systemPrompt,
-        description: templates.agentDescription,
-        memoryBlocks: [
-          {
-            label: "human",
-            value: parseTemplate(templates.humanMemory, {})
-          },
-          {
-            label: "persona",
-            value: templates.p33lPersona,
-            limit: 6000
-          }
-        ],
-        blockIds: [templates.sharedMemoryBlockId],
-        model: this.MODEL,
-        contextWindowLimit: this.MAX_CONTEXT_WINDOW_LIMIT,
-        embedding: this.EMBEDDING,
-        identityIds: [identityId]  // Associate the new user identity with the agent
+        name: params.agentName,
+        system: params.systemPrompt || '',
+        description: params.description || '',
+        memoryBlocks: params.memoryBlocks || [],
+        blockIds: params.blockIds || [],
+        model: params.model || this.MODEL,
+        contextWindowLimit: params.contextWindowLimit || this.MAX_CONTEXT_WINDOW_LIMIT,
+        embedding: params.embedding || this.EMBEDDING,
+        identityIds: [identityId],
       });
-      
-      console.log(`Agent created: ${agentName} with identity ID: ${identityId}`);
       return lettaAgent.id;
-    } catch (error) {
-      console.error('Failed to create Letta agent:', error);
-      throw new Error('Failed to initialize Letta agent');
+    } else if (params.agentName) {
+      // Generic agent creation (without a user identity)
+      const lettaAgent = await this.lettaClient.agents.create({
+        name: params.agentName,
+        system: params.systemPrompt || '',
+        description: params.description || '',
+        memoryBlocks: params.memoryBlocks || [],
+        blockIds: params.blockIds || [],
+        model: params.model || this.MODEL,
+        contextWindowLimit: params.contextWindowLimit || this.MAX_CONTEXT_WINDOW_LIMIT,
+        embedding: params.embedding || this.EMBEDDING,
+      });
+      return lettaAgent.id;
+    } else {
+      throw new Error('Failed to create Letta agent: insufficient parameters');
     }
   }
 
@@ -228,7 +169,7 @@ class AgentManager {
    * @param name - The name of the agent to retrieve
    * @returns Promise<string> - The agent ID if found
    */
-  public async getAgentByName(name: string): Promise<AgentType> {
+  public async getAgentByName(name: string): Promise<AgentState> {
     try {
       const agents = await this.lettaClient.agents.list({
         name: name,
