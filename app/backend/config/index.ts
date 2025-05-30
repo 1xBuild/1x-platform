@@ -133,7 +133,7 @@ const envSchema = z.object({
   ANALYST_AGENT_ENABLED: z.preprocess(
     (val: unknown) => val === 'true',
     z.boolean()
-  ).default(true),
+  ).default(false),
   ANALYST_AGENT_MEMORY_BLOCK_LABEL: z.string().default('crypto-news'),
 
   // Cryptopanic Configuration
