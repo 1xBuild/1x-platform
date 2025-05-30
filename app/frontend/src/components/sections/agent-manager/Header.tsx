@@ -3,6 +3,7 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import type { Agent } from "@/types/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useState } from "react";
 
 interface HeaderProps {
   agent?: Agent | null;
@@ -10,8 +11,38 @@ interface HeaderProps {
   publishDisabled: boolean;
 }
 
+function ConfirmModal({ open, onConfirm, onCancel }: { open: boolean; onConfirm: () => void; onCancel: () => void }) {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+      <div className="bg-background rounded-lg shadow-lg p-6 w-full max-w-sm">
+        <h2 className="text-lg font-semibold mb-4">Confirm publish</h2>
+        <p className="mb-6">Are you sure you want to publish your changes?</p>
+        <div className="flex justify-end gap-2">
+          <button onClick={onCancel} className="px-4 py-2 rounded bg-muted text-foreground hover:bg-muted-foreground/10">Cancel</button>
+          <button onClick={onConfirm} className="px-4 py-2 rounded bg-primary text-primary-foreground hover:bg-primary/90">Confirm</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Header({ agent, onPublish, publishDisabled }: HeaderProps) {
+  const [modalOpen, setModalOpen] = useState(false);
+
   const versions = agent ? [agent.version] : [];
+
+  const handlePublishClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    setModalOpen(true);
+  };
+
+  const handleConfirm = () => {
+    setModalOpen(false);
+    onPublish();
+  };
+
+  const handleCancel = () => setModalOpen(false);
 
   return (
     <Card className="border-b-0 rounded-none shadow-none">
@@ -47,9 +78,10 @@ export default function Header({ agent, onPublish, publishDisabled }: HeaderProp
               ))}
             </SelectContent>
           </Select>
-          <Button className="hover:text-primary" type="submit" onClick={onPublish} disabled={publishDisabled}>Publish changes</Button>
+          <Button className="hover:text-primary" type="submit" onClick={handlePublishClick} disabled={publishDisabled}>Publish changes</Button>
         </div>
       </CardHeader>
+      <ConfirmModal open={modalOpen} onConfirm={handleConfirm} onCancel={handleCancel} />
     </Card>
   );
 }
