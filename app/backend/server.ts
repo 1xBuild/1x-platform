@@ -10,6 +10,7 @@ import { errorHandler } from './middlewares/error.middleware';
 import { notFoundHandler } from './middlewares/not-found.middleware';
 import { createApiLimiter } from './config/rateLimiter';
 import { agentService } from './services/agent';
+import { analystAgent } from './services/analyst-agent';
 
 // Initialize express app
 const app = express();
@@ -42,6 +43,10 @@ async function initServices() {
     // Initialize the main agent
     const mainAgentId = await agentService.getOrCreateMainAgent();
     console.log(`🤖 Main agent ID: ${mainAgentId}`);
+
+    // Set mainAgentId for analystAgent and start it
+    await analystAgent.setMainAgentId(mainAgentId);
+    analystAgent.start();
 
     // Initialize the telegram bot
     await telegramBot.initialize(mainAgentId);

@@ -132,9 +132,9 @@ export const agentService = {
     return agentManager.getOrCreateAgent({
       agentName: agent.details.name,
       description: agent.details.description,
-      systemPrompt: agent.details.systemPrompt,
-      model: agent.details.model,
-      memoryBlocks: [
+      systemPrompt: agent.details.systemPrompt || templates.systemPrompt,
+      model: agent.details.model || config.model.modelConfig,
+      memoryBlocks: lettaOptions.memoryBlocks || [
         { label: 'human', value: parseTemplate(templates.humanMemory, {}) },
         { label: 'persona', value: agent.details.persona, limit: 6000 },
       ],
@@ -195,8 +195,9 @@ export const agentService = {
       contextWindowLimit: 16000,
       embedding: config.model.embeddingConfig,
       memoryBlocks: [
-        { label: 'human', value: templates.mainAgentHumanMemory },
+        { label: 'human', value: templates.mainAgentHumanMemory, limit: 1000 },
         { label: 'persona', value: templates.p33lPersona, limit: 6000 },
+        { label: 'crypto-news', value: config.analystAgent.cryptoNewsMemoryBlockLabel, limit: 6000 },
       ],
     });
 
