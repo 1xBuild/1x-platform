@@ -65,8 +65,8 @@ export default function MainContent({ agent, selectedSection, onEdit }: MainCont
                       onChange={e => setEditValue(e.target.value)}
                     />
                     <div className="flex gap-2">
-                      <Button className="text-foreground" variant="default" onClick={handleSave}>Save</Button>
-                      <Button className="text-foreground" variant="secondary" onClick={handleCancel}>Cancel</Button>
+                      <Button className="text-chart-2" variant="secondary" onClick={handleSave}>Save</Button>
+                      <Button className="text-destructive" variant="secondary" onClick={handleCancel}>Cancel</Button>
                     </div>
                   </>
                 ) : (

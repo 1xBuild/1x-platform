@@ -47,7 +47,7 @@ export default function Header({ agent, onPublish, publishDisabled }: HeaderProp
               ))}
             </SelectContent>
           </Select>
-          <Button className="text-primary hover:text-primary" type="submit" onClick={onPublish} disabled={publishDisabled}>Publish changes</Button>
+          <Button className="hover:text-primary" type="submit" onClick={onPublish} disabled={publishDisabled}>Publish changes</Button>
         </div>
       </CardHeader>
     </Card>
