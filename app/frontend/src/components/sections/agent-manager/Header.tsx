@@ -14,21 +14,21 @@ export default function Header({ agent, onPublish, publishDisabled }: HeaderProp
   const versions = agent ? [agent.version] : [];
 
   return (
-    <Card className="border-b-0 rounded-none shadow-none bg-white">
+    <Card className="border-b-0 rounded-none shadow-none">
       <CardHeader className="flex flex-row items-center justify-between gap-4 p-6 pb-4">
         <div className="flex items-center gap-4 flex-1 min-w-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center">
-              <span className="text-cyan-600 font-bold">A</span>
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center">
+              <span className="font-bold">A</span>
             </div>
             <div className="min-w-0">
               {agent ? (
-                <CardTitle className="font-semibold text-gray-900 text-xl mb-1 truncate">{agent.details?.name || "Agy, the telegram bot"}</CardTitle>
+                <CardTitle className="font-semibold text-xl mb-1 truncate">{agent.details?.name || "Agy, the telegram bot"}</CardTitle>
               ) : (
                 <Skeleton className="h-6 w-40 mb-1" />
               )}
               {agent ? (
-                <p className="text-sm text-gray-500 truncate">{agent.details?.description || "Agy manages your telegram chat by engaging with users about crypto, memes and web3..."}</p>
+                <p className="text-sm text-muted-foreground truncate">{agent.details?.description || "Agy manages your telegram chat by engaging with users about crypto, memes and web3..."}</p>
               ) : (
                 <Skeleton className="h-4 w-64" />
               )}
@@ -37,17 +37,17 @@ export default function Header({ agent, onPublish, publishDisabled }: HeaderProp
         </div>
         <div className="flex items-center gap-3 flex-shrink-0">
           <Select>
-            <SelectTrigger className="w-32 text-white">
+            <SelectTrigger className="w-32 text-foreground">
               <SelectValue placeholder="Versions" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="current">Version: {agent ? agent.version : <Skeleton className="h-4 w-12 inline-block align-middle" />}</SelectItem>
+              <SelectItem value="current">V: {agent ? agent.version : <Skeleton className="h-4 w-12 inline-block align-middle" />}</SelectItem>
               {versions.map((v) => (
-                <SelectItem key={v} value={String(v)}>{v}</SelectItem>
+                <SelectItem key={v} value={String(v)}>V: {v}</SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <Button className="text-white hover:text-cyan-400" type="submit" onClick={onPublish} disabled={publishDisabled}>Publish changes</Button>
+          <Button className="text-primary hover:text-primary" type="submit" onClick={onPublish} disabled={publishDisabled}>Publish changes</Button>
         </div>
       </CardHeader>
     </Card>

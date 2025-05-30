@@ -2,73 +2,68 @@ import { useState, useEffect } from "react";
 import type { Agent } from "@/types/types";
 
 export function useAgentState() {
-  const [agent, setAgent] = useState<Agent | null>(null);
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
   const [localEdits, setLocalEdits] = useState<Partial<Agent["details"]>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const defaultAgent: Agent = {
-      id: "default",
-      version: 1,
-      details: {
-        name: "No bot",
-        description: "No description",
-        systemPrompt: "No system prompt",
-        persona: "No persona",
-        model: "No model"
-      }
-    };
     setLoading(true);
     setError(null);
     fetch("/api/agents")
       .then(res => {
-        if (!res.ok) throw new Error("Failed to fetch agent");
+        if (!res.ok) throw new Error("Failed to fetch agents");
         return res.json();
       })
       .then(data => {
         if (Array.isArray(data) && data.length > 0) {
-          setAgent(data[0]);
+          setAgents(data);
+          setSelectedAgentId(data[0].id || null);
         } else {
-          setAgent(defaultAgent);
+          setAgents([]);
+          setSelectedAgentId(null);
         }
         setLoading(false);
       })
       .catch(err => {
         setError(err.message || "Unknown error");
-        setAgent(defaultAgent);
+        setAgents([]);
+        setSelectedAgentId(null);
         setLoading(false);
       });
   }, []);
+
+  const selectedAgent = agents.find(a => a.id === selectedAgentId) || null;
 
   const editField = (field: keyof Agent["details"], value: string) => {
     setLocalEdits(edits => ({ ...edits, [field]: value }));
   };
 
   const getMergedAgent = () => {
-    if (!agent) return null;
+    if (!selectedAgent) return null;
     return {
-      ...agent,
-      details: { ...agent.details, ...localEdits }
+      ...selectedAgent,
+      details: { ...selectedAgent.details, ...localEdits }
     };
   };
 
   const publish = async () => {
-    if (!agent || !agent.id) return;
+    if (!selectedAgent || !selectedAgent.id) return;
     setLoading(true);
     setError(null);
     const updatedAgent = {
       ...getMergedAgent(),
-      version: agent.version + 1,
+      version: selectedAgent.version + 1,
     };
     try {
-      const res = await fetch(`/api/agents/${agent.id}`, {
+      const res = await fetch(`/api/agents/${selectedAgent.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedAgent),
       });
       if (!res.ok) throw new Error("Failed to update agent");
-      setAgent({ ...(updatedAgent as Agent), details: updatedAgent.details! });
+      setAgents(prev => prev.map(a => a.id === selectedAgent.id ? { ...(updatedAgent as Agent), details: updatedAgent.details! } : a));
       setLocalEdits({});
       setLoading(false);
       return true;
@@ -83,7 +78,10 @@ export function useAgentState() {
   const reset = () => setLocalEdits({});
 
   return {
+    agents,
     agent: getMergedAgent(),
+    setSelectedAgentId,
+    selectedAgentId,
     editField,
     publish,
     reset,

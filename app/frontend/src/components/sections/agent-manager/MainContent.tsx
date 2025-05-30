@@ -65,16 +65,16 @@ export default function MainContent({ agent, selectedSection, onEdit }: MainCont
                       onChange={e => setEditValue(e.target.value)}
                     />
                     <div className="flex gap-2">
-                      <Button className="text-green-500" variant="default" onClick={handleSave}>Save</Button>
-                      <Button className="text-red-500" variant="secondary" onClick={handleCancel}>Cancel</Button>
+                      <Button className="text-foreground" variant="default" onClick={handleSave}>Save</Button>
+                      <Button className="text-foreground" variant="secondary" onClick={handleCancel}>Cancel</Button>
                     </div>
                   </>
                 ) : (
                   <>
                     <div className="whitespace-pre-line text-base min-h-[80px]">
-                      {currentValue || <span className="italic text-gray-400">{showPrompt ? "No system prompt" : "No persona"}</span>}
+                      {currentValue || <span className="italic text-muted-foreground">{showPrompt ? "No system prompt" : "No persona"}</span>}
                     </div>
-                    <Button className="mt-4 text-white hover:text-cyan-400" variant="outline" size="sm" onClick={handleEdit}>Edit</Button>
+                    <Button className="mt-4 text-foreground hover:text-primary" variant="outline" size="sm" onClick={handleEdit}>Edit</Button>
                   </>
                 )}
               </CardContent>
