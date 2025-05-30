@@ -2,12 +2,13 @@ import z from 'zod';
 import { config as dotenvConfig } from 'dotenv';
 import { resolve } from 'path';
 
+// Load the base .env file for common variables
+dotenvConfig();
+
 // Load environment-specific .env file
 const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development';
 dotenvConfig({ path: resolve(process.cwd(), envFile) });
 
-// Also load the base .env file for common variables
-dotenvConfig();
 
 // Define Zod schema for environment variables
 const envSchema = z.object({
