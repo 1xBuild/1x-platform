@@ -67,7 +67,7 @@ export default function Header({ agent, onPublish, publishDisabled }: HeaderProp
           </div>
         </div>
         <div className="flex items-center gap-3 flex-shrink-0">
-          <Select>
+          <Select disabled>
             <SelectTrigger className="w-32 text-foreground">
               <SelectValue placeholder="Versions" />
             </SelectTrigger>
