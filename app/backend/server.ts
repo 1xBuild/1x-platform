@@ -61,6 +61,15 @@ async function initServices() {
   }
 }
 
+function shutdown() {
+  console.log('🛑 Shutting down gracefully...');
+  // Add cleanup logic for bots, timers, DB, etc.
+  process.exit(0);
+}
+
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);
+
 // Start the server
 app.listen(PORT, () => {
   console.log(`🌐 Server listening on port ${PORT}`);
