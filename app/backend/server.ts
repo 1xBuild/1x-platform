@@ -20,7 +20,7 @@ app.set('trust proxy', 1);
 
 // Middlewares Security & Parsing
 app.use(helmet());
-app.use(cors({ origin: config.app.corsOrigin }));
+config.env === 'production' ? app.use(cors({ origin: config.app.corsOrigin })) : app.use(cors());
 app.use(express.json({ limit: config.app.uploadMaxJsonSize }));
 app.use(createApiLimiter);
 

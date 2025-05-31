@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import type { Agent } from "@/types/types";
+import { SERVER_URL } from "@/config";
 
 export function useAgentState() {
   const [agents, setAgents] = useState<Agent[]>([]);
@@ -11,7 +12,7 @@ export function useAgentState() {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    fetch("/api/agents")
+    fetch(`${SERVER_URL}/api/agents`)
       .then(res => {
         if (!res.ok) throw new Error("Failed to fetch agents");
         return res.json();
@@ -57,7 +58,7 @@ export function useAgentState() {
       version: selectedAgent.version + 1,
     };
     try {
-      const res = await fetch(`/api/agents/${selectedAgent.id}`, {
+      const res = await fetch(`${SERVER_URL}/api/agents/${selectedAgent.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedAgent),
