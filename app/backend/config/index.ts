@@ -153,6 +153,9 @@ if (!envVars.success) {
 // Export typed and validated config
 export const config = {
   env: process.env.NODE_ENV,
+  railway: { // see Railway defaults env
+    envName: process.env.RAILWAY_ENVIRONMENT_NAME,
+  },
   letta: {
     token: envVars.data.LETTA_TOKEN,
     baseUrl: envVars.data.LETTA_BASE_URL,
