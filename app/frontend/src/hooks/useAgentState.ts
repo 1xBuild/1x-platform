@@ -89,5 +89,6 @@ export function useAgentState() {
     hasEdits: Object.keys(localEdits).length > 0,
     loading,
     error,
+    setAgents,
   };
 }

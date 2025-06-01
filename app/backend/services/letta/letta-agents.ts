@@ -288,17 +288,15 @@ class AgentManager {
         throw new Error(`Agent not found: ${agentId}`);
       }
 
-      let response;
       try {
-        response = await this.lettaClient.agents.blocks.modify(agentId, label, {
+        await this.lettaClient.agents.blocks.modify(agentId, label, {
           value: value
         });
       } catch (error) {
         console.error(`Failed to update memory block '${label}' for agent: ${agentId}`, error);
         throw new Error(`Failed to update memory block: ${error}`);
       }
-      
-      console.log(response);
+
       console.log(`Memory block '${label}' updated for agent: ${agentId}`);
     } catch (error) {
       console.error(`Failed to update memory block '${label}' for agent: ${agentId}`, error);

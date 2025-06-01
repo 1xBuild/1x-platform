@@ -1,5 +1,7 @@
 import { config } from '../config';
 import { agentManager } from './letta/letta-agents';
+import { agentService } from './agent';
+import * as templates from '../data/prompt';
 
 const MEMORY_BLOCK_LABEL = config.analystAgent.cryptoNewsMemoryBlockLabel;
 const MAX_MEMORY_LENGTH = 6000;
@@ -7,28 +9,42 @@ const DELAY_BETWEEN_FETCHES = 8 * 60 * 60 * 1000; // 8 hours
 const CACHE_DURATION = 2 * 60 * 60 * 1000; // 2 hours in ms
 
 class AnalystAgentService {
-  private enabled: boolean = config.analystAgent.enabled;
   private timer: NodeJS.Timeout | null = null;
   private mainAgentId: string | null = null;
+
+  constructor() {
+    console.log('🔍 Analyst Agent constructor');
+  }
 
   // Cryptopanic cache
   private cryptopanicCache: { data: string; timestamp: number } | null = null;
 
-  public isEnabled() {
-    console.log('🔍 Analyst Agent status:', this.enabled);
-    return this.enabled;
+  public async isEnabled() {
+    const agentId = await this.getOrCreateAnalystAgent();
+    const agent = await agentService.get(agentId);
+    const enabled = agent && agent.status === 'enabled';
+    console.log('🔍 Analyst Agent status:', enabled);
+    return enabled;
   }
 
-  public enable() {
+  public async enable() {
+    const agentId = await this.getOrCreateAnalystAgent();
+    const agent = await agentService.get(agentId);
+    if (agent && agent.status !== 'enabled') {
+      await agentService.update({ ...agent, status: 'enabled' });
+    }
     this.start();
-    this.enabled = true;
     console.log('🔍 Analyst Agent enabled');
   }
 
-  public disable() {
-    this.clearMemoryBlock();
+  public async disable() {
+    const agentId = await this.getOrCreateAnalystAgent();
+    const agent = await agentService.get(agentId);
+    if (agent && agent.status !== 'disabled') {
+      await agentService.update({ ...agent, status: 'disabled' });
+    }
+    await this.clearMemoryBlock();
     this.stop();
-    this.enabled = false;
     console.log('🔍 Analyst Agent disabled');
   }
 
@@ -46,7 +62,9 @@ class AnalystAgentService {
   // TODO: improve the order of the data (most recent news first) when updating
   public async fetchAndStore() {
     console.log('🔍 Fetching and storing Cryptopanic data');
-    if (!this.enabled || !this.mainAgentId) return;
+    if (!this.mainAgentId) return;
+    const agent = await agentService.get(this.mainAgentId);
+    if (!agent || agent.status !== 'enabled') return;
     try {
       const data = await this.fetchCryptopanicData();
       const memoryBlockHeader = 'Crypto news:\n';
@@ -110,7 +128,15 @@ class AnalystAgentService {
     return data;
   }
 
-  public start() {
+  public async start() {
+    const agentId = await this.getOrCreateAnalystAgent();
+    const agent = await agentService.get(agentId);
+    const enabled = agent && agent.status === 'enabled';
+    console.log('🔍 Analyst Agent enabled:', enabled);
+    if (!enabled) {
+      console.log('🔍 Analyst Agent is disabled, not starting');
+      return;
+    }
     console.log('🔍 Starting Analyst Agent');
     if (this.timer) clearInterval(this.timer);
     this.timer = setInterval(() => this.fetchAndStore(), DELAY_BETWEEN_FETCHES);
@@ -122,6 +148,33 @@ class AnalystAgentService {
     console.log('🔍 Stopping Analyst Agent');
     if (this.timer) clearInterval(this.timer);
     this.timer = null;
+  }
+
+  /**
+   * Get or create the Analyst Agent
+   * IMPORTANT: This is only so the users can enable/disable the Analyst Agent
+   * but the prompt is not used, and the tools + triggers are not available (hardcoded here).
+   * @returns The ID of the Analyst Agent
+   */
+  public async getOrCreateAnalystAgent() {
+    const agentName = 'analyst-agent';
+    let agent = (await agentService.list()).find(a => a.details.name === agentName);
+    if (agent && agent.id) return agent.id;
+    const newAgent = agentService.buildAgentConfig({
+      name: agentName,
+      description: templates.analystAgentDescription,
+      systemPrompt: templates.analystAgentPrompt,
+      persona: '',
+      model: config.model.modelConfig,
+    });
+    newAgent.status = 'disabled';
+    const lettaId = await agentService.getOrCreateLettaAgent(newAgent, {
+      memoryBlocks: [
+        { label: 'crypto-news', value: config.analystAgent.cryptoNewsMemoryBlockLabel, limit: 6000 },
+      ],
+    });
+    await agentService.create({ ...newAgent, id: lettaId, status: 'enabled' });
+    return lettaId;
   }
 }
 

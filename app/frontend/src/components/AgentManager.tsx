@@ -6,6 +6,7 @@ import MainContent from "./sections/agent-manager/MainContent";
 import { useAgentState } from "@/hooks/useAgentState";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { Agent } from "@/types/types";
 
 export default function AgentManager() {
   const [selectedSection, setSelectedSection] = useState("persona");
@@ -22,6 +23,7 @@ export default function AgentManager() {
     reset,
     loading,
     error,
+    setAgents,
   } = useAgentState();
   const lastErrorRef = useRef<string | null>(null);
 
@@ -61,6 +63,11 @@ export default function AgentManager() {
     setPendingSection(null);
   };
 
+  const handleAgentStatusChange = (updatedAgent: Agent) => {
+    // Update the agent in the agents array and in the selected agent
+    setAgents(prev => prev.map(a => a.id === updatedAgent.id ? updatedAgent : a));
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen w-full bg-transparent">
@@ -79,7 +86,7 @@ export default function AgentManager() {
         selectedAgentId={selectedAgentId}
       />
       <div className="flex-1 flex flex-col min-w-0">
-        <Header agent={agent} onPublish={handlePublish} publishDisabled={!hasEdits} />
+        <Header agent={agent} onPublish={handlePublish} publishDisabled={!hasEdits} onAgentStatusChange={handleAgentStatusChange} />
         <div className="flex-1 flex min-h-0">
           <div className="flex-1 flex flex-col min-w-0">
             <MainContent
