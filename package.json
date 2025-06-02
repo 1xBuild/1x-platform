@@ -9,9 +9,5 @@
     "build:frontend": "pnpm --filter app-frontend run build",
     "start:frontend": "pnpm --filter app-frontend run start",
     "dev:frontend": "pnpm --filter app-frontend run dev"
-  },
-  "workspaces": [
-    "app-backend",
-    "app-frontend"
-  ]
+  }
 }
