@@ -10,4 +10,5 @@ export interface Agent {
   id?: string;
   version: number;
   details: AgentDetails;
+  status: 'enabled' | 'disabled' | 'pending' | 'error';
 } 

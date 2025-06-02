@@ -128,6 +128,12 @@ const envSchema = z.object({
 
   // OpenAI Configuration
   OPENAI_API_KEY: z.string().min(1),
+
+  // AnalystAgent Configuration
+  ANALYST_AGENT_MEMORY_BLOCK_LABEL: z.string().default('crypto-news'),
+
+  // Cryptopanic Configuration
+  CRYPTOPANIC_API_KEY: z.string().min(1).optional(),
 });
 
 // Parse environment variables
@@ -143,6 +149,9 @@ if (!envVars.success) {
 // Export typed and validated config
 export const config = {
   env: process.env.NODE_ENV,
+  railway: { // see Railway defaults env
+    envName: process.env.RAILWAY_ENVIRONMENT_NAME,
+  },
   letta: {
     token: envVars.data.LETTA_TOKEN,
     baseUrl: envVars.data.LETTA_BASE_URL,
@@ -206,7 +215,13 @@ export const config = {
     respondToMentions: envVars.data.TELEGRAM_RESPOND_TO_MENTIONS,
     respondToGeneric: envVars.data.TELEGRAM_RESPOND_TO_GENERIC,
     llmDecidesGroupResponse: envVars.data.TELEGRAM_LLM_DECIDES_GROUP_RESPONSE,
-  }
+  },
+  analystAgent: {
+    cryptoNewsMemoryBlockLabel: envVars.data.ANALYST_AGENT_MEMORY_BLOCK_LABEL,
+  },
+  cryptopanic: {
+    apiKey: envVars.data.CRYPTOPANIC_API_KEY,
+  },
 };
 
 export default config; 
