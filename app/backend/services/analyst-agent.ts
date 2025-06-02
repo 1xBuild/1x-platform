@@ -8,6 +8,23 @@ const MAX_MEMORY_LENGTH = 6000;
 const DELAY_BETWEEN_FETCHES = 8 * 60 * 60 * 1000; // 8 hours
 const CACHE_DURATION = 2 * 60 * 60 * 1000; // 2 hours in ms
 
+export interface CryptopanicData {
+  next: any
+  previous: any
+  results: Result[]
+}
+
+export interface Result {
+  id: number
+  slug: string
+  title: string
+  description: string
+  published_at: string
+  created_at: string
+  kind: string
+}
+
+
 class AnalystAgentService {
   private timer: NodeJS.Timeout | null = null;
   private mainAgentId: string | null = null;
@@ -66,53 +83,66 @@ class AnalystAgentService {
     const agent = await agentService.get(this.mainAgentId);
     if (!agent || agent.status !== 'enabled') return;
     try {
-      const data = await this.fetchCryptopanicData();
-      const memoryBlockHeader = 'Crypto news:\n';
-      // Get current memory block
-      let currentBlock = await agentManager.getMemoryBlock(this.mainAgentId, MEMORY_BLOCK_LABEL);
-      let existingTitles = new Set<string>();
-      if (currentBlock && currentBlock.startsWith(memoryBlockHeader)) {
-        const lines = currentBlock.slice(memoryBlockHeader.length).split('\n');
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (trimmed.startsWith('- ')) {
-            existingTitles.add(trimmed.substring(2));
+      const newsItems = await this.fetchCryptopanicData();
+      // Group news by date
+      const today = new Date();
+      const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const formatDate = (d: Date) => d.toISOString().slice(0, 10);
+      const todayStr = formatDate(today);
+      const yesterdayStr = formatDate(yesterday);
+      const grouped: Record<string, Result[]> = {};
+      for (const item of newsItems) {
+        const date = item.published_at ? item.published_at.slice(0, 10) : '';
+        if (!grouped[date]) grouped[date] = [];
+        grouped[date].push(item);
+      }
+      // Sort dates descending (most recent first)
+      const sortedDates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
+      // Build memory block
+      let value = '';
+      let totalLength = 0;
+      for (const date of sortedDates) {
+        let sectionHeader = '';
+        if (date === todayStr) {
+          sectionHeader = `Crypto news - today - ${date}\n`;
+        } else if (date === yesterdayStr) {
+          sectionHeader = `Crypto news - yesterday - ${date}\n`;
+        } else {
+          sectionHeader = `Crypto news - ${date}\n`;
+        }
+        if (totalLength + sectionHeader.length > MAX_MEMORY_LENGTH) break;
+        value += sectionHeader;
+        totalLength += sectionHeader.length;
+        for (const item of grouped[date]) {
+          const newsBlock = `-\nDate: ${item.published_at.slice(0, 10)}\nTitle: ${item.title}\nDesc: ${item.description || ''}\n`;
+          if (totalLength + newsBlock.length > MAX_MEMORY_LENGTH) {
+            value = value.trimEnd();
+            await agentManager.updateMemoryBlock(this.mainAgentId, MEMORY_BLOCK_LABEL, value);
+            return;
           }
+          value += newsBlock;
+          totalLength += newsBlock.length;
         }
+        value += '\n';
+        totalLength += 1;
       }
-      // Parse new data
-      const newTitles = data.split('\n').map(l => l.trim()).filter(l => l.startsWith('- ')).map(l => l.substring(2));
-      // Add only unique new titles
-      const allTitles = Array.from(existingTitles);
-      for (const title of newTitles) {
-        if (!existingTitles.has(title)) {
-          allTitles.push(title);
-        }
-      }
-      // Rebuild memory block
-      let value = memoryBlockHeader + allTitles.map(t => `- ${t}`).join('\n');
-      if (value.length > MAX_MEMORY_LENGTH) {
-        // Truncate to fit max length, keeping header and as many items as possible
-        let truncated = memoryBlockHeader;
-        for (const t of allTitles) {
-          const nextLine = `- ${t}\n`;
-          if ((truncated + nextLine).length > MAX_MEMORY_LENGTH) break;
-          truncated += nextLine;
-        }
-        value = truncated.trimEnd();
-      }
+      value = value.trimEnd();
       await agentManager.updateMemoryBlock(this.mainAgentId, MEMORY_BLOCK_LABEL, value);
     } catch (err) {
       console.error('AnalystAgent fetch/store error:', err);
     }
   }
 
-  private async fetchCryptopanicData(): Promise<string> {
+  private async fetchCryptopanicData(): Promise<Result[]> {
     console.log('🔍 Fetching Cryptopanic data');
     const now = Date.now();
     if (this.cryptopanicCache && (now - this.cryptopanicCache.timestamp < CACHE_DURATION)) {
       console.log('🔍 Returning cached Cryptopanic data');
-      return this.cryptopanicCache.data;
+      try {
+        return JSON.parse(this.cryptopanicCache.data);
+      } catch {
+        // fallback to refetch
+      }
     }
     const url = `https://cryptopanic.com/api/developer/v2/posts/?auth_token=${config.cryptopanic.apiKey}&public=true&filter=important&kind=news&regions=en`;
     const res = await fetch(url);
@@ -121,11 +151,10 @@ class AnalystAgentService {
       console.error('Cryptopanic API error:', error);
       throw new Error(`Cryptopanic API error: ${error.message}`);
     }
-    const json = await res.json();
-    // Simple summary: join titles
-    const data = (json.results || []).map((item: any) => `- ${item.title}`).join('\n');
-    this.cryptopanicCache = { data, timestamp: now };
-    return data;
+    const json: CryptopanicData = await res.json();
+    const results = json.results || [];
+    this.cryptopanicCache = { data: JSON.stringify(results), timestamp: now };
+    return results;
   }
 
   public async start() {
