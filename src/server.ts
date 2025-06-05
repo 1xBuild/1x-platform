@@ -3,6 +3,7 @@ import express from 'express';
 import { config } from './config/index';
 import { getOrCreateMainAgent } from './services/agents';
 import { discordBot } from './services/discord-bot';
+import { telegramBot } from './services/telegram-bot';
 
 // Initialize express app
 const app = express();
@@ -12,14 +13,16 @@ const PORT = config.app.port;
 async function init() {
   try {
     console.log('🚀 Starting application...');
-    
+
     // Initialize the main agent
     const mainAgentId = await getOrCreateMainAgent();
-    console.log(`🤖 Main agent initialized: ${mainAgentId}`);
-    
+
+    // Initialize the telegram bot
+    await telegramBot.initialize(mainAgentId);
+
     // Start timers
     discordBot.startRandomEventTimer();
-    
+
     console.log(`✅ All services initialized successfully!`);
   } catch (error) {
     console.error('❌ Error initializing services:', error);

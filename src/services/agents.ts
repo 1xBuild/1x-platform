@@ -8,7 +8,6 @@ import { config } from '../config/index';
  */
 export const getOrCreateMainAgent = async (): Promise<string> => {
   const mainAgentId = await agentManager.getOrCreateMainAgent();
-  console.log(`🤖 Main agent initialized: ${mainAgentId}`);
   
   // Attach data source to agent
   if (config.dataSource.mainDataSourceName && config.dataSource.mainDataSourceFilePath) {
@@ -20,6 +19,7 @@ export const getOrCreateMainAgent = async (): Promise<string> => {
     await dataSourceManager.attachSourceToAgent(mainAgentId, mainDataSourceId);
   }
   
+  console.log(`🤖 Main agent initialized: ${mainAgentId}`);
   return mainAgentId;
 };
 
@@ -39,11 +39,13 @@ export const getOrCreatePersonalAgent = async (
   const agentId = await agentManager.getOrCreateAgent(userId, channelId, username);
   
   // Attach data source to the agent if it's a new agent
-  const mainDataSourceId = await dataSourceManager.getOrCreateMainDataSource(
-    config.dataSource.mainDataSourceName, 
-    config.dataSource.mainDataSourceFilePath
-  );
-  await dataSourceManager.attachSourceToAgent(agentId, mainDataSourceId);
+  if (config.dataSource.mainDataSourceName && config.dataSource.mainDataSourceFilePath) {
+    const mainDataSourceId = await dataSourceManager.getOrCreateMainDataSource(
+      config.dataSource.mainDataSourceName,
+      config.dataSource.mainDataSourceFilePath
+    );
+    await dataSourceManager.attachSourceToAgent(agentId, mainDataSourceId);
+  }
   
   console.log(`🤖 Coaching agent ready: ${agentId} for user: ${username}`);
   return agentId;
