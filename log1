@@ -1,0 +1,168 @@
+
+> thep33l-root@1.0.0 lint:fix C:\Users\regni\Documents\dev\thep33l
+> eslint . --ext ts,tsx --fix "--debug"
+
+
+C:\Users\regni\Documents\dev\thep33l\app\backend\data\prompt.ts
+  1:10  error  'config' is defined but never used  no-unused-vars
+
+C:\Users\regni\Documents\dev\thep33l\app\backend\services\discord-bot.ts
+    6:3   error  'Interaction' is defined but never used  no-unused-vars
+  178:14  error  'error' is defined but never used        no-unused-vars
+
+C:\Users\regni\Documents\dev\thep33l\app\backend\services\letta\letta-agents.ts
+  248:18  error  'e' is defined but never used      no-unused-vars
+  356:16  error  'error' is defined but never used  no-unused-vars
+
+C:\Users\regni\Documents\dev\thep33l\app\backend\services\message-service.ts
+   1:10  error  'Message' is defined but never used  no-unused-vars
+   7:3   error  'DM' is defined but never used       no-unused-vars
+   8:3   error  'MENTION' is defined but never used  no-unused-vars
+   9:3   error  'REPLY' is defined but never used    no-unused-vars
+  10:3   error  'GENERIC' is defined but never used  no-unused-vars
+
+C:\Users\regni\Documents\dev\thep33l\app\backend\tests\datasource.test.ts
+  3:10  error  'createReadStream' is defined but never used  no-unused-vars
+
+C:\Users\regni\Documents\dev\thep33l\app\frontend\dist\assets\index-BbcYOoTd.js
+    721:17   error  Unreachable code                                                           no-unreachable
+   1273:19   error  Empty block statement                                                      no-empty
+   1355:15   error  Empty block statement                                                      no-empty
+   1679:365  error  Unexpected combined character in character class                           no-misleading-character-class
+   1872:13   error  Expected a conditional expression and instead saw an assignment            no-cond-assign
+   1943:10   error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+   2071:16   error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+   2147:12   error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+   2148:27   error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+   2155:23   error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+   2156:31   error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+   2255:7    error  Unexpected control character(s) in regular expression: \x00, \x1f          no-control-regex
+   2389:9    error  Expected to return a value in method 'get'                                 getter-return
+   2439:11   error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+   2458:41   error  Invalid typeof comparison value                                            valid-typeof
+   2466:42   error  Invalid typeof comparison value                                            valid-typeof
+   2603:10   error  Expected a conditional expression and instead saw an assignment            no-cond-assign
+   2991:24   error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+   3857:15   error  Expected a 'break' statement before 'case'                                 no-fallthrough
+   3894:16   error  Unexpected constant condition                                              no-constant-condition
+   4709:17   error  Empty block statement                                                      no-empty
+   4710:19   error  Empty block statement                                                      no-empty
+   5370:17   error  Empty block statement                                                      no-empty
+   5892:14   error  Expected a conditional expression and instead saw an assignment            no-cond-assign
+   5941:12   error  Expected a conditional expression and instead saw an assignment            no-cond-assign
+   6480:16   error  Expected a conditional expression and instead saw an assignment            no-cond-assign
+   6803:48   error  Unnecessary escape character: \/                                           no-useless-escape
+   7524:7    error  Expected a 'break' statement before 'case'                                 no-fallthrough
+   7581:15   error  Empty block statement                                                      no-empty
+   7602:7    error  Expected a 'break' statement before 'case'                                 no-fallthrough
+   7996:40   error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+   8125:9    error  Expected a 'break' statement before 'case'                                 no-fallthrough
+   8180:9    error  Expected a 'break' statement before 'case'                                 no-fallthrough
+   8592:13   error  Expected a 'break' statement before 'case'                                 no-fallthrough
+   8616:14   error  Unexpected constant condition                                              no-constant-condition
+   8789:12   error  Unexpected constant condition                                              no-constant-condition
+   8847:17   error  Expected a 'break' statement before 'case'                                 no-fallthrough
+   8878:12   error  Unexpected constant condition                                              no-constant-condition
+   8907:7    error  Expected a 'break' statement before 'default'                              no-fallthrough
+   9136:17   error  Empty block statement                                                      no-empty
+   9163:15   error  'e' is defined but never used                                              no-unused-vars
+   9191:17   error  Empty block statement                                                      no-empty
+   9293:18   error  't' is defined but never used                                              no-unused-vars
+   9465:16   error  Expected a conditional expression and instead saw an assignment            no-cond-assign
+   9685:13   error  Expected a 'break' statement before 'case'                                 no-fallthrough
+   9701:13   error  Expected a 'break' statement before 'case'                                 no-fallthrough
+   9800:20   error  Expected a conditional expression and instead saw an assignment            no-cond-assign
+   9904:11   error  Expected a 'break' statement before 'case'                                 no-fallthrough
+  10001:10   error  Unexpected control character(s) in regular expression: \x00                no-control-regex
+  10045:7    error  Expected a 'break' statement before 'case'                                 no-fallthrough
+  10280:17   error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+  10325:17   error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+  10351:17   error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+  10386:17   error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+  10396:15   error  Expected a 'break' statement before 'default'                              no-fallthrough
+  10407:17   error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+  10428:17   error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+  10459:7    error  Expected a 'break' statement before 'case'                                 no-fallthrough
+  10471:17   error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+  10483:15   error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+  10489:9    error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+  10512:17   error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+  10520:15   error  Expected a 'break' statement before 'default'                              no-fallthrough
+  10521:19   error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+  10526:30   error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+  10559:30   error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+  10565:15   error  Expected a 'break' statement before 'default'                              no-fallthrough
+  10566:19   error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+  10572:15   error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+  10583:15   error  Expected a 'break' statement before 'default'                              no-fallthrough
+  10599:15   error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+  10599:52   error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+  10613:15   error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+  10636:15   error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+  10636:53   error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+  10649:15   error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+  10677:15   error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+  10679:18   error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+  10685:15   error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+  10700:17   error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+  10702:20   error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+  10707:18   error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+  10716:11   error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+  10718:14   error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+  10723:12   error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+  11175:14   error  Expected a conditional expression and instead saw an assignment            no-cond-assign
+  11329:14   error  Expected a conditional expression and instead saw an assignment            no-cond-assign
+  12081:15   error  Empty block statement                                                      no-empty
+  12332:13   error  Empty block statement                                                      no-empty
+  13037:34   error  'i' is assigned a value but never used                                     no-unused-vars
+  13069:16   error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+  13214:13   error  'a' is defined but never used                                              no-unused-vars
+  13740:9    error  Empty block statement                                                      no-empty
+  18293:21   error  'i' is already defined                                                     no-redeclare
+  18333:16   error  'r' is defined but never used                                              no-unused-vars
+  18837:30   error  'c' is defined but never used                                              no-unused-vars
+  19038:8    error  'J2' is assigned a value but never used                                    no-unused-vars
+  19204:20   error  'i' is assigned a value but never used                                     no-unused-vars
+  19205:16   error  'c' is assigned a value but never used                                     no-unused-vars
+  19229:28   error  'o' is assigned a value but never used                                     no-unused-vars
+  19810:42   error  'i' is assigned a value but never used                                     no-unused-vars
+  19810:52   error  'c' is assigned a value but never used                                     no-unused-vars
+  19966:28   error  'o' is assigned a value but never used                                     no-unused-vars
+  19982:39   error  'a' is defined but never used                                              no-unused-vars
+  20506:8    error  'eM' is assigned a value but never used                                    no-unused-vars
+  21736:26   error  'o' is assigned a value but never used                                     no-unused-vars
+  21742:26   error  'o' is assigned a value but never used                                     no-unused-vars
+  21910:26   error  'o' is assigned a value but never used                                     no-unused-vars
+  21927:4    error  'tM' is assigned a value but never used                                    no-unused-vars
+  22145:8    error  'nM' is assigned a value but never used                                    no-unused-vars
+  23933:15   error  Empty block statement                                                      no-empty
+  23936:21   error  'a' is defined but never used                                              no-unused-vars
+
+C:\Users\regni\Documents\dev\thep33l\app\frontend\src\components\sections\agent-manager\Header.tsx
+  21:26  error  'agent' is defined but never used  no-unused-vars
+
+C:\Users\regni\Documents\dev\thep33l\app\frontend\src\components\sections\agent-manager\MainContent.tsx
+  9:13  error  'field' is defined but never used  no-unused-vars
+  9:48  error  'value' is defined but never used  no-unused-vars
+
+C:\Users\regni\Documents\dev\thep33l\app\frontend\src\components\sections\agent-manager\Sidebar.tsx
+  18:24  error  'id' is defined but never used  no-unused-vars
+  20:24  error  'id' is defined but never used  no-unused-vars
+
+C:\Users\regni\Documents\dev\thep33l\app\frontend\src\types\types.ts
+  20:14  error  'theme' is defined but never used  no-unused-vars
+
+C:\Users\regni\Documents\dev\thep33l\dist\app\backend\data\prompt.js
+  267:50  error  Unnecessary escape character: \=  no-useless-escape
+  282:32  error  Unnecessary escape character: \=  no-useless-escape
+
+C:\Users\regni\Documents\dev\thep33l\dist\app\backend\services\discord-bot.js
+  155:14  error  'error' is defined but never used  no-unused-vars
+
+C:\Users\regni\Documents\dev\thep33l\dist\app\backend\services\letta\letta-agents.js
+  214:18  error  'e' is defined but never used      no-unused-vars
+  307:16  error  'error' is defined but never used  no-unused-vars
+
+✖ 134 problems (134 errors, 0 warnings)
+
+ ELIFECYCLE  Command failed with exit code 1.

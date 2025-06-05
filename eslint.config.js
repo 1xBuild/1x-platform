@@ -7,7 +7,7 @@ import prettierPlugin from 'eslint-plugin-prettier';
 export default [
   js.configs.recommended,
   {
-    files: ['**/*.{js,ts,tsx}'],
+    files: ['**/*.{js,ts,tsx}', '!**/dist/**'],
     plugins: {
       '@typescript-eslint': tseslint,
       prettier: prettierPlugin,
