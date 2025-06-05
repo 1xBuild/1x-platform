@@ -9,4 +9,4 @@ router.use('/agents', agentRoutes);
 router.use('/health', healthRoutes);
 router.use('/auth', authRoutes);
 
-export default router; 
+export default router;

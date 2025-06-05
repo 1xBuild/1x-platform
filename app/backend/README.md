@@ -21,7 +21,7 @@
 <a href="https://railway.com/template/C__ceE?referralCode=kdR8zc"><img src="https://railway.com/button.svg" alt="Deploy on Railway"/></a></div>
 </div>
 
-### 
+###
 
 > [!NOTE]
 > You must have a Letta server running to use this app. Follow this [quickstart guide](https://docs.letta.com/quickstart) to run your local Letta server.
@@ -42,14 +42,12 @@
 - Discord Bot
 
   - Interacts with your Discord server to send and receive messages.
-    
+
     <img width="400" alt="image" src="https://github.com/user-attachments/assets/a09ce294-6cec-477f-ac60-f4b52493af67" />
+
   - Interacts with you through Direct Messages (DMs) and send and receive messages.
-    
+
     <img width="400" alt="image" src="https://github.com/user-attachments/assets/0eabe8fa-556b-436f-9fbc-496f198ef482" />
-
-
-
 
 ## 📦 What's included
 
@@ -68,7 +66,6 @@
 - [TypeScript](https://www.typescriptlang.org)
 
   - TypeScript enhances our codebase with **static typing, improved maintainability, and better developer tooling**, reducing potential runtime errors.
-
 
 ---
 
@@ -90,7 +87,6 @@ Follow the [quickstart guide](https://docs.letta.com/quickstart) to run your loc
 You can run your own Letta server using [Letta Desktop](https://docs.letta.com/quickstart/desktop) or [Docker](https://docs.letta.com/quickstart/docker).
 By default, the Letta server will run on `http://localhost:8283`.
 
-
 ## 👉 Set up app
 
 1️⃣ Clone the repository and install dependencies:
@@ -111,18 +107,15 @@ cp .env.template .env
 
 2️⃣ Update the `.env` file with your Letta variables
 
-
 ## 👾 Create your Discord app and set your variables
 
 1️⃣ Create a new Discord application [here](https://discord.com/developers/applications).
 
 <img width="475" alt="image" src="https://github.com/user-attachments/assets/b57ec05b-5381-43f4-afc4-824a84abdd55" />
 
-
 2️⃣ Under `Settings` -> `General Information` of your Discord app, copy your Discord application's `Application ID` and `Public Key`, and paste them in your `.env` file.
 
 <img width="1302" alt="image" src="https://github.com/user-attachments/assets/56e55a8e-6322-48a7-9b36-afbf538db359" />
-
 
 3️⃣ Under `Settings` -> `Bot` of your Discord app, copy your Discord bot's `Token`, and paste it in your `.env` file.
 
@@ -135,7 +128,6 @@ cp .env.template .env
 5️⃣ Under `Settings` -> `Installation`, under `Guild Install` set up `scopes` and `permissions`
 
 <img width="1057" alt="image" src="https://github.com/user-attachments/assets/73921af7-7478-4b51-b388-ff30b9844d2f" />
-
 
 6️⃣ Install Discord Bot on your server; copy and paste `Link` on your browser.
 
@@ -170,42 +162,42 @@ const timerEnabled = config.timer.enabled;
 
 The following environment variables can be set in the `.env` file:
 
-* `LETTA_TOKEN`: The password of your Letta server (if you self-deployed a server). Not applicable if you are not using a password (see [docs](https://docs.letta.com/guides/server/docker#password-protection-advanced)).
-* `LETTA_BASE_URL`: The base URL of your Letta server. This is usually `http://localhost:8283`.
-* `LETTA_AGENT_ID`: The ID of the Letta agent to use for the bot.
-* `LETTA_USE_SENDER_PREFIX`: If true, includes a prefix on every message sent to the agent. This prefix includes information about the Discord user who sent the message.
+- `LETTA_TOKEN`: The password of your Letta server (if you self-deployed a server). Not applicable if you are not using a password (see [docs](https://docs.letta.com/guides/server/docker#password-protection-advanced)).
+- `LETTA_BASE_URL`: The base URL of your Letta server. This is usually `http://localhost:8283`.
+- `LETTA_AGENT_ID`: The ID of the Letta agent to use for the bot.
+- `LETTA_USE_SENDER_PREFIX`: If true, includes a prefix on every message sent to the agent. This prefix includes information about the Discord user who sent the message.
 
-* `APP_ID`: The ID of your Discord application.
-* `DISCORD_TOKEN`: The bot token for your Discord bot.
-* `PUBLIC_KEY`: The public key for your Discord bot.
-* `DISCORD_CHANNEL_ID`: Set this if you want the bot to only respond to messages (listen) in a specific channel.
-* `DISCORD_SERVER_NAME`: The name of your Discord server.
-* `DISCORD_ADMIN_NAME`: The Discord username of the server admin (without @).
-* `DISCORD_BOT_NAME`: The name of your Discord bot that will be used in prompts.
-* `RESPOND_TO_DMS`: If true, the bot will respond to DMs. If false, the bot will ignore them.
-* `RESPOND_TO_MENTIONS`: Whether or not to respond to mentions.
-* `RESPOND_TO_BOTS`: Whether or not to respond to bots.
-* `RESPOND_TO_GENERIC`: Whether or not to respond to generic messages.
-* `SURFACE_ERRORS`: If true, will send errors as messages in Discord. Otherwise, errors will only be visible in the logs.
+- `APP_ID`: The ID of your Discord application.
+- `DISCORD_TOKEN`: The bot token for your Discord bot.
+- `PUBLIC_KEY`: The public key for your Discord bot.
+- `DISCORD_CHANNEL_ID`: Set this if you want the bot to only respond to messages (listen) in a specific channel.
+- `DISCORD_SERVER_NAME`: The name of your Discord server.
+- `DISCORD_ADMIN_NAME`: The Discord username of the server admin (without @).
+- `DISCORD_BOT_NAME`: The name of your Discord bot that will be used in prompts.
+- `RESPOND_TO_DMS`: If true, the bot will respond to DMs. If false, the bot will ignore them.
+- `RESPOND_TO_MENTIONS`: Whether or not to respond to mentions.
+- `RESPOND_TO_BOTS`: Whether or not to respond to bots.
+- `RESPOND_TO_GENERIC`: Whether or not to respond to generic messages.
+- `SURFACE_ERRORS`: If true, will send errors as messages in Discord. Otherwise, errors will only be visible in the logs.
 
-* `PORT`: The port to run the app on. Default is `3001`.
+- `PORT`: The port to run the app on. Default is `3001`.
 
-* `ENABLE_TIMER`: Enable or disable the timer feature (will randomly trigger an agent input/event at a certain interval, defaults to true). Note that the timer feature requires `DISCORD_CHANNEL_ID` to be set (so that the agent knows where to send a message to if the timer is fired).
-* `TIMER_INTERVAL_MINUTES`: Maximum interval range in minutes for the random timer (defaults to every 15 minutes).
-* `FIRING_PROBABILITY`: Probability of the timer firing (0.0 to 1.0), defaults to 0.1 (10%).
+- `ENABLE_TIMER`: Enable or disable the timer feature (will randomly trigger an agent input/event at a certain interval, defaults to true). Note that the timer feature requires `DISCORD_CHANNEL_ID` to be set (so that the agent knows where to send a message to if the timer is fired).
+- `TIMER_INTERVAL_MINUTES`: Maximum interval range in minutes for the random timer (defaults to every 15 minutes).
+- `FIRING_PROBABILITY`: Probability of the timer firing (0.0 to 1.0), defaults to 0.1 (10%).
 
-* `MAIN_DATA_SOURCE_NAME`: The name of the main data source for RAG functionality.
-* `MAIN_DATA_SOURCE_FILE_PATH`: The file path to the main data source.
-* `EMBEDDING_CONFIG`: The embedding model configuration.
-* `MODEL_CONFIG`: The LLM model configuration.
+- `MAIN_DATA_SOURCE_NAME`: The name of the main data source for RAG functionality.
+- `MAIN_DATA_SOURCE_FILE_PATH`: The file path to the main data source.
+- `EMBEDDING_CONFIG`: The embedding model configuration.
+- `MODEL_CONFIG`: The LLM model configuration.
 
-* `MESSAGE_REPLY_TRUNCATE_LENGTH`: Maximum length for truncated message replies.
+- `MESSAGE_REPLY_TRUNCATE_LENGTH`: Maximum length for truncated message replies.
 
-* `LANGFUSE_SECRET_KEY`: Secret key for Langfuse integration.
-* `LANGFUSE_PUBLIC_KEY`: Public key for Langfuse integration.
-* `LANGFUSE_HOST`: Host URL for Langfuse.
-* `ENABLE_LANGFUSE`: Whether to enable Langfuse logging.
-* `ENABLE_FORMAT_VALIDATION`: Whether to enable message format validation.
+- `LANGFUSE_SECRET_KEY`: Secret key for Langfuse integration.
+- `LANGFUSE_PUBLIC_KEY`: Public key for Langfuse integration.
+- `LANGFUSE_HOST`: Host URL for Langfuse.
+- `ENABLE_LANGFUSE`: Whether to enable Langfuse logging.
+- `ENABLE_FORMAT_VALIDATION`: Whether to enable message format validation.
 
 For more settings view the [`.env.template`](/.env.template) file provided.
 
@@ -214,6 +206,7 @@ For more settings view the [`.env.template`](/.env.template) file provided.
 You can connect an existing agent to Discord (by using its `LETTA_AGENT_ID`), or you can create a brand new agent specifically to use as a Discord bot.
 
 If you create a new agent, we'd recommend adding some information (e.g. inside of the `human` or `persona` memory block) that explains how to interact with Discord. For example, placing the following text in `human`:
+
 ```
 I can use this space in my core memory to take notes on the users that I am interacting with.
 So far, all I know that is that I am connected to a Discord server.
@@ -223,6 +216,7 @@ This will render the user tag in a dynamic way on Discord, vs any other referenc
 ```
 
 Additionally, if you would like to give your chatbot/agent the ability to "ignore" (not reply) to certain messages, you can add a custom tool like this to your agent (for information on how to add a custom tool, see [our docs](https://docs.letta.com/guides/agents/tools#custom-tools)):
+
 ```python
 def ignore():
     """
@@ -236,6 +230,7 @@ The ability for an agent to "ignore" messages can be crucial if you connect your
 ## 🚀 Run app
 
 To run the app locally, simply do:
+
 ```bash
 npm start
 ```

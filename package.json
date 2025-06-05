@@ -8,6 +8,39 @@
     "dev": "pnpm --filter app-backend run dev",
     "build:frontend": "pnpm --filter app-frontend run build",
     "start:frontend": "pnpm --filter app-frontend run start",
-    "dev:frontend": "pnpm --filter app-frontend run dev"
+    "dev:frontend": "pnpm --filter app-frontend run dev",
+    "lint:fix": "eslint . --ext ts,tsx --fix",
+    "format": "prettier --write \"**/*.{js,ts,json,md}\"",
+    "prepare": "husky install",
+    "release": "standard-version",
+    "release:minor": "standard-version --release-as minor",
+    "release:major": "standard-version --release-as major",
+    "release:patch": "standard-version --release-as patch",
+    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.8.0",
+    "@commitlint/config-conventional": "^19.8.0",
+    "conventional-changelog-cli": "^5.0.0",
+    "standard-version": "^9.5.0",
+    "eslint": "^9.0.0",
+    "@eslint/js": "^9.0.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-prettier": "^5.4.0",
+    "@typescript-eslint/eslint-plugin": "^8.31.1",
+    "@typescript-eslint/parser": "^8.31.1",
+    "husky": "^8.0.0",
+    "lint-staged": "^15.5.1",
+    "nodemon": "^3.1.10",
+    "prettier": "^3.5.3"
   }
 }
