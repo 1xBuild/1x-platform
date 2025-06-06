@@ -17,9 +17,9 @@ class AgentManager {
   private readonly EMBEDDING: string;
   constructor() {
     this.lettaClient = lettaClient;
-    this.MODEL = config.dataSource.modelConfig;
+    this.MODEL = config.model.modelConfig;
     this.MAX_CONTEXT_WINDOW_LIMIT = 16000;
-    this.EMBEDDING = config.dataSource.embeddingConfig;
+    this.EMBEDDING = config.model.embeddingConfig;
   }
 
   /**

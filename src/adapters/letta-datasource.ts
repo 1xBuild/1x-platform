@@ -3,8 +3,9 @@ import { lettaClient } from "./letta-client";
 import { LettaClient } from "@letta-ai/letta-client";
 import { createReadStream } from "fs";
 import { isFileUploaded, markFileAsUploaded } from "../database/db";
+import { config } from "../config";
 
-const EMBEDDING_CONFIG = "openai/text-embedding-3-small";
+const EMBEDDING_CONFIG = config.model.embeddingConfig;
 
 class DataSourceManager {
   protected lettaClient: LettaClient;

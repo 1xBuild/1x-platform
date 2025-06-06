@@ -119,6 +119,11 @@ const envSchema = z.object({
 
   // OpenAI Configuration
   OPENAI_API_KEY: z.string().min(1),
+  
+  // OpenRouter Configuration
+  OPENROUTER_API_KEY: z.string().min(1),
+  OPENROUTER_SITE_URL: z.string().url().optional().or(z.literal('')),
+  OPENROUTER_SITE_NAME: z.string().optional().or(z.literal('')),
 });
 
 // Parse environment variables
@@ -170,17 +175,24 @@ export const config = {
     enabled: envVars.data.ENABLE_LANGFUSE,
     formatValidation: envVars.data.ENABLE_FORMAT_VALIDATION,
   },
+  model: {
+    modelConfig: envVars.data.MODEL_CONFIG,
+    embeddingConfig: envVars.data.EMBEDDING_CONFIG,
+  },
   dataSource: {
     mainDataSourceName: envVars.data.MAIN_DATA_SOURCE_NAME,
     mainDataSourceFilePath: envVars.data.MAIN_DATA_SOURCE_FILE_PATH,
-    embeddingConfig: envVars.data.EMBEDDING_CONFIG,
-    modelConfig: envVars.data.MODEL_CONFIG,
   },
   messages: {
     replyTruncateLength: envVars.data.MESSAGE_REPLY_TRUNCATE_LENGTH,
   },
   openai: {
     apiKey: envVars.data.OPENAI_API_KEY,
+  },
+  openrouter: {
+    apiKey: envVars.data.OPENROUTER_API_KEY,
+    siteUrl: envVars.data.OPENROUTER_SITE_URL,
+    siteName: envVars.data.OPENROUTER_SITE_NAME,
   },
   telegram: {
     token: envVars.data.TELEGRAM_TOKEN,
