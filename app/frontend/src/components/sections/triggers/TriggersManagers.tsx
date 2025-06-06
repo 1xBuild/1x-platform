@@ -45,11 +45,17 @@ export default function TriggersManager({ agent }: { agent: Agent }) {
 
   useEffect(() => {
     if (!agent?.id) return;
-    fetch(`/api/triggers/telegram?agentId=${agent.id}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setConnected((prev) => ({ ...prev, Telegram: !!data.enabled }));
-      });
+    const triggersToFetch = [
+      { name: 'Telegram', endpoint: '/api/triggers/telegram' },
+      { name: 'Schedule', endpoint: '/api/triggers/schedule' },
+    ];
+    triggersToFetch.forEach(({ name, endpoint }) => {
+      fetch(`${endpoint}?agentId=${agent.id}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setConnected((prev) => ({ ...prev, [name]: !!data.enabled }));
+        });
+    });
   }, [agent?.id]);
 
   useEffect(() => {

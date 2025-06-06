@@ -25,8 +25,8 @@ export interface Result {
 }
 
 class AnalystAgentService {
-  private timer: NodeJS.Timeout | null = null;
-  private mainAgentId: string | null = null;
+  private timers: Record<string, NodeJS.Timeout | null> = {};
+  private enabledAgents: Record<string, boolean> = {};
 
   constructor() {
     console.log('🔍 Analyst Agent constructor');
@@ -35,51 +35,35 @@ class AnalystAgentService {
   // Cryptopanic cache
   private cryptopanicCache: { data: string; timestamp: number } | null = null;
 
-  public async isEnabled() {
-    const agentId = await this.getOrCreateAnalystAgent();
-    const agent = await agentService.get(agentId);
-    const enabled = agent && agent.status === 'enabled';
-    console.log('🔍 Analyst Agent status:', enabled);
-    return enabled;
+  public async isEnabled(agentId: string) {
+    return !!this.enabledAgents[agentId];
   }
 
-  public async enable() {
-    const agentId = await this.getOrCreateAnalystAgent();
-    const agent = await agentService.get(agentId);
-    if (agent && agent.status !== 'enabled') {
-      await agentService.update({ ...agent, status: 'enabled' });
-    }
-    this.start();
-    console.log('🔍 Analyst Agent enabled');
+  public async enable(agentId: string) {
+    this.enabledAgents[agentId] = true;
+    this.start(agentId);
+    console.log('🔍 Analyst Agent enabled for', agentId);
   }
 
-  public async disable() {
-    const agentId = await this.getOrCreateAnalystAgent();
-    const agent = await agentService.get(agentId);
-    if (agent && agent.status !== 'disabled') {
-      await agentService.update({ ...agent, status: 'disabled' });
-    }
-    await this.clearMemoryBlock();
-    this.stop();
-    console.log('🔍 Analyst Agent disabled');
+  public async disable(agentId: string) {
+    this.enabledAgents[agentId] = false;
+    this.stop(agentId);
+    console.log('🔍 Analyst Agent disabled for', agentId);
   }
 
-  private clearMemoryBlock() {
-    if (!this.mainAgentId) return;
-    console.log('🔍 Clearing memory block for Agent:', this.mainAgentId);
-    agentManager.updateMemoryBlock(this.mainAgentId, MEMORY_BLOCK_LABEL, '');
+  private clearMemoryBlock(agentId: string) {
+    console.log('🔍 Clearing memory block for Agent:', agentId);
+    agentManager.updateMemoryBlock(agentId, MEMORY_BLOCK_LABEL, '');
   }
 
   public async setMainAgentId(agentId: string) {
-    this.mainAgentId = agentId;
-    console.log('🔍 Main agent ID set for Analyst Agent:', this.mainAgentId);
+    console.log('🔍 Main agent ID set for Analyst Agent:', agentId);
   }
 
   // TODO: improve the order of the data (most recent news first) when updating
-  public async fetchAndStore() {
-    console.log('🔍 Fetching and storing Cryptopanic data');
-    if (!this.mainAgentId) return;
-    const agent = await agentService.get(this.mainAgentId);
+  public async fetchAndStore(agentId: string) {
+    console.log('🔍 Fetching and storing Cryptopanic data for', agentId);
+    const agent = await agentService.get(agentId);
     if (!agent || agent.status !== 'enabled') return;
     try {
       const newsItems = await this.fetchCryptopanicData();
@@ -119,7 +103,7 @@ class AnalystAgentService {
           if (totalLength + newsBlock.length > MAX_MEMORY_LENGTH) {
             value = value.trimEnd();
             await agentManager.updateMemoryBlock(
-              this.mainAgentId,
+              agentId,
               MEMORY_BLOCK_LABEL,
               value,
             );
@@ -132,11 +116,7 @@ class AnalystAgentService {
         totalLength += 1;
       }
       value = value.trimEnd();
-      await agentManager.updateMemoryBlock(
-        this.mainAgentId,
-        MEMORY_BLOCK_LABEL,
-        value,
-      );
+      await agentManager.updateMemoryBlock(agentId, MEMORY_BLOCK_LABEL, value);
     } catch (err) {
       console.error('AnalystAgent fetch/store error:', err);
     }
@@ -169,26 +149,18 @@ class AnalystAgentService {
     return results;
   }
 
-  public async start() {
-    const agentId = await this.getOrCreateAnalystAgent();
-    const agent = await agentService.get(agentId);
-    const enabled = agent && agent.status === 'enabled';
-    console.log('🔍 Analyst Agent enabled:', enabled);
-    if (!enabled) {
-      console.log('🔍 Analyst Agent is disabled, not starting');
-      return;
-    }
-    console.log('🔍 Starting Analyst Agent');
-    if (this.timer) clearInterval(this.timer);
-    this.timer = setInterval(() => this.fetchAndStore(), DELAY_BETWEEN_FETCHES);
-    // Initial fetch
-    this.fetchAndStore();
+  public start(agentId: string) {
+    if (this.timers[agentId]) clearInterval(this.timers[agentId]!);
+    this.timers[agentId] = setInterval(
+      () => this.fetchAndStore(agentId),
+      DELAY_BETWEEN_FETCHES,
+    );
+    this.fetchAndStore(agentId);
   }
 
-  public stop() {
-    console.log('🔍 Stopping Analyst Agent');
-    if (this.timer) clearInterval(this.timer);
-    this.timer = null;
+  public stop(agentId: string) {
+    if (this.timers[agentId]) clearInterval(this.timers[agentId]!);
+    this.timers[agentId] = null;
   }
 
   /**

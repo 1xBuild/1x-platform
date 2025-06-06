@@ -78,12 +78,12 @@ export const agentService = {
             agent.details.name === 'analyst-agent' &&
             agent.status === 'enabled'
           )
-            analystAgent.enable();
+            analystAgent.enable(agent.id);
           if (
             agent.details.name === 'analyst-agent' &&
             agent.status === 'disabled'
           )
-            analystAgent.disable();
+            analystAgent.disable(agent.id);
           // TODO: update other letta fields
           // TODO: extend the update so "template agents" can have a custom update
           lettaId = letta.id;
