@@ -11,11 +11,10 @@ export const agentController = {
     } catch (error) {
       const errorResponse: IApiErrorResponse = {
         status: 'error',
-        code: 500,
-        message: 'Internal server error',
-        details: error instanceof Error ? error.message : 'Unknown error',
+        code: error.code,
+        message: error.message,
       };
-      res.status(500).json(errorResponse);
+      res.status(error.code).json(errorResponse);
     }
   },
 
@@ -78,11 +77,10 @@ export const agentController = {
     } catch (error) {
       const errorResponse: IApiErrorResponse = {
         status: 'error',
-        code: 500,
-        message: 'Internal server error',
-        details: error instanceof Error ? error.message : 'Unknown error',
+        code: error.code,
+        message: error.message,
       };
-      res.status(500).json(errorResponse);
+      res.status(error.code).json(errorResponse);
     }
   },
 
