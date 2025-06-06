@@ -3,10 +3,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import TriggersManager from '../triggers/TriggersManagers';
+import { useEffect } from 'react';
 
 interface MainContentProps {
   agent?: Agent | null;
   selectedSection: string;
+  setSelectedSection: (id: string) => void;
   onEdit?: (field: 'systemPrompt' | 'persona', value: string) => void;
   hasEdits?: boolean;
   activeMainContent: string;
@@ -15,6 +17,7 @@ interface MainContentProps {
 export default function MainContent({
   agent,
   selectedSection,
+  setSelectedSection,
   onEdit,
   activeMainContent,
 }: MainContentProps) {
@@ -37,6 +40,14 @@ export default function MainContent({
     if (showPrompt) onEdit('systemPrompt', value);
     else if (showPersona) onEdit('persona', value);
   };
+
+  const hasPersona = !!agent?.details?.persona;
+
+  useEffect(() => {
+    if (selectedSection === 'persona' && !hasPersona) {
+      setSelectedSection('system-prompt');
+    }
+  }, [agent, selectedSection, hasPersona, setSelectedSection]);
 
   return (
     <div className="flex-1 h-full p-6 overflow-auto">

@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import RightSidebar from './sections/agent-manager/RightSidebar';
 import Header from './sections/agent-manager/Header';
 import Sidebar from './sections/agent-manager/Sidebar';
@@ -27,6 +27,10 @@ export default function AgentManager() {
     setAgents,
   } = useAgentState();
   const lastErrorRef = useRef<string | null>(null);
+  const [pendingAgentId, setPendingAgentId] = useState<string | null>(null);
+  const [pendingMainContent, setPendingMainContent] = useState<string | null>(
+    null,
+  );
 
   if (error && lastErrorRef.current !== error) {
     let displayError = error;
@@ -38,7 +42,6 @@ export default function AgentManager() {
     lastErrorRef.current = error;
   }
 
-  // Toast pour succès de publication
   const handlePublish = async () => {
     const success = await publish();
     if (success) toast.success('Agent updated!');
@@ -54,12 +57,40 @@ export default function AgentManager() {
     }
   };
 
+  const handleAgentChange = (agentId: string) => {
+    if (hasEdits) {
+      setPendingAgentId(agentId);
+      setShowUnsavedModal(true);
+    } else {
+      setSelectedAgentId(agentId);
+    }
+  };
+
+  const handleActiveMainContentChange = (mainContent: string) => {
+    if (hasEdits) {
+      setPendingMainContent(mainContent);
+      setShowUnsavedModal(true);
+    } else {
+      setActiveMainContent(mainContent);
+    }
+  };
+
   const handleConfirmSectionChange = () => {
     setShowUnsavedModal(false);
-    setSelectedSection(pendingSection!);
-    setPendingSection(null);
+    if (pendingSection) {
+      setSelectedSection(pendingSection);
+      setPendingSection(null);
+      setActiveMainContent('');
+    }
+    if (pendingAgentId) {
+      setSelectedAgentId(pendingAgentId);
+      setPendingAgentId(null);
+    }
+    if (pendingMainContent) {
+      setActiveMainContent(pendingMainContent);
+      setPendingMainContent(null);
+    }
     reset();
-    setActiveMainContent('');
   };
 
   const handleCancelSectionChange = () => {
@@ -73,6 +104,12 @@ export default function AgentManager() {
       prev.map((a) => (a.id === updatedAgent.id ? updatedAgent : a)),
     );
   };
+
+  useEffect(() => {
+    if (selectedSection === 'persona' && agent && !agent.details?.persona) {
+      setSelectedSection('system-prompt');
+    }
+  }, [agent, selectedSection]);
 
   if (loading) {
     return (
@@ -88,7 +125,7 @@ export default function AgentManager() {
         selectedSection={selectedSection}
         setSelectedSection={handleSectionChange}
         agents={agents}
-        setSelectedAgentId={setSelectedAgentId}
+        setSelectedAgentId={handleAgentChange}
         selectedAgentId={selectedAgentId}
       />
       <div className="flex-1 flex flex-col min-w-0">
@@ -103,6 +140,7 @@ export default function AgentManager() {
             <MainContent
               agent={agent}
               selectedSection={selectedSection}
+              setSelectedSection={setSelectedSection}
               onEdit={(field, value) => editField(field, value)}
               hasEdits={hasEdits}
               activeMainContent={activeMainContent}
@@ -110,7 +148,7 @@ export default function AgentManager() {
           </div>
           <RightSidebar
             agent={agent}
-            setActiveMainContent={setActiveMainContent}
+            setActiveMainContent={handleActiveMainContentChange}
           />
         </div>
         {showUnsavedModal && (
