@@ -53,7 +53,7 @@ async function initServices() {
     analystAgent.start();
 
     // Initialize the telegram bot
-    await telegramBot.initialize(mainAgentId);
+    await telegramBot.start(mainAgentId);
 
     // Start timers
     discordBot.startRandomEventTimer();
