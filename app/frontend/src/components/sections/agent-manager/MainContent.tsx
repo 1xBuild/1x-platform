@@ -11,7 +11,6 @@ interface MainContentProps {
   setSelectedSection: (id: string) => void;
   onEdit?: (field: 'systemPrompt' | 'persona', value: string) => void;
   hasEdits?: boolean;
-  activeMainContent: string;
 }
 
 export default function MainContent({
@@ -19,9 +18,8 @@ export default function MainContent({
   selectedSection,
   setSelectedSection,
   onEdit,
-  activeMainContent,
 }: MainContentProps) {
-  if (activeMainContent === 'triggers' && agent) {
+  if (selectedSection === 'triggers' && agent) {
     return <TriggersManager agent={agent} />;
   }
 

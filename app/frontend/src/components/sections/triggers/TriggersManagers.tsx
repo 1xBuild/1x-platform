@@ -20,8 +20,6 @@ const availableTriggers = [
     disabled: false,
     agents: [AGENTS.MAIN, AGENTS.ANALYST],
   },
-  { name: 'Discord', disabled: true, agents: [AGENTS.MAIN] },
-  { name: 'X', disabled: true, agents: [AGENTS.MAIN] },
 ];
 
 export default function TriggersManager({ agent }: { agent: Agent }) {

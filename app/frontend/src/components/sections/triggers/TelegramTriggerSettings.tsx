@@ -27,9 +27,9 @@ export default function TelegramTriggerSettings({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ enabled: checked, agentId: agent?.id }),
       });
-      if (!response.ok) throw new Error('Erreur API');
+      if (!response.ok) throw new Error('API error');
       setConnected((prev) => ({ ...prev, Telegram: checked }));
-      toast.success(`Telegram ${checked ? 'activé' : 'désactivé'} success !`);
+      toast.success(`Telegram ${checked ? 'enabled' : 'disabled'} with success !`);
     } catch (err) {
       toast.error('Impossible to update Telegram status');
     } finally {
