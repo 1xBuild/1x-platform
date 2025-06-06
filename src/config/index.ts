@@ -119,11 +119,6 @@ const envSchema = z.object({
 
   // OpenAI Configuration
   OPENAI_API_KEY: z.string().min(1),
-  
-  // OpenRouter Configuration
-  OPENROUTER_API_KEY: z.string().min(1),
-  OPENROUTER_SITE_URL: z.string().url().optional().or(z.literal('')),
-  OPENROUTER_SITE_NAME: z.string().optional().or(z.literal('')),
 });
 
 // Parse environment variables
