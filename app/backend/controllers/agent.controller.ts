@@ -66,11 +66,11 @@ export const agentController = {
       const existing = await agentService.get(req.params.id);
       if (!existing) {
         const error: IApiErrorResponse = {
-        status: 'error',
-        code: 404,
-        message: 'Agent not found',
-      };
-      res.status(404).json(error);
+          status: 'error',
+          code: 404,
+          message: 'Agent not found',
+        };
+        res.status(404).json(error);
         return;
       }
       await agentService.update(parse.data);
@@ -100,4 +100,4 @@ export const agentController = {
     await agentService.delete(req.params.id, existing.details.name);
     res.status(204).send();
   },
-}; 
+};

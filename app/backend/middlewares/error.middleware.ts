@@ -7,11 +7,7 @@ import { config } from '../config/index';
  * @param req - The request object
  * @param res - The response object
  */
-export function errorHandler(
-  err: any,
-  _req: Request,
-  res: Response,
-) {
+export function errorHandler(err: any, _req: Request, res: Response) {
   if (config.env !== 'test') {
     console.error('Unhandled error: ', err);
   }
