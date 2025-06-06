@@ -1,4 +1,4 @@
-import { config } from "../config";
+import { config } from '../config';
 
 const DISCORD_WEBHOOK_URL = config.app.discordWebhookUrl;
 const SLACK_WEBHOOK_URL = config.app.slackWebhookUrl;
@@ -9,18 +9,23 @@ export async function sendDiscordAlert(message: string) {
     return;
   }
   try {
-    const railwayUrl = "https://railway.app/";
+    const railwayUrl = 'https://railway.app/';
     const embed = {
-      title: "🚨 Application Error Alert! 🚨",
-      description: "```" + (typeof message === "string" ? message : JSON.stringify(message, null, 2)) + "```",
+      title: '🚨 Application Error Alert! 🚨',
+      description:
+        '```' +
+        (typeof message === 'string'
+          ? message
+          : JSON.stringify(message, null, 2)) +
+        '```',
       color: 0xff0000, // Red
       fields: [
         {
-          name: "🔎 View full logs on Railway",
-          value: `[Click here to view logs](${railwayUrl})`
-        }
+          name: '🔎 View full logs on Railway',
+          value: `[Click here to view logs](${railwayUrl})`,
+        },
       ],
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     await fetch(DISCORD_WEBHOOK_URL, {
@@ -54,16 +59,16 @@ export async function sendSlackAlert(message: string) {
 
 export async function sendAlertToAdmins(message: string) {
   // Discord will use embed, Slack will use styled text
-  const railwayUrl = "https://railway.app/";
+  const railwayUrl = 'https://railway.app/';
   const slackLink = `<${railwayUrl}|View full logs on Railway>`;
 
   const styledMessageSlack = [
-    ":rotating_light: *Application Error Alert!* :rotating_light:",
-    "```",
-    typeof message === "string" ? message : JSON.stringify(message, null, 2),
-    "```",
-    "",
-    `:mag: ${slackLink}`
+    ':rotating_light: *Application Error Alert!* :rotating_light:',
+    '```',
+    typeof message === 'string' ? message : JSON.stringify(message, null, 2),
+    '```',
+    '',
+    `:mag: ${slackLink}`,
   ].join('\n');
 
   await sendDiscordAlert(message);

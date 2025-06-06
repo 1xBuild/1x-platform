@@ -4,7 +4,7 @@ import helmet from 'helmet';
 import cors from 'cors';
 import { config } from './config/index';
 import { discordBot } from './services/discord-bot';
-import { telegramBot } from './services/telegram-bot';
+import { telegramBotManager } from './services/telegram-bot-manager';
 import routes from './routes/index';
 import { errorHandler } from './middlewares/error.middleware';
 import { notFoundHandler } from './middlewares/not-found.middleware';
@@ -20,7 +20,9 @@ app.set('trust proxy', 1);
 
 // Middlewares Security & Parsing
 app.use(helmet());
-config.railway.envName === 'production' ? app.use(cors({ origin: config.app.corsOrigin })) : app.use(cors());
+config.railway.envName === 'production'
+  ? app.use(cors({ origin: config.app.corsOrigin }))
+  : app.use(cors());
 app.use(express.json({ limit: config.app.uploadMaxJsonSize }));
 app.use(createApiLimiter);
 
@@ -51,7 +53,7 @@ async function initServices() {
     analystAgent.start();
 
     // Initialize the telegram bot
-    await telegramBot.initialize(mainAgentId);
+    await telegramBotManager.start(mainAgentId);
 
     // Start timers
     discordBot.startRandomEventTimer();

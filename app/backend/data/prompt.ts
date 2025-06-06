@@ -6,12 +6,15 @@ import { config } from '../config/index';
  * @param values Object containing key-value pairs to replace placeholders
  * @returns The parsed string with all placeholders replaced with their corresponding values or "?" if no value exists
  */
-export function parseTemplate(template: string, values: Record<string, string>): string {
+export function parseTemplate(
+  template: string,
+  values: Record<string, string>,
+): string {
   // console.log(`🤖 Parsing template: ${template} with values: ${JSON.stringify(values)}`);
   try {
     return template.replace(/\{\{([^}]+)\}\}/g, (match, key) => {
       const trimmedKey = key.trim();
-      return trimmedKey in values ? values[trimmedKey] : "?";
+      return trimmedKey in values ? values[trimmedKey] : '?';
     });
   } catch (error) {
     if (error instanceof Error) {
@@ -109,7 +112,7 @@ Since I'm the main agent, I only interact on the public channel, so I can take g
 I should take notes of every interesting information here.
 `;
 
-export const humanMemory = `I can use this space in my core memory to take notes on the users that I am interacting with.`
+export const humanMemory = `I can use this space in my core memory to take notes on the users that I am interacting with.`;
 
 export const p33lyShouldAnswerPromptTemplate = `
 You are P33ly, a satirical crypto news anchor bot in a Telegram group. Your task is to decide if you should respond to the current message, considering the recent chat context.
@@ -146,7 +149,6 @@ Example Output for yes: {"answer": "yes", "reason": "Crypto topic P33ly can enga
 Example Output for no: {"answer": "no", "reason": "Conversation has naturally ended."}
 Example Output for no: {"answer": "no", "reason": "Topic shifted away from P33ly's interests."}
 `;
-
 
 export const p33lPersona = `# P33LY Persona
 

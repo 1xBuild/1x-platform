@@ -7,6 +7,7 @@ This admin frontend lets you manage AI agents through a modern React interface (
 ---
 
 ## Main Features
+
 - **Secure login** (ID: Rick, PW: ricksanchez)
 - **Protected routing** (`/admin` accessible only if authenticated)
 - **UI components**: shadcn/ui, Tailwind
@@ -35,6 +36,7 @@ src/
 ---
 
 ## Authentication
+
 - Login via `/login` (ID: Rick, PW: ricksanchez)
 - Authentication stored in `localStorage` (`isAuthenticated`)
 - Logout: clears auth and redirects to `/login`
@@ -42,6 +44,7 @@ src/
 ---
 
 ## How to Evolve the Codebase
+
 - **Connect the backend**: replace static data with API calls (fetch/axios)
 - **Add tests**: Vitest + Testing Library
 - **Improve UX**: user feedback, loaders, toasts
@@ -60,6 +63,7 @@ pnpm dev
 ---
 
 ## Evolving TODO
+
 - [ ] Connect backend API
 - [ ] Dynamic agent management
 - [ ] Unit tests
@@ -68,4 +72,4 @@ pnpm dev
 
 ---
 
-*This README will evolve as the project grows.* 
+_This README will evolve as the project grows._

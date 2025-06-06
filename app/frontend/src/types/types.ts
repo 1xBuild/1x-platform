@@ -11,4 +11,17 @@ export interface Agent {
   version: number;
   details: AgentDetails;
   status: 'enabled' | 'disabled' | 'pending' | 'error';
-} 
+}
+
+export type Theme = 'dark' | 'light' | 'system';
+
+export type ThemeProviderState = {
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
+};
+
+export type ThemeProviderProps = {
+  children: React.ReactNode;
+  defaultTheme?: Theme;
+  storageKey?: string;
+};
