@@ -16,6 +16,11 @@ export default function ScheduleTriggerSettings({
   loading,
   setLoading,
 }: ScheduleTriggerSettingsProps) {
+  console.log('agent', agent);
+  console.log('connected', connected);
+  console.log('setConnected', setConnected);
+  console.log('loading', loading);
+  console.log('setLoading', setLoading);
   // TODO: Ajouter la logique de gestion du schedule ici
   return (
     <div className="flex flex-col gap-4 mb-4">

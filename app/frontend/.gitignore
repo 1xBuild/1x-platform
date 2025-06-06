@@ -23,3 +23,8 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
+
+# tsconfig
+tsconfig.node.tsbuildinfo
+tsconfig.app.tsbuildinfo
+*.tsbuildinfo
