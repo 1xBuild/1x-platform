@@ -531,6 +531,7 @@ export class TelegramBot {
   public stop() {
     this.bot.stop();
     this.running = false;
+    console.log('🤖 Telegram bot stopped');
   }
 
   // We might not need getRecentMessages and truncateMessage here if `sendMessage` and services handle this.

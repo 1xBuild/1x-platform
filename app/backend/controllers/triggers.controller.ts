@@ -1,14 +1,20 @@
 import { Request, Response } from 'express';
-import { telegramBot } from '../services/telegram-bot';
+import { telegramBotManager } from '../services/telegram-bot-manager';
 
 export const enableTelegram = async (req: Request, res: Response) => {
-  const { enabled } = req.body;
+  const { enabled, agentId } = req.body;
   try {
     if (enabled) {
-      await telegramBot.start();
+      console.log(
+        `[TelegramBotManager] Activation requested for agentId: ${agentId}`,
+      );
+      await telegramBotManager.start(agentId);
       res.json({ success: true, enabled: true });
     } else {
-      telegramBot.stop();
+      console.log(
+        `[TelegramBotManager] Deactivation requested for agentId: ${agentId}`,
+      );
+      telegramBotManager.stop(agentId);
       res.json({ success: true, enabled: false });
     }
   } catch (err) {
@@ -20,5 +26,19 @@ export const enableTelegram = async (req: Request, res: Response) => {
 };
 
 export const getTelegramStatus = (req: Request, res: Response) => {
-  res.json({ enabled: telegramBot.isRunning() });
+  const agentId = req.query.agentId || req.params.agentId || req.body.agentId;
+
+  if (!agentId) {
+    res.status(400).json({
+      success: false,
+      error: 'agentId is required',
+    });
+    return;
+  }
+
+  console.log(`[TelegramBotManager] Checking status for agentId: ${agentId}`);
+
+  res.json({
+    enabled: telegramBotManager.isRunning(agentId),
+  });
 };
