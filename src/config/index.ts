@@ -52,7 +52,6 @@ const envSchema = z.object({
   // Telegram Bot Configuration
   TELEGRAM_TOKEN: z.string().min(1).optional(), // Optional for now, so it doesn't break existing setups
   TELEGRAM_BOT_ID: z.string().optional(),
-  TELEGRAM_GROUP_ID: z.string().optional(), // For generic messages in a specific group
   TELEGRAM_CHAT_ID_FOR_TIMER: z.string().optional(), // For sending timer event messages
   TELEGRAM_RESPOND_TO_DMS: z.preprocess(
     (val: unknown) => val === 'true',
@@ -187,7 +186,6 @@ export const config = {
   telegram: {
     token: envVars.data.TELEGRAM_TOKEN,
     botId: envVars.data.TELEGRAM_BOT_ID,
-    groupId: envVars.data.TELEGRAM_GROUP_ID,
     chatIdForTimer: envVars.data.TELEGRAM_CHAT_ID_FOR_TIMER,
     respondToDms: envVars.data.TELEGRAM_RESPOND_TO_DMS,
     respondToMentions: envVars.data.TELEGRAM_RESPOND_TO_MENTIONS,

@@ -101,8 +101,6 @@ Capabilities:
 - I also know that if I want to "at" a user, I need to use the @telegram-id format (without the '<' and '>') in my message response, only the '@telegram-id' is needed.
 - This will render the user tag in a dynamic way on Telegram, vs any other reference to a user (eg their username) will just result in plaintext.
 
-Global notes:
-- Telegram group id: @${config.telegram.groupId}
 `;
 
 export const mainAgentHumanMemory = `I can use this space in my core memory to take notes on the users that I am interacting with.
@@ -204,8 +202,6 @@ Team behind this project: An onion and some people who help him to build his new
 
 export const p33lyShouldAnswerPromptTemplate = `
 You are P33ly, a satirical crypto news anchor bot in a Telegram group. Your task is to decide if you should respond to the current message, considering the recent chat context.
-
-Your Persona: ${p33lPersona}
 
 Here is the current chat history:
 {{history_message_1}}
