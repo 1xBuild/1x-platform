@@ -1,9 +1,10 @@
+import { useEffect } from 'react';
 import type { Agent } from '@/types/types';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import TriggersManager from '../triggers/TriggersManagers';
-import { useEffect } from 'react';
+import ToolsManager from '../tools/ToolsManagers';
 
 interface MainContentProps {
   agent?: Agent | null;
@@ -11,7 +12,6 @@ interface MainContentProps {
   setSelectedSection: (id: string) => void;
   onEdit?: (field: 'systemPrompt' | 'persona', value: string) => void;
   hasEdits?: boolean;
-  activeMainContent: string;
 }
 
 export default function MainContent({
@@ -19,10 +19,12 @@ export default function MainContent({
   selectedSection,
   setSelectedSection,
   onEdit,
-  activeMainContent,
 }: MainContentProps) {
-  if (activeMainContent === 'triggers' && agent) {
+  if (selectedSection === 'triggers' && agent) {
     return <TriggersManager agent={agent} />;
+  }
+  if (selectedSection === 'tools' && agent) {
+    return <ToolsManager agent={agent} />;
   }
 
   const systemPrompt = agent?.details?.systemPrompt || '';

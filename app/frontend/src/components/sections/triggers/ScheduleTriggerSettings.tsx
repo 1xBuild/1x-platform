@@ -20,7 +20,7 @@ export default function ScheduleTriggerSettings({
   return (
     <div className="flex flex-col gap-4 mb-4">
       <div className="text-muted-foreground">
-        (Schedule settings UI à implémenter)
+        (Schedule settings UI wip)
       </div>
       {/* Ajoute ici les champs de configuration, switch, etc. */}
     </div>

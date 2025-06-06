@@ -13,12 +13,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 interface RightSidebarProps {
   agent?: Agent | null;
-  setActiveMainContent: (view: string) => void;
 }
 
 export default function RightSidebar({
   agent,
-  setActiveMainContent,
 }: RightSidebarProps) {
   const model = agent?.details?.model || '';
 
@@ -42,41 +40,7 @@ export default function RightSidebar({
           </Select>
         ),
       disabled: false,
-    },
-    {
-      id: 'triggers',
-      title: 'Triggers',
-      description: 'Add and manage triggers for your agent',
-      button: {
-        label: 'Add trigger',
-        icon: <Plus className="w-4 h-4 mr-1 text-accent" />,
-        onClick: () => setActiveMainContent('triggers'),
-      },
-    },
-    {
-      id: 'tools',
-      title: 'Tools',
-      description:
-        'Add tools to give your agents the ability to perform actions or connect with integrations.',
-      button: {
-        label: 'Add tool',
-        icon: <Plus className="w-4 h-4 mr-1 text-accent" />,
-        disabled: true,
-      },
-      disabled: true,
-    },
-    {
-      id: 'knowledge',
-      title: 'Knowledge',
-      description:
-        'Add knowledge to give your agents more customized, context-relevant responses.',
-      button: {
-        label: '',
-        icon: <Plus className="w-4 h-4 text-accent" />,
-        disabled: true,
-      },
-      disabled: true,
-    },
+    }
   ];
 
   return (
@@ -94,26 +58,11 @@ export default function RightSidebar({
                 >
                   {section.title}
                 </CardTitle>
-                {section.button && (
-                  <Button
-                    size="sm"
-                    disabled={section.button.disabled}
-                    className={section.disabled ? 'opacity-50' : ''}
-                    onClick={section.button.onClick}
-                  >
-                    {section.button.icon}
-                    {section.button.label}
-                  </Button>
-                )}
               </div>
             </CardHeader>
             <CardContent className="pt-0">
-              {section.content ? (
+              {section.content && (
                 section.content({ agent, model })
-              ) : (
-                <p className="text-xs text-muted-foreground">
-                  {section.description}
-                </p>
               )}
             </CardContent>
           </Card>

@@ -1,4 +1,4 @@
-import { FileText, Wrench, Brain, HelpCircle, User } from 'lucide-react';
+import { FileText, Wrench, Brain, HelpCircle, User, PlugZap } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import type { Agent } from '@/types/types';
 import { Button } from '@/components/ui/button';
@@ -42,11 +42,17 @@ export default function Sidebar({
       description: 'Create guidelines for your agent',
     },
     {
+      id: 'triggers',
+      label: 'Triggers',
+      description: 'Add and manage triggers for your agent',
+      icon: PlugZap,
+    },
+    {
       id: 'tools',
       label: 'Tools',
       icon: Wrench,
       description: 'Used by agents to complete tasks',
-      disabled: true,
+      disabled: false,
     },
     {
       id: 'knowledge',
