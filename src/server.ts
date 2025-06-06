@@ -16,6 +16,7 @@ async function init() {
 
     // Initialize the main agent
     const mainAgentId = await getOrCreateMainAgent();
+    console.log(`🤖 Main agent ID: ${mainAgentId}`);
 
     // Initialize the telegram bot
     await telegramBot.initialize(mainAgentId);
