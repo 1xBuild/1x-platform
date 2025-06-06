@@ -9,12 +9,21 @@ export const agentController = {
       const agents = await agentService.list();
       res.json(agents);
     } catch (error) {
-      const errorResponse: IApiErrorResponse = {
-        status: 'error',
-        code: error.code,
-        message: error.message,
-      };
-      res.status(error.code).json(errorResponse);
+      let errorResponse: IApiErrorResponse;
+      if (error instanceof Error) {
+        errorResponse = {
+          status: 'error',
+          code: 500,
+          message: error.message,
+        };
+      } else {
+        errorResponse = {
+          status: 'error',
+          code: 500,
+          message: String(error),
+        };
+      }
+      res.status(500).json(errorResponse);
     }
   },
 
@@ -75,12 +84,21 @@ export const agentController = {
       await agentService.update(parse.data);
       res.json(parse.data);
     } catch (error) {
-      const errorResponse: IApiErrorResponse = {
-        status: 'error',
-        code: error.code,
-        message: error.message,
-      };
-      res.status(error.code).json(errorResponse);
+      let errorResponse: IApiErrorResponse;
+      if (error instanceof Error) {
+        errorResponse = {
+          status: 'error',
+          code: 500,
+          message: error.message,
+        };
+      } else {
+        errorResponse = {
+          status: 'error',
+          code: 500,
+          message: String(error),
+        };
+      }
+      res.status(500).json(errorResponse);
     }
   },
 
