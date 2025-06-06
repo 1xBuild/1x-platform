@@ -26,7 +26,7 @@ export const enableCryptoPanic = async (req: Request, res: Response) => {
   }
 };
 
-export const getCryptoPanicStatus = (req: Request, res: Response) => {
+export const getCryptoPanicStatus = async (req: Request, res: Response) => {
   const agentId = req.query.agentId || req.params.agentId || req.body.agentId;
 
   if (!agentId) {
@@ -39,7 +39,9 @@ export const getCryptoPanicStatus = (req: Request, res: Response) => {
 
   console.log(`[CryptoPanicToolManager] Checking status for agentId: ${agentId}`);
 
+  const isRunning = await cryptoPanicToolManager.isRunning(agentId);
+
   res.json({
-    enabled: cryptoPanicToolManager.isRunning(agentId),
+    enabled: isRunning,
   });
 };

@@ -25,7 +25,7 @@ export const enableTelegram = async (req: Request, res: Response) => {
   }
 };
 
-export const getTelegramStatus = (req: Request, res: Response) => {
+export const getTelegramStatus = async (req: Request, res: Response) => {
   const agentId = req.query.agentId || req.params.agentId || req.body.agentId;
 
   if (!agentId) {
@@ -36,9 +36,11 @@ export const getTelegramStatus = (req: Request, res: Response) => {
     return;
   }
 
+  const isRunning = await telegramBotManager.isRunning(agentId);
+
   console.log(`[TelegramBotManager] Checking status for agentId: ${agentId}`);
 
   res.json({
-    enabled: telegramBotManager.isRunning(agentId),
+    enabled: isRunning,
   });
 };
