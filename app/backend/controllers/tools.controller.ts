@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import { telegramBotManager } from '../services/telegram-bot-manager';
 import { cryptoPanicToolManager } from '../services/crypto-panic-tool-manager';
-import { toolsManager } from '../services/letta/letta-tools';
 
 export const enableCryptoPanic = async (req: Request, res: Response) => {
   const { enabled, agentId } = req.body;

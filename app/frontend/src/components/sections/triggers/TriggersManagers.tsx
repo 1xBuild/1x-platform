@@ -6,6 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import { Agent } from '@/types/types';
 import TelegramTriggerSettings from './TelegramTriggerSettings';
 import ScheduleTriggerSettings from './ScheduleTriggerSettings';
+import { SERVER_URL } from '@/config';
 
 const AGENTS = {
   MAIN: 'main-agent',
@@ -43,7 +44,7 @@ export default function TriggersManager({ agent }: { agent: Agent }) {
 
   useEffect(() => {
     if (!agent?.id) return;
-    fetch(`/api/triggers/telegram?agentId=${agent.id}`)
+    fetch(`${SERVER_URL}/api/triggers/telegram?agentId=${agent.id}`)
       .then((res) => res.json())
       .then((data) => {
         setConnected((prev) => ({ ...prev, Telegram: !!data.enabled }));
