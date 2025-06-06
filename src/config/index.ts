@@ -184,11 +184,6 @@ export const config = {
   openai: {
     apiKey: envVars.data.OPENAI_API_KEY,
   },
-  openrouter: {
-    apiKey: envVars.data.OPENROUTER_API_KEY,
-    siteUrl: envVars.data.OPENROUTER_SITE_URL,
-    siteName: envVars.data.OPENROUTER_SITE_NAME,
-  },
   telegram: {
     token: envVars.data.TELEGRAM_TOKEN,
     botId: envVars.data.TELEGRAM_BOT_ID,
