@@ -46,6 +46,21 @@ try {
   console.error('Failed to migrate agents table to add status column:', e);
 }
 
+// --- SCHEDULED TRIGGERS TABLE ---
+db.exec(`
+  CREATE TABLE IF NOT EXISTS scheduled_triggers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    agent_id TEXT NOT NULL,
+    enabled INTEGER NOT NULL DEFAULT 1,
+    hour INTEGER NOT NULL,
+    minute INTEGER NOT NULL DEFAULT 0,
+    message TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(agent_id) REFERENCES agents(id)
+  )
+`);
+
 export default db;
 
 /**
@@ -131,4 +146,64 @@ export function updateAgent(agent: IAgent): void {
 export function deleteAgent(id: string): void {
   const stmt = db.prepare('DELETE FROM agents WHERE id = ?');
   stmt.run(id);
+}
+
+export interface ScheduledTrigger {
+  id: number;
+  agent_id: string;
+  enabled: boolean;
+  hour: number;
+  minute: number;
+  message: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export function getScheduledTriggerByAgentId(agent_id: string): ScheduledTrigger | null {
+  const stmt = db.prepare('SELECT * FROM scheduled_triggers WHERE agent_id = ? LIMIT 1');
+  const row = stmt.get(agent_id) as
+    | {
+        id: number;
+        agent_id: string;
+        enabled: number;
+        hour: number;
+        minute: number;
+        message: string;
+        created_at: string;
+        updated_at: string;
+      }
+    | undefined;
+  return row
+    ? {
+        ...row,
+        enabled: !!row.enabled,
+      }
+    : null;
+}
+
+export function upsertScheduledTrigger(trigger: Omit<ScheduledTrigger, 'id' | 'created_at' | 'updated_at'> & { id?: number }): void {
+  if (trigger.id) {
+    const stmt = db.prepare(`
+      UPDATE scheduled_triggers
+      SET enabled = ?, hour = ?, minute = ?, message = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `);
+    stmt.run(trigger.enabled ? 1 : 0, trigger.hour, trigger.minute, trigger.message, trigger.id);
+  } else {
+    const stmt = db.prepare(`
+      INSERT INTO scheduled_triggers (agent_id, enabled, hour, minute, message)
+      VALUES (?, ?, ?, ?, ?)
+    `);
+    stmt.run(trigger.agent_id, trigger.enabled ? 1 : 0, trigger.hour, trigger.minute, trigger.message);
+  }
+}
+
+export function listScheduledTriggersToFire(currentHour: number, currentMinute: number): ScheduledTrigger[] {
+  const stmt = db.prepare('SELECT * FROM scheduled_triggers WHERE enabled = 1 AND hour = ? AND minute = ?');
+  return stmt.all(currentHour, currentMinute).map((row: any) => ({ ...row, enabled: !!row.enabled }));
+}
+
+export function listAllScheduledTriggers(): ScheduledTrigger[] {
+  const stmt = db.prepare('SELECT * FROM scheduled_triggers');
+  return stmt.all().map((row: any) => ({ ...row, enabled: !!row.enabled }));
 }
