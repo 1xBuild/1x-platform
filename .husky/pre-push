@@ -3,3 +3,7 @@
 
 # 1) Run vulnerability audit (will fail if any issue >= moderate)
 pnpm audit --audit-level=moderate
+
+# 2) Run build to check for errors
+pnpm run build:frontend
+pnpm run build:backend
