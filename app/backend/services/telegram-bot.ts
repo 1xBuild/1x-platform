@@ -217,10 +217,6 @@ export class TelegramBot {
 
     // Handle generic messages in groups (if the bot is part of the group and configured to respond)
     // This would typically be for groups where the bot is explicitly added and configured to listen.
-    console.log(`🤖 Responding to generic messages in group ${ctx.chat?.id}`);
-    console.log(`🤖 RespondToGeneric: ${config.telegram.respondToGeneric}`);
-    console.log(`🤖 ChatId: ${ctx.chat?.id}`);
-    console.log(`🤖 Message: ${ctx.message.text}`);
     if (config.telegram.respondToGeneric && ctx.chat) {
       console.log(`🤖 Handling generic message in group ${ctx.chat.id}`);
       // If LLM should decide, call shouldAnswer
@@ -533,9 +529,6 @@ export class TelegramBot {
     this.running = false;
     console.log('🤖 Telegram bot stopped');
   }
-
-  // We might not need getRecentMessages and truncateMessage here if `sendMessage` and services handle this.
-  // If direct message history manipulation is needed within TelegramBot, these would be adapted.
 }
 
 // Export an instance of the bot
