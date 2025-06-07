@@ -10,6 +10,7 @@ import { errorHandler } from './middlewares/error.middleware';
 import { notFoundHandler } from './middlewares/not-found.middleware';
 import { createApiLimiter } from './config/rateLimiter';
 import { agentService } from './services/agent';
+import { startScheduledTriggerWorker } from './services/scheduled-trigger-worker';
 // import { analystAgent } from './services/analyst-agent';
 
 // Initialize express app
@@ -56,6 +57,9 @@ async function initServices() {
 
     // Start timers
     discordBot.startRandomEventTimer();
+
+    // Start scheduled trigger worker
+    startScheduledTriggerWorker();
 
     console.log(`✅ All services initialized successfully!`);
   } catch (error) {
