@@ -221,7 +221,7 @@ export default function TriggersManager({ agent }: { agent: Agent }) {
       {showTriggers && selectedTrigger && (
         <Card>
           <CardHeader>
-            <CardTitle>{selectedTrigger === 'Schedule' ? 'Add a new Scheduled Trigger' : `${selectedTrigger} Settings`}</CardTitle>
+            <CardTitle>{selectedTrigger === 'Schedule' ? 'Add a new Scheduled Trigger (UTC time)' : `${selectedTrigger} Settings`}</CardTitle>
           </CardHeader>
           <CardContent>
             {selectedTrigger === 'Telegram' ? (
