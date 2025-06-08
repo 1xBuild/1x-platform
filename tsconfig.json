@@ -8,10 +8,10 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "rootDir": "./",
-    "outDir": "./dist"
+    "outDir": "./dist",
   },
   "include": [
-    "src/**/*",
+    "app/**/*",
     "tests/**/*"
   ],
   "exclude": [
