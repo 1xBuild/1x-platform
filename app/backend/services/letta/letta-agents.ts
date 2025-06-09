@@ -6,6 +6,7 @@ import * as templates from '../../data/template';
 import { AgentType, AgentName } from '../../types';
 import { parseTemplate } from '../../data/template';
 import { config } from '../../config/index';
+import { dataSourceManager } from './letta-datasource';
 /**
  * Manages Letta agent mappings for Discord conversations.
  */
@@ -49,7 +50,8 @@ class AgentManager {
   }
 
   /**
-   * Retrieves an existing main agent or creates a new one if it doesn't exist
+   * Retrieves an existing main agent (the one in the public channel) 
+   * or creates a new one if it doesn't exist
    * @returns Promise<string> - The agent ID for the main agent
    */
   async getOrCreateMainAgent(): Promise<string> {
@@ -82,6 +84,16 @@ class AgentManager {
       contextWindowLimit: this.MAX_CONTEXT_WINDOW_LIMIT,
       embedding: this.EMBEDDING,
     });
+
+    // Attach data source to agent
+    if (config.dataSource.mainDataSourceName && config.dataSource.mainDataSourceFilePath) {
+      const mainDataSourceId = await dataSourceManager.getOrCreateMainDataSource(
+        config.dataSource.mainDataSourceName, 
+        config.dataSource.mainDataSourceFilePath
+      );
+      await dataSourceManager.attachSourceToAgent(agent.id, mainDataSourceId);
+      console.log(`🤖 Main data source initialized: ${mainDataSourceId}`);
+    }
     
     return agent.id;
   }
@@ -93,7 +105,7 @@ class AgentManager {
    * @param channelId - The Discord DM channel ID (used as unique key)
    * @returns Promise<string> - The agent ID for this conversation
    */
-  public async getOrCreateAgent(userId: string, channelId: string, username: string): Promise<string> {
+  public async getOrCreateDmAgent(userId: string, channelId: string, username: string): Promise<string> {
     const agentName = this.generateAgentName(userId, channelId);
     const agent = await this.getAgent(agentName);
 
@@ -103,7 +115,18 @@ class AgentManager {
     }
 
     console.log(`🤖 Creating new agent: ${agentName}`);
-    return await this.createAgent(agentName, userId, username);
+    const agentId = await this.createAgent(agentName, userId, username);
+
+    // Attach data source to the agent if it's a new agent
+    if (config.dataSource.mainDataSourceName && config.dataSource.mainDataSourceFilePath && agent) {
+      const mainDataSourceId = await dataSourceManager.getOrCreateMainDataSource(
+        config.dataSource.mainDataSourceName,
+        config.dataSource.mainDataSourceFilePath
+      );
+      await dataSourceManager.attachSourceToAgent(agentId, mainDataSourceId);
+    }
+
+    return agentId;
   }
 
   /**
