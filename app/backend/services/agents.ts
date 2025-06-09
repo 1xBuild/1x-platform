@@ -1,5 +1,5 @@
-import { agentManager } from '../adapters/letta-agents';
-import { dataSourceManager } from '../adapters/letta-datasource';
+import { agentManager } from './letta/letta-agents';
+import { dataSourceManager } from './letta/letta-datasource';
 import { config } from '../config/index';
 
 /**

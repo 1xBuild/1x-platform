@@ -2,8 +2,8 @@ import { EmbeddingConfig } from "@letta-ai/letta-client/api/types/EmbeddingConfi
 import { lettaClient } from "./letta-client";
 import { LettaClient } from "@letta-ai/letta-client";
 import { createReadStream } from "fs";
-import { isFileUploaded, markFileAsUploaded } from "../database/db";
-import { config } from "../config";
+import { isFileUploaded, markFileAsUploaded } from "../../database/db";
+import { config } from "../../config";
 
 const EMBEDDING_CONFIG = config.model.embeddingConfig;
 

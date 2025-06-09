@@ -10,7 +10,7 @@ const client = new OpenAI({
 // Initialize cache
 const cache = ApiCache.getInstance('openai');
 
-export const openaiAdapter = {
+export const openaiService = {
   /**
    * Generate a cache key for a chat completion request
    * @param params - Chat completion parameters
@@ -36,7 +36,7 @@ export const openaiAdapter = {
   ): Promise<OpenAI.Chat.ChatCompletion> => {
     try {
       // Check cache
-      const cacheKey = openaiAdapter.generateCacheKey(params);
+      const cacheKey = openaiService.generateCacheKey(params);
       const cachedResponse = cache.get(cacheKey);
 
       if (cachedResponse) {
@@ -80,7 +80,7 @@ export const openaiAdapter = {
       { role: 'user', content: prompt },
     ];
 
-    const response = await openaiAdapter.createChatCompletion({
+    const response = await openaiService.createChatCompletion({
       messages,
       model,
       ...options,
@@ -108,7 +108,7 @@ export const openaiAdapter = {
       { role: 'user', content: prompt },
     ];
 
-    const response = await openaiAdapter.createChatCompletion({
+    const response = await openaiService.createChatCompletion({
       messages,
       model,
       response_format: { type: 'json_object' },
