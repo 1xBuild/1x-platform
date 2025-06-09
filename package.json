@@ -5,9 +5,9 @@
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch",
-    "start": "NODE_ENV=production ts-node src/server.ts",
-    "start:dev": "NODE_ENV=development ts-node src/server.ts",
-    "dev": "NODE_ENV=development ts-node-dev --respawn --transpile-only --watch src src/server.ts",
+    "start": "NODE_ENV=production ts-node app/backend/server.ts",
+    "start:dev": "NODE_ENV=development ts-node app/backend/server.ts",
+    "dev": "NODE_ENV=development ts-node-dev --respawn --transpile-only --watch src app/backend/server.ts",
     "build": "tsc",
     "build:dev": "NODE_ENV=development tsc",
     "build:prod": "NODE_ENV=production tsc"
