@@ -137,7 +137,7 @@ const envSchema = z.object({
   ANALYST_AGENT_MEMORY_BLOCK_LABEL: z.string().default('crypto-news'),
 
   // Cryptopanic Configuration
-  CRYPTOPANIC_API_KEY: z.string().min(1),
+  CRYPTOPANIC_API_KEY: z.string().min(1).optional(),
 });
 
 // Parse environment variables

@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "build": "pnpm --filter app-backend run build && pnpm --filter app-frontend run build",
-    "start": "pnpm --filter app-backend run start & pnpm --filter app-frontend run preview"
+    "build": "pnpm --filter app-backend run build",
+    "start": "pnpm --filter app-backend run start"
   }
 } 
