@@ -1,10 +1,10 @@
 // __tests__/datasource.test.ts
-import { DataSourceManager } from '../app/backend/services/letta/letta-datasource';
+import { DataSourceManager } from '../services/letta/letta-datasource';
 import { createReadStream } from 'fs';
 // No need to import jest types directly
 
 // Mock for the EMBEDDING_CONFIG value
-jest.mock('../app/backend/adapters/letta-datasource', () => ({
+jest.mock('../adapters/letta-datasource', () => ({
   EMBEDDING_CONFIG: 'embed1',
   MODEL_CONFIG: 'model1'
 }));
@@ -14,7 +14,7 @@ jest.mock('fs', () => ({
 }));
 
 // Mock implementation of the entire module
-jest.mock('../app/backend/adapters/letta-datasource', () => {
+jest.mock('../adapters/letta-datasource', () => {
   // Define mock client inline in the factory function
   const mockLettaClient = {
     models: { 
@@ -36,7 +36,7 @@ jest.mock('../app/backend/adapters/letta-datasource', () => {
 });
 
 // Create a reference to the mock for our tests
-const mockLettaClient = jest.requireMock('../app/backend/adapters/letta-datasource').lettaClient;
+const mockLettaClient = jest.requireMock('../adapters/letta-datasource').lettaClient;
 
 describe('DataSourceManager', () => {
   let manager: DataSourceManager;

@@ -5,15 +5,12 @@
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch",
-    "start": "cross-env NODE_ENV=production ts-node app/backend/server.ts",
-    "start:dev": "cross-env NODE_ENV=development ts-node app/backend/server.ts",
-    "dev": "cross-env NODE_ENV=development ts-node-dev --respawn --transpile-only --watch src app/backend/server.ts",
+    "start": "cross-env NODE_ENV=production ts-node server.ts",
+    "start:dev": "cross-env NODE_ENV=development ts-node server.ts",
+    "dev": "cross-env NODE_ENV=development ts-node-dev --respawn --transpile-only --watch src server.ts",
     "build": "tsc",
     "build:dev": "NODE_ENV=development tsc",
-    "build:prod": "NODE_ENV=production tsc",
-    "build:front": "cd app/frontend && npm run build",
-    "build:back": "cd app/backend && npm run build",
-    "build:all": "npm run build:front && npm run build:back"
+    "build:prod": "NODE_ENV=production tsc"
   },
   "keywords": [],
   "author": "",
