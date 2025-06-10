@@ -178,6 +178,7 @@ export const agentService = {
   },
 
   // Get or create the main agent (local + Letta)
+  // The main agent is the one connected to the public Discord / Telegram server
   getOrCreateMainAgent: async () => {
     const agentName = (config.env === 'development') ? 'main-agent-dev' : 'main-agent';
     let agent = db.listAgents().find(a => a.details.name === agentName);
