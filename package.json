@@ -13,7 +13,10 @@
     "build:prod": "NODE_ENV=production tsc",
     "build:front": "cd app/frontend && npm run build",
     "build:back": "cd app/backend && npm run build",
-    "build:all": "npm run build:front && npm run build:back"
+    "build:all": "npm run build:front && npm run build:back",
+    "start:front": "cd app/frontend && npm start",
+    "start:back": "cd app/backend && npm start",
+    "start:all": "npm-run-all --parallel start:front start:back"
   },
   "keywords": [],
   "author": "",
