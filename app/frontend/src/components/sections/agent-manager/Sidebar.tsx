@@ -1,11 +1,27 @@
-import { ChevronLeft, ChevronDown, FileText, Wrench, Brain, HelpCircle, User } from "lucide-react";
+import {FileText, Wrench, Brain, HelpCircle, User } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Agent } from "@/types/types";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+import { ModeToggle } from "@/components/ModeToggle";
 
-export default function Sidebar({ selectedSection, setSelectedSection, agent }: { selectedSection: string, setSelectedSection: (id: string) => void, agent?: Agent | null }) {
+interface SidebarProps {
+  selectedSection: string;
+  setSelectedSection: (id: string) => void;
+  agents: Agent[];
+  setSelectedAgentId: (id: string) => void;
+  selectedAgentId: string | null;
+}
+
+export default function Sidebar({ selectedSection, setSelectedSection, agents, setSelectedAgentId, selectedAgentId }: SidebarProps) {
     const sidebarItems = [
       { id: "system-prompt", label: "System Prompt", icon: FileText, description: "Create guidelines for your agent" },
       { id: "persona", label: "Persona", icon: User, description: "Create a persona for your agent" },
@@ -14,27 +30,26 @@ export default function Sidebar({ selectedSection, setSelectedSection, agent }: 
     ];
 
     return (
-      <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
-        <div className="p-4 border-b border-gray-200">
-          <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
-            <ChevronLeft className="w-4 h-4" />
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 bg-cyan-100 rounded flex items-center justify-center">
-                <span className="text-cyan-600 text-xs font-bold">A</span>
-              </div>
-              {!agent ? (
-                <>
-                  <Skeleton className="h-4 w-20 mr-2" />
-                  <Skeleton className="h-3 w-10 ml-2" />
-                </>
-              ) : (
-                <>
-                  <span className="font-medium">{agent.details?.name || "P33ly"}</span>
-                  <span className="text-xs text-gray-400 ml-2">v{agent.version}</span>
-                </>
-              )}
-              <ChevronDown className="w-4 h-4" />
-            </div>
+      <div className="w-64 border-r border-border flex flex-col">
+        <div className="p-4 border-b border-border">
+          <div className="mb-2">
+            <div className="text-xs text-muted-foreground mb-1">Agents disponibles</div>
+            {agents.length === 0 ? (
+              <Skeleton className="h-4 w-20" />
+            ) : (
+              <Select value={selectedAgentId ?? undefined} onValueChange={setSelectedAgentId}>
+                <SelectTrigger className="w-full text-foreground">
+                  <SelectValue placeholder="Sélectionner un agent" />
+                </SelectTrigger>
+                <SelectContent>
+                  {agents.map(a => (
+                    <SelectItem key={a.id} value={a.id!}>
+                      {a.details.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
         </div>
         <ScrollArea className="flex-1">
@@ -49,14 +64,14 @@ export default function Sidebar({ selectedSection, setSelectedSection, agent }: 
                   className={`w-full flex items-start gap-3 p-3 rounded-lg text-left transition-colors ${
                     item.disabled
                       ? "opacity-50 cursor-not-allowed"
-                      : "hover:bg-gray-50 " + (selectedSection === item.id ? "bg-gray-100" : "")
+                      : "hover:bg-accent focus:bg-accent " + (selectedSection === item.id ? "bg-accent" : "")
                   } ${idx !== sidebarItems.length - 1 ? "mb-2" : ""}`}
                 >
-                  <Icon className={`w-4 h-4 mt-0.5 ${item.disabled ? "text-gray-400" : "text-cyan-600"}`} />
+                  <Icon className={`w-4 h-4 mt-0.5 ${item.disabled ? "text-muted-foreground" : (selectedSection === item.id ? "text-accent-foreground" : "text-foreground")}`} />
                   <div className="flex-1 min-w-0">
-                    <div className={`font-medium text-sm ${item.disabled ? "text-gray-400" : "text-white"}`}>{item.label}</div>
+                    <div className={`font-medium text-sm ${item.disabled ? "text-muted-foreground" : (selectedSection === item.id ? "text-accent-foreground" : "text-foreground")}`}>{item.label}</div>
                     {item.description && (
-                      <div className={`text-xs mt-0.5 ${item.disabled ? "text-gray-400" : "text-white"}`}>{item.description}</div>
+                      <div className={`text-xs mt-0.5 ${item.disabled ? "text-muted-foreground" : (selectedSection === item.id ? "text-accent-foreground" : "text-muted-foreground")}`}>{item.description}</div>
                     )}
                   </div>
                 </button>
@@ -66,10 +81,13 @@ export default function Sidebar({ selectedSection, setSelectedSection, agent }: 
         </ScrollArea>
         <Separator />
         <div className="p-4">
-          <Button variant="outline" className="text-white hover:text-cyan-400">
-          <HelpCircle className="w-4 h-4" />
+          <Button variant="outline" className="text-foreground hover:text-primary">
+            <HelpCircle className="w-4 h-4 text-accent-foreground" />
             Need help?
           </Button>
+          <div className="mt-4">
+            <ModeToggle />
+          </div>
         </div>
       </div>
     );

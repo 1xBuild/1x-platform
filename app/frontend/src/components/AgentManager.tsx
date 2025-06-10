@@ -9,7 +9,17 @@ import { Loader2 } from "lucide-react";
 
 export default function AgentManager() {
   const [selectedSection, setSelectedSection] = useState("system-prompt");
-  const { agent, editField, publish, hasEdits, loading, error } = useAgentState();
+  const {
+    agents,
+    agent,
+    setSelectedAgentId,
+    selectedAgentId,
+    editField,
+    publish,
+    hasEdits,
+    loading,
+    error,
+  } = useAgentState();
   const lastErrorRef = useRef<string | null>(null);
 
   if (error && lastErrorRef.current !== error) {
@@ -29,32 +39,34 @@ export default function AgentManager() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen w-full bg-gray-50">
-        <Loader2 className="animate-spin w-10 h-10 text-cyan-600" />
+      <div className="flex items-center justify-center h-screen w-full">
+        <Loader2 className="animate-spin w-10 h-10" />
       </div>
     );
   }
 
   return (
-      <div className="flex h-screen bg-gray-50 overflow-hidden">
-        <Sidebar
-          selectedSection={selectedSection}
-          setSelectedSection={setSelectedSection}
-          agent={agent}
-        />
-        <div className="flex-1 flex flex-col min-w-0">
-          <Header agent={agent} onPublish={handlePublish} publishDisabled={!hasEdits} />
-          <div className="flex-1 flex min-h-0">
-            <div className="flex-1 flex flex-col min-w-0">
-              <MainContent
-                agent={agent}
-                selectedSection={selectedSection}
-                onEdit={(field, value) => editField(field, value)}
-              />
-            </div>
-            <RightSidebar agent={agent} />
+    <div className="flex h-screen overflow-hidden">
+      <Sidebar
+        selectedSection={selectedSection}
+        setSelectedSection={setSelectedSection}
+        agents={agents}
+        setSelectedAgentId={setSelectedAgentId}
+        selectedAgentId={selectedAgentId}
+      />
+      <div className="flex-1 flex flex-col min-w-0">
+        <Header agent={agent} onPublish={handlePublish} publishDisabled={!hasEdits} />
+        <div className="flex-1 flex min-h-0">
+          <div className="flex-1 flex flex-col min-w-0">
+            <MainContent
+              agent={agent}
+              selectedSection={selectedSection}
+              onEdit={(field, value) => editField(field, value)}
+            />
           </div>
+          <RightSidebar agent={agent} />
         </div>
       </div>
+    </div>
   );
 } 
