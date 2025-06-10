@@ -41,19 +41,15 @@ export const agentService = {
   // Create agent locally and in Letta
   create: async (agent: IAgent): Promise<string> => {
     try {
-      if (!agent.id) throw new Error('Agent ID is required');
-      // Try to get or create in Letta first
-      let lettaId: string;
-      try {
-        const letta = await agentManager.getAgentById(agent.id);
-        lettaId = letta?.id || (await agentService.getOrCreateLettaAgent(agent));
-      } catch (lettaError) {
-        console.error(`Failed to get or create Letta agent for ID ${agent.id}:`, lettaError);
-        throw lettaError;
+      // If no ID, leave Letta or the backend to generate it
+      let agentId = agent.id;
+      if (!agentId) {
+        // Call Letta to create the agent and get the ID, or generate a UUID here if needed
+        agentId = await agentService.getOrCreateLettaAgent(agent);
       }
       // Only update local DB if Letta succeeded
-      await db.createAgent({ ...agent, id: lettaId });
-      return lettaId;
+      await db.createAgent({ ...agent, id: agentId });
+      return agentId;
     } catch (error) {
       console.error(`Error in agentService.create for agent ID ${agent.id}:`, error);
       throw error;
