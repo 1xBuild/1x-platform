@@ -4,7 +4,7 @@ import fs from 'fs';
 import { IAgent } from '../types';
 
 // Ensure the database directory exists
-const dbDir = path.join(process.cwd(), './app/backend/data');
+const dbDir = path.join(process.cwd(), './data');
 if (!fs.existsSync(dbDir)) {
   fs.mkdirSync(dbDir, { recursive: true });
 }
