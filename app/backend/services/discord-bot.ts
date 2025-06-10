@@ -9,7 +9,7 @@ import {
   SlashCommandBuilder
 } from 'discord.js';
 import { config } from '../config/index';
-import { agentManager } from './letta/letta-agents';
+import { agentService } from './agent';
 import { sendMessage, sendTimerMessage, MessageType, MessagePayload } from './message-service';
 
 export class DiscordBot {
@@ -229,7 +229,7 @@ export class DiscordBot {
       
       // Handle agent creation/retrieval for DMs
       if (messageType === MessageType.DM) {
-        agentId = await agentManager.getOrCreateDmAgent(
+        agentId = await agentService.getOrCreateDmAgent(
           message.author.id,
           message.channel.id,
           message.author.username

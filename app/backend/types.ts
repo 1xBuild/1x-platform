@@ -1,8 +1,26 @@
-export type AgentType = {
-  id: string;
-  name: string;
-  // and other properties
-  // TODO: import from letta-client
-}
+export type IAgentName = `${string}_${string}_${string}`;
 
-export type AgentName = `${string}_${string}_${string}`;
+export type IAgentDetails = {
+  name: string;
+  description: string;
+  systemPrompt: string;
+  persona: string;
+  model: string;
+};
+
+export type IAgent = {
+  id?: string;
+  version: number;
+  details: IAgentDetails;
+};
+
+export interface IApiErrorResponse {
+  /** The status of the error (e.g. 'error', 'success') */
+  status: string;
+  /** The code of the error (e.g. 400, 401, 403, 404, 500) */
+  code: number;
+  /** The message of the error */
+  message: string;
+  /** The details of the error */
+  details?: any;
+}

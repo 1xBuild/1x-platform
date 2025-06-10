@@ -3,13 +3,13 @@ import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import { config } from './config/index';
-import { agentManager } from './services/letta/letta-agents';
 import { discordBot } from './services/discord-bot';
 import { telegramBot } from './services/telegram-bot';
-import authRoutes from './routes/auth.routes';
+import routes from './routes/index';
 import { errorHandler } from './middlewares/error.middleware';
 import { notFoundHandler } from './middlewares/not-found.middleware';
 import { createApiLimiter } from './config/rateLimiter';
+import { agentService } from './services/agent';
 
 // Initialize express app
 const app = express();
@@ -28,7 +28,7 @@ app.use(createApiLimiter);
 app.use(express.json());
 
 // --- Routes API ---
-app.use('/api', authRoutes);
+app.use('/api', routes);
 
 // --- Middlewares ---
 app.use(notFoundHandler);
@@ -40,7 +40,7 @@ async function initServices() {
     console.log('🚀 Starting bots services...');
 
     // Initialize the main agent
-    const mainAgentId = await agentManager.getOrCreateMainAgent();
+    const mainAgentId = await agentService.getOrCreateMainAgent();
     console.log(`🤖 Main agent ID: ${mainAgentId}`);
 
     // Initialize the telegram bot
