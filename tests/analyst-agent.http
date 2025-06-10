@@ -1,0 +1,14 @@
+### Enable analystAgent
+POST http://localhost:8000/api/analyst-agent/enable
+Content-Type: application/json
+
+{}
+
+### Disable analystAgent
+POST http://localhost:8000/api/analyst-agent/disable
+Content-Type: application/json
+
+{}
+
+### Get analystAgent status
+GET http://localhost:8000/api/analyst-agent/status
