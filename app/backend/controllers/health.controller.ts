@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-
+import { IApiErrorResponse } from '../types';
 /**
  * Handle /GET /health
  * @param req - The request object.
@@ -23,11 +23,13 @@ export const healthController = {
 
       res.status(200).json(healthStatus);
     } catch (error) {
-      res.status(500).json({
+      const errorResponse: IApiErrorResponse = {
         status: 'error',
+        code: 500,
         message: 'Health check failed',
-        error: error instanceof Error ? error.message : 'Unknown error',
-      });
+        details: error instanceof Error ? error.message : 'Unknown error',
+      };
+      res.status(500).json(errorResponse);
     }
   },
 };

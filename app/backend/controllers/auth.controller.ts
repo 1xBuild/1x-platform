@@ -1,9 +1,22 @@
 import { Request, Response } from 'express';
+import { IApiErrorResponse } from '../types';
 
-export function loginController(req: Request, res: Response) {
-  const { id, password } = req.body;
-  if (id === 'Rick' && password === 'ricksanchez') {
-    return res.json({ success: true });
-  }
-  return res.status(401).json({ success: false, error: 'Invalid credentials' });
-} 
+/**
+ * Login controller
+ * @param req - The request object
+ * @param res - The response object
+ */
+export const authController = {
+  login: async (req: Request, res: Response) => {
+    const { id, password } = req.body;
+    if (id === 'Rick' && password === 'ricksanchez') {
+      res.json({ success: true });
+    }
+    const errorResponse: IApiErrorResponse = {
+      status: 'error',
+      code: 401,
+      message: 'Invalid credentials',
+    };
+    res.status(401).json(errorResponse);
+  },
+};
