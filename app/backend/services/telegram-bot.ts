@@ -6,11 +6,10 @@ import {
   sendMessage,
   sendTimerMessage,
   MessageType,
-  MessagePayload,
 } from './message-service';
 import { openaiService } from './openai';
 import { p33lyShouldAnswerPromptTemplate, parseTemplate } from '../data/prompt';
-
+import * as LettaTypes from '@letta-ai/letta-client/api/types';
 // Define the expected JSON structure from the LLM
 interface ShouldAnswerResponse {
   answer: 'yes' | 'no';
@@ -211,6 +210,7 @@ export class TelegramBot {
       (ctx.message.reply_to_message &&
         ctx.message.reply_to_message.from?.username === botUsername)
     ) {
+      console.log(`📩 Received mention/reply from ${username}, handling...`);
       await this.handleMentionOrReply(ctx);
       return;
     }
@@ -307,10 +307,11 @@ export class TelegramBot {
     // Construct MessagePayload from Telegraf context
     if (!ctx.message || !('text' in ctx.message) || !ctx.from || !ctx.chat)
       return;
-    const payload: MessagePayload = {
+    const payload: LettaTypes.MessageCreate = {
       content: ctx.message.text,
       senderId: ctx.from.id.toString(),
-      senderName: ctx.from.username || `User_${ctx.from.id}`,
+      name: ctx.from.username || `User_${ctx.from.id}`,
+      role: 'user',
       // channelId: ctx.chat.id.toString() // Not strictly needed by sendMessage now
     };
     const responseText = await sendMessage(
@@ -372,10 +373,11 @@ export class TelegramBot {
         );
         return;
       }
-      const payload: MessagePayload = {
+      const payload: LettaTypes.MessageCreate = {
         content: ctx.message.text,
         senderId: ctx.from.id.toString(),
-        senderName: ctx.from.username || `User_${ctx.from.id}`,
+        name: ctx.from.username || `User_${ctx.from.id}`,
+        role: 'user',
       };
       const responseText = await sendMessage(payload, messageType, agentId);
 

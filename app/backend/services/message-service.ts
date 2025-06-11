@@ -2,19 +2,13 @@ import { Message } from 'discord.js';
 import { lettaMessageAdapter } from './letta/letta-messages';
 import { config } from '../config/index';
 import { sendAlertToAdmins } from '../utils/alert-handler';
+import * as LettaTypes from '@letta-ai/letta-client/api/types';
 
 export enum MessageType {
   DM = 'DM',
   MENTION = 'MENTION',
   REPLY = 'REPLY',
   GENERIC = 'GENERIC',
-}
-
-export interface MessagePayload {
-  content: string;
-  senderId: string;
-  senderName: string;
-  // channelId: string; // We'll let bot files handle channel specific logic like typing
 }
 
 const USE_SENDER_PREFIX = config.letta.useSenderPrefix;
@@ -70,11 +64,11 @@ export const sendTimerMessage = async (agentId: string): Promise<string> => {
  * @returns Promise<string> - The agent's response
  */
 export const sendMessage = async (
-  messagePayload: MessagePayload,
+  messagePayload: LettaTypes.MessageCreate,
   messageType: MessageType,
   agentId?: string,
 ): Promise<string> => {
-  const { content: message, senderId, senderName } = messagePayload;
+  const { content: message, senderId, name } = messagePayload;
 
   if (!agentId) {
     console.error('Error: agentId is not set');
@@ -85,7 +79,7 @@ export const sendMessage = async (
 
   // We include a sender receipt so that agent knows which user sent the message
   // We also include the Discord ID so that the agent can tag the user with @
-  const senderNameReceipt = `${senderName} (id=${senderId})`;
+  const senderNameReceipt = `${name} (id=${senderId})`;
 
   // If LETTA_USE_SENDER_PREFIX, then we put the receipt in the front of the message
   // If it's false, then we put the receipt in the name field (the backend must handle it)
