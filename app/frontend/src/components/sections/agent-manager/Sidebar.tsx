@@ -23,8 +23,8 @@ interface SidebarProps {
 
 export default function Sidebar({ selectedSection, setSelectedSection, agents, setSelectedAgentId, selectedAgentId }: SidebarProps) {
     const sidebarItems = [
-      { id: "system-prompt", label: "System Prompt", icon: FileText, description: "Create guidelines for your agent" },
       { id: "persona", label: "Persona", icon: User, description: "Create a persona for your agent" },
+      { id: "system-prompt", label: "System Prompt", icon: FileText, description: "Create guidelines for your agent" },
       { id: "tools", label: "Tools", icon: Wrench, description: "Used by agents to complete tasks", disabled: true },
       { id: "knowledge", label: "Knowledge", icon: Brain, description: "Add your documents and data", disabled: true },
     ];
@@ -33,7 +33,7 @@ export default function Sidebar({ selectedSection, setSelectedSection, agents, s
       <div className="w-64 border-r border-border flex flex-col">
         <div className="p-4 border-b border-border">
           <div className="mb-2">
-            <div className="text-xs text-muted-foreground mb-1">Agents disponibles</div>
+            <div className="text-xs text-muted-foreground mb-1">Your agents</div>
             {agents.length === 0 ? (
               <Skeleton className="h-4 w-20" />
             ) : (
@@ -80,12 +80,12 @@ export default function Sidebar({ selectedSection, setSelectedSection, agents, s
           </div>
         </ScrollArea>
         <Separator />
-        <div className="p-4">
+        <div className="p-4 flex justify-between align-middle">
           <Button variant="outline" className="text-foreground hover:text-primary">
             <HelpCircle className="w-4 h-4 text-accent-foreground" />
             Need help?
           </Button>
-          <div className="mt-4">
+          <div>
             <ModeToggle />
           </div>
         </div>

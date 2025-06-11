@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "@/pages/Login";
 import Admin from "@/pages/Admin";
 import AuthGuard from "@/components/AuthGuard";
@@ -17,7 +17,7 @@ function App() {
               <Admin />
             </AuthGuard>
           } />
-          <Route path="*" element={<Login />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "scripts": {
     "build": "pnpm --filter app-backend run build",
-    "start": "pnpm --filter app-backend run start"
+    "start": "pnpm --filter app-backend run start",
+    "dev": "pnpm --filter app-backend run dev"
   }
 } 
