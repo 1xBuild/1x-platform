@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.2](https://github.com/1xBuild/thep33l/compare/v2.0.1...v2.0.2) (2025-06-11)
+
+
+### Features
+
+* add new scheduled trigger that send a message to a .env var group ([0f8339e](https://github.com/1xBuild/thep33l/commit/0f8339ef842b65a51694eced65e500c3f644a686))
+
+
+### Bug Fixes
+
+* frontend build error ([8da1041](https://github.com/1xBuild/thep33l/commit/8da10410228fdf92c2a79f6d5a6f93cc2aac6e6e))
+* remove delay for faster reply ([463027b](https://github.com/1xBuild/thep33l/commit/463027b4944f601701c3b20abee124ddfe8f0b7a))
+* update the shouldanswer prompt ([92da43b](https://github.com/1xBuild/thep33l/commit/92da43b2a571f1e62c57bdb6d0201969e61d49e5))
+
 ### [2.0.1](https://github.com/1xBuild/thep33l/compare/v2.0.0...v2.0.1) (2025-06-06)
 
 
