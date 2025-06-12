@@ -1,14 +1,2 @@
 node_modules
-.env
-.env.development
-.env.production
-
-.cache
-
-app/backend/data/*.db
-
 .DS_Store
-.vercel
-
-dist
-*.js

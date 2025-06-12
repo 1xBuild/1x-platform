@@ -1,10 +1,12 @@
 export type IAgentName = `${string}_${string}_${string}`;
 
+export type AgentStatus = 'enabled' | 'disabled' | 'pending' | 'error';
+
 export type IAgentDetails = {
   name: string;
   description: string;
   systemPrompt: string;
-  persona: string;
+  persona?: string;
   model: string;
 };
 
@@ -12,6 +14,7 @@ export type IAgent = {
   id?: string;
   version: number;
   details: IAgentDetails;
+  status: AgentStatus;
 };
 
 export interface IApiErrorResponse {
