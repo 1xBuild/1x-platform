@@ -6,6 +6,7 @@ node_modules
 .cache
 
 data/*.db
+local_db.*
 
 .DS_Store
 .vercel

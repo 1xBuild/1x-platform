@@ -5,6 +5,13 @@
   "scripts": {
     "build": "pnpm --filter app-backend run build",
     "start": "pnpm --filter app-backend run start",
-    "dev": "pnpm --filter app-backend run dev"
-  }
-} 
+    "dev": "pnpm --filter app-backend run dev",
+    "build:frontend": "pnpm --filter app-frontend run build",
+    "start:frontend": "pnpm --filter app-frontend run start",
+    "dev:frontend": "pnpm --filter app-frontend run dev"
+  },
+  "workspaces": [
+    "app-backend",
+    "app-frontend"
+  ]
+}
