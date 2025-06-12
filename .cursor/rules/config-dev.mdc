@@ -1,0 +1,43 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+CONTEXT
+Objectif : typage fiable (TypeScript), rapidité de dev (Vite), design utilitaire (Tailwind), React
+Public : développeurs front-end & designers
+Contraintes : navigateurs ciblés, intégration back-end existant
+
+PRECONFIGURATION
+- Node.js 
+- Vite
+- tailwind
+- react19
+- typescript
+- OpenAI
+- Express
+- Routing : React Router
+- State management : Zustand ou React Context
+- Fichiers : fs (ou multer pour upload)
+- DOCKER
+
+POSTCONFIGURATION
+- Lint (eslint), type-check (tsc --noEmit)
+- Tests :
+    - Front-end : Vitest + React Testing Library
+    - Back-end : Jest + Supertest
+- Husky + lint-staged + Prettier
+- Surveillance & docs (typedocs)
+- Analyseurs de bundle (vite build --report)
+- Monitoring (Sentry, LogRocket)
+- Branches git : main, develop
+- Versionning Semver
+- README
+
+
+
+
+
+
+
+Doc auto (TypeDoc, commentaires TSDoc)
