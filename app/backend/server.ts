@@ -46,6 +46,8 @@ async function initServices() {
 
     // Set mainAgentId for analystAgent and start it
     await analystAgent.setMainAgentId(mainAgentId);
+    const analystAgentId = await analystAgent.getOrCreateAnalystAgent();
+    console.log(`🤖 Analyst agent ID: ${analystAgentId}`);
     analystAgent.start();
 
     // Initialize the telegram bot

@@ -29,9 +29,20 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS agents (
     id TEXT PRIMARY KEY,
     version INTEGER NOT NULL,
-    details TEXT NOT NULL -- JSON string
+    details TEXT NOT NULL, -- JSON string
+    status TEXT NOT NULL DEFAULT 'enabled'
   )
 `);
+
+// Migration: add status column if it doesn't exist
+try {
+  const columns = db.prepare("PRAGMA table_info(agents)").all();
+  if (!columns.some((col: any) => col.name === 'status')) {
+    db.exec("ALTER TABLE agents ADD COLUMN status TEXT NOT NULL DEFAULT 'enabled'");
+  }
+} catch (e) {
+  console.error('Failed to migrate agents table to add status column:', e);
+}
 
 export default db;
 
@@ -63,23 +74,23 @@ export function markFileAsUploaded(sourceId: string, fileUrl: string): void {
 
 export function listAgents(): IAgent[] {
   const stmt = db.prepare('SELECT * FROM agents');
-  return (stmt.all() as any[]).map((row: { id: string; version: number; details: string }) => ({ ...row, details: JSON.parse(row.details) }));
+  return (stmt.all() as any[]).map((row: { id: string; version: number; details: string; status: string }) => ({ ...row, details: JSON.parse(row.details), status: row.status as import('../types').AgentStatus }));
 }
 
 export function getAgentById(id: string): IAgent | null {
   const stmt = db.prepare('SELECT * FROM agents WHERE id = ?');
-  const row = stmt.get(id) as { id: string; version: number; details: string } | undefined;
-  return row ? { ...row, details: JSON.parse(row.details) } : null;
+  const row = stmt.get(id) as { id: string; version: number; details: string; status: string } | undefined;
+  return row ? { ...row, details: JSON.parse(row.details), status: row.status as import('../types').AgentStatus } : null;
 }
 
 export function createAgent(agent: IAgent): void {
-  const stmt = db.prepare('INSERT OR IGNORE INTO agents (id, version, details) VALUES (?, ?, ?)');
-  stmt.run(agent.id, agent.version, JSON.stringify(agent.details));
+  const stmt = db.prepare('INSERT OR IGNORE INTO agents (id, version, details, status) VALUES (?, ?, ?, ?)');
+  stmt.run(agent.id, agent.version, JSON.stringify(agent.details), agent.status);
 }
 
 export function updateAgent(agent: IAgent): void {
-  const stmt = db.prepare('UPDATE agents SET version = ?, details = ? WHERE id = ?');
-  stmt.run(agent.version, JSON.stringify(agent.details), agent.id);
+  const stmt = db.prepare('UPDATE agents SET version = ?, details = ?, status = ? WHERE id = ?');
+  stmt.run(agent.version, JSON.stringify(agent.details), agent.status, agent.id);
 }
 
 export function deleteAgent(id: string): void {

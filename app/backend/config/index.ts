@@ -130,10 +130,6 @@ const envSchema = z.object({
   OPENAI_API_KEY: z.string().min(1),
 
   // AnalystAgent Configuration
-  ANALYST_AGENT_ENABLED: z.preprocess(
-    (val: unknown) => val === 'true',
-    z.boolean()
-  ).default(false),
   ANALYST_AGENT_MEMORY_BLOCK_LABEL: z.string().default('crypto-news'),
 
   // Cryptopanic Configuration
@@ -221,7 +217,6 @@ export const config = {
     llmDecidesGroupResponse: envVars.data.TELEGRAM_LLM_DECIDES_GROUP_RESPONSE,
   },
   analystAgent: {
-    enabled: envVars.data.ANALYST_AGENT_ENABLED,
     cryptoNewsMemoryBlockLabel: envVars.data.ANALYST_AGENT_MEMORY_BLOCK_LABEL,
   },
   cryptopanic: {

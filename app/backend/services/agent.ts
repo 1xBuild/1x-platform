@@ -5,6 +5,7 @@ import { parseTemplate } from '../data/prompt';
 import * as templates from '../data/prompt';
 import { config } from '../config/index';
 import { dataSourceManager } from './letta/letta-datasource';
+import { analystAgent } from './analyst-agent';
 
 export const agentService = {
   // List all local agents, optionally enriched with Letta data
@@ -65,7 +66,11 @@ export const agentService = {
       try {
         const letta = await agentManager.getAgentById(agent.id);
         if (letta) {
-          await agentManager.updateMemoryBlock(letta.id, 'persona', agent.details.persona);
+          await agentManager.updateMemoryBlock(letta.id, 'persona', agent.details.persona || '');
+          if (agent.details.name === 'analyst-agent' && agent.status === 'enabled') analystAgent.enable();
+          if (agent.details.name === 'analyst-agent' && agent.status === 'disabled') analystAgent.disable();
+          // TODO: update other letta fields
+          // TODO: extend the update so "template agents" can have a custom update
           lettaId = letta.id;
         } else {
           lettaId = await agentService.getOrCreateLettaAgent(agent);
@@ -151,6 +156,7 @@ export const agentService = {
     model,
     version = 1,
     id = '',
+    status = 'disabled',
   }: {
     name: string;
     description: string;
@@ -159,6 +165,7 @@ export const agentService = {
     model: any;
     version?: number;
     id?: string;
+    status?: 'enabled' | 'disabled' | 'pending';
   }): IAgent => {
     return {
       id,
@@ -170,13 +177,14 @@ export const agentService = {
         persona,
         model,
       },
+      status,
     };
   },
 
   // Get or create the main agent (local + Letta)
   // The main agent is the one connected to the public Discord / Telegram server
   getOrCreateMainAgent: async () => {
-    const agentName = (config.env === 'development') ? 'main-agent-dev' : 'main-agent';
+    const agentName = 'main-agent';
     let agent = db.listAgents().find(a => a.details.name === agentName);
     if (agent && agent.id) return agent.id;
 
@@ -187,6 +195,7 @@ export const agentService = {
       systemPrompt: templates.systemPrompt,
       persona: templates.p33lPersona,
       model: config.model.modelConfig,
+      status: 'enabled',
     });
 
     // Create or get in Letta using the DRY helper
@@ -228,6 +237,7 @@ export const agentService = {
       systemPrompt: templates.systemPrompt,
       persona: templates.p33lPersona,
       model: config.model.modelConfig,
+      status: 'enabled',
     });
 
     // Create or get in Letta using the DRY helper
@@ -251,6 +261,22 @@ export const agentService = {
       await dataSourceManager.attachSourceToAgent(lettaId, mainDataSourceId);
     }
     return lettaId;
+  },
+
+  enableAgent: async (id: string) => {
+    const agent = await agentService.get(id);
+    if (agent && agent.status !== 'enabled') {
+      await agentService.update({ ...agent, status: 'enabled' });
+    }
+    // Optionally: call a hook for agent-specific logic
+  },
+
+  disableAgent: async (id: string) => {
+    const agent = await agentService.get(id);
+    if (agent && agent.status !== 'disabled') {
+      await agentService.update({ ...agent, status: 'disabled' });
+    }
+    // Optionally: call a hook for agent-specific logic
   },
 
 };
