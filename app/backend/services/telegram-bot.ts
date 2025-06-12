@@ -16,6 +16,7 @@ export class TelegramBot {
   private bot: Telegraf<Context>;
   private mainAgentId: string = '';
   private messageHistory: Map<string, Array<{text: string, sender: string}>> = new Map(); // chatId -> message history with sender info
+  private startTime: number = Math.floor(Date.now() / 1000); // UNIX timestamp in seconds
 
   constructor() {
     if (!config.telegram || !config.telegram.token) {
@@ -34,6 +35,7 @@ export class TelegramBot {
     this.mainAgentId = mainAgentId;
     // Launch the bot
     this.bot.launch();
+    this.startTime = Math.floor(Date.now() / 1000);
     console.log('🤖 Telegram bot started');
 
     // Enable graceful stop
@@ -109,16 +111,22 @@ export class TelegramBot {
         console.log('📩 Ignoring message without text or sender info.');
         return;
     }
+    
     const messageText = ctx.message.text;
+    const userId = ctx.from.id;
+    const username = ctx.from.username || `User_${userId}`;
+
+    // Ignore messages from before the bot was started
+    if (ctx.message.date < this.startTime) {
+      console.log('Ignoring old message:', ctx.message.text);
+      return;
+    }
 
     // If it's a /start command, let handleStartCommand deal with it.
     if (messageText.trim().toLowerCase() === '/start') {
       console.log('📩 Text message is /start, deferring to command handler.');
       return;
     }
-
-    const userId = ctx.from.id;
-    const username = ctx.from.username || `User_${userId}`;
 
     // Ignore messages from the bot itself (if config.telegram.botId is set)
     if (config.telegram.botId && userId.toString() === config.telegram.botId) {
