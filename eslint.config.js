@@ -5,9 +5,9 @@ import prettier from 'eslint-config-prettier';
 import prettierPlugin from 'eslint-plugin-prettier';
 
 export default [
-  js.configs.recommended,
   {
     files: ['**/*.{js,ts,tsx}', '!**/dist/**'],
+    ignores: ['**/dist/**', 'node_modules/', 'build/', '.husky/', 'coverage/'],
     plugins: {
       '@typescript-eslint': tseslint,
       prettier: prettierPlugin,
