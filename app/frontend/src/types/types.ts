@@ -11,4 +11,4 @@ export interface Agent {
   version: number;
   details: AgentDetails;
   status: 'enabled' | 'disabled' | 'pending' | 'error';
-} 
+}

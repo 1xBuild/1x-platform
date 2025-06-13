@@ -1,7 +1,7 @@
 import { lettaClient } from './letta-client';
 import { MessageCreate } from '@letta-ai/letta-client/api/types/MessageCreate';
-import { LettaStreamingResponse } from "@letta-ai/letta-client/api/resources/agents/resources/messages/types/LettaStreamingResponse";
-import { Stream } from "@letta-ai/letta-client/core";
+import { LettaStreamingResponse } from '@letta-ai/letta-client/api/resources/agents/resources/messages/types/LettaStreamingResponse';
+import { Stream } from '@letta-ai/letta-client/core';
 
 /**
  * Adapter for handling Letta message operations
@@ -15,7 +15,7 @@ export class LettaMessageAdapter {
    */
   public async sendStreamMessage(agentId: string, message: MessageCreate) {
     return await lettaClient.agents.messages.createStream(agentId, {
-      messages: [message]
+      messages: [message],
     });
   }
 
@@ -24,7 +24,9 @@ export class LettaMessageAdapter {
    * @param response - The stream to process
    * @returns The complete message content
    */
-  async processStream(response: Stream<LettaStreamingResponse>): Promise<string> {
+  async processStream(
+    response: Stream<LettaStreamingResponse>,
+  ): Promise<string> {
     let agentMessageResponse = '';
     for await (const chunk of response) {
       if ('content' in chunk && typeof chunk.content === 'string') {
@@ -35,4 +37,4 @@ export class LettaMessageAdapter {
   }
 }
 
-export const lettaMessageAdapter = new LettaMessageAdapter(); 
+export const lettaMessageAdapter = new LettaMessageAdapter();

@@ -38,7 +38,7 @@ class AgentManager {
     try {
       const agents = await this.lettaClient.agents.list({
         name: name,
-        limit: 1
+        limit: 1,
       });
       console.log(`🤖 Found ${agents.length} agents with name: ${name}`);
       return agents[0] || null;
@@ -72,16 +72,21 @@ class AgentManager {
    * @param username - Discord username to use as identity name
    * @returns Promise<string> - The identity ID
    */
-  private async getOrCreateUserIdentity(userId: string, username: string): Promise<string> {
+  private async getOrCreateUserIdentity(
+    userId: string,
+    username: string,
+  ): Promise<string> {
     try {
       // First try to find existing identity
       const existingIdentities = await this.lettaClient.identities.list({
         identifierKey: userId,
-        limit: 1
+        limit: 1,
       });
 
       if (existingIdentities && existingIdentities[0]?.id) {
-        console.log(`Found existing identity for user: ${username} (${userId})`);
+        console.log(
+          `Found existing identity for user: ${username} (${userId})`,
+        );
         return existingIdentities[0].id;
       }
 
@@ -89,13 +94,13 @@ class AgentManager {
       const identity = await this.lettaClient.identities.create({
         identifierKey: userId,
         name: username,
-        identityType: "user"
+        identityType: 'user',
       });
-      
+
       if (!identity || !identity.id) {
         throw new Error('Failed to create user identity');
       }
-      
+
       console.log(`Identity created for user: ${username} (${userId})`);
       return identity.id;
     } catch (error) {
@@ -132,7 +137,10 @@ class AgentManager {
     }
     if (params.agentName && params.userId && params.username) {
       // DM agent creation with identity
-      const identityId = await this.getOrCreateUserIdentity(params.userId, params.username);
+      const identityId = await this.getOrCreateUserIdentity(
+        params.userId,
+        params.username,
+      );
       if (!identityId) throw new Error('Failed to get or create user identity');
       const lettaAgent = await this.lettaClient.agents.create({
         name: params.agentName,
@@ -141,7 +149,8 @@ class AgentManager {
         memoryBlocks: params.memoryBlocks || [],
         blockIds: params.blockIds || [],
         model: params.model || this.MODEL,
-        contextWindowLimit: params.contextWindowLimit || this.MAX_CONTEXT_WINDOW_LIMIT,
+        contextWindowLimit:
+          params.contextWindowLimit || this.MAX_CONTEXT_WINDOW_LIMIT,
         embedding: params.embedding || this.EMBEDDING,
         identityIds: [identityId],
       });
@@ -155,7 +164,8 @@ class AgentManager {
         memoryBlocks: params.memoryBlocks || [],
         blockIds: params.blockIds || [],
         model: params.model || this.MODEL,
-        contextWindowLimit: params.contextWindowLimit || this.MAX_CONTEXT_WINDOW_LIMIT,
+        contextWindowLimit:
+          params.contextWindowLimit || this.MAX_CONTEXT_WINDOW_LIMIT,
         embedding: params.embedding || this.EMBEDDING,
       });
       return lettaAgent.id;
@@ -173,14 +183,14 @@ class AgentManager {
     try {
       const agents = await this.lettaClient.agents.list({
         name: name,
-        limit: 1  // We only need the first match
+        limit: 1, // We only need the first match
       });
-      
+
       const agent = agents[0];
       if (!agent) {
         throw new Error(`No agent found with name: ${name}`);
       }
-      
+
       return agent;
     } catch (error) {
       console.error(`Failed to retrieve agent with name: ${name}`, error);
@@ -202,38 +212,44 @@ class AgentManager {
    * Export an agent to a JSON file
    * @param agentId - The ID of the agent to export
    * @returns Promise<any> - The exported agent data
-  */
+   */
   // FIXME: not working at the moment (April 5, 2025), same in the ADE
   public async exportAgent(agentId: string) {
     try {
-      console.log(`Exporting agent ${agentId} with url: ${config.letta.baseUrl}/v1/agents/${agentId}/export`);
-      
+      console.log(
+        `Exporting agent ${agentId} with url: ${config.letta.baseUrl}/v1/agents/${agentId}/export`,
+      );
+
       // Export the agent using the Letta API
       const response = await fetch(
         `${config.letta.baseUrl}/v1/agents/${agentId}/export`,
         {
           method: 'GET',
           headers: {
-            'Authorization': `Bearer ${config.letta.token}`
-          }
-        }
+            Authorization: `Bearer ${config.letta.token}`,
+          },
+        },
       );
 
       if (!response.ok) {
-        const errorResponse = await response.text();  // Get raw text first
+        const errorResponse = await response.text(); // Get raw text first
         console.error('Export agent response:', {
           status: response.status,
           statusText: response.statusText,
-          error: errorResponse
+          error: errorResponse,
         });
-        
+
         try {
           // Try to parse as JSON if possible
           const errorJson = JSON.parse(errorResponse);
-          throw new Error(`Failed to export agent: ${errorJson.detail || JSON.stringify(errorJson)}`);
+          throw new Error(
+            `Failed to export agent: ${errorJson.detail || JSON.stringify(errorJson)}`,
+          );
         } catch (e) {
           // If JSON parsing fails, use the raw text
-          throw new Error(`Failed to export agent: ${errorResponse || response.statusText}`);
+          throw new Error(
+            `Failed to export agent: ${errorResponse || response.statusText}`,
+          );
         }
       }
 
@@ -244,9 +260,9 @@ class AgentManager {
       }
       const afPath = path.join(dataDir, 'main-agent.af');
       fs.writeFileSync(afPath, JSON.stringify(afFile, null, 2));
-      
+
       console.log(`Agent file written to ${afPath}`);
-      
+
       return afFile;
     } catch (error) {
       console.error(`Failed to export agent: ${agentId}`, error);
@@ -262,11 +278,11 @@ class AgentManager {
   private async agentExists(agentId: string): Promise<boolean> {
     try {
       const agents = await this.lettaClient.agents.list({
-        limit: 100  // Get a reasonable number of agents to check
+        limit: 100, // Get a reasonable number of agents to check
       });
-      
+
       // Check if any agent has the matching ID
-      return agents.some(agent => agent.id === agentId);
+      return agents.some((agent) => agent.id === agentId);
     } catch (error) {
       console.error(`Failed to check if agent exists: ${agentId}`, error);
       throw error;
@@ -280,7 +296,11 @@ class AgentManager {
    * @param value - The new value for the memory block
    * @returns Promise<void>
    */
-  public async updateMemoryBlock(agentId: string, label: string, value: string): Promise<void> {
+  public async updateMemoryBlock(
+    agentId: string,
+    label: string,
+    value: string,
+  ): Promise<void> {
     try {
       // First verify the agent exists
       const exists = await this.agentExists(agentId);
@@ -290,16 +310,22 @@ class AgentManager {
 
       try {
         await this.lettaClient.agents.blocks.modify(agentId, label, {
-          value: value
+          value: value,
         });
       } catch (error) {
-        console.error(`Failed to update memory block '${label}' for agent: ${agentId}`, error);
+        console.error(
+          `Failed to update memory block '${label}' for agent: ${agentId}`,
+          error,
+        );
         throw new Error(`Failed to update memory block: ${error}`);
       }
 
       console.log(`Memory block '${label}' updated for agent: ${agentId}`);
     } catch (error) {
-      console.error(`Failed to update memory block '${label}' for agent: ${agentId}`, error);
+      console.error(
+        `Failed to update memory block '${label}' for agent: ${agentId}`,
+        error,
+      );
       throw new Error(`Failed to update memory block: ${error}`);
     }
   }
@@ -310,7 +336,10 @@ class AgentManager {
    * @param label - The label of the memory block to get
    * @returns Promise<string | null> - The value of the memory block, or null if not found
    */
-  public async getMemoryBlock(agentId: string, label: string): Promise<string | null> {
+  public async getMemoryBlock(
+    agentId: string,
+    label: string,
+  ): Promise<string | null> {
     try {
       // First verify the agent exists
       const exists = await this.agentExists(agentId);
@@ -319,14 +348,20 @@ class AgentManager {
       }
 
       try {
-        const block = await this.lettaClient.agents.blocks.retrieve(agentId, label);
+        const block = await this.lettaClient.agents.blocks.retrieve(
+          agentId,
+          label,
+        );
         return block.value;
       } catch (error) {
         console.log(`Memory block '${label}' not found for agent: ${agentId}`);
         return null;
       }
     } catch (error) {
-      console.error(`Failed to get memory block '${label}' for agent: ${agentId}`, error);
+      console.error(
+        `Failed to get memory block '${label}' for agent: ${agentId}`,
+        error,
+      );
       throw new Error(`Failed to get memory block: ${error}`);
     }
   }

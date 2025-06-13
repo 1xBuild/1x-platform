@@ -1,9 +1,9 @@
-import { EmbeddingConfig } from "@letta-ai/letta-client/api/types/EmbeddingConfig";
-import { lettaClient } from "./letta-client";
-import { LettaClient } from "@letta-ai/letta-client";
-import { createReadStream } from "fs";
-import { isFileUploaded, markFileAsUploaded } from "../../database/db";
-import { config } from "../../config";
+import { EmbeddingConfig } from '@letta-ai/letta-client/api/types/EmbeddingConfig';
+import { lettaClient } from './letta-client';
+import { LettaClient } from '@letta-ai/letta-client';
+import { createReadStream } from 'fs';
+import { isFileUploaded, markFileAsUploaded } from '../../database/db';
+import { config } from '../../config';
 
 const EMBEDDING_CONFIG = config.model.embeddingConfig;
 
@@ -19,10 +19,12 @@ class DataSourceManager {
   public async initialize() {
     const embeddingConfig = EMBEDDING_CONFIG;
     if (!embeddingConfig) {
-      throw new Error("DEFAULT_EMBEDDING is not set");
+      throw new Error('DEFAULT_EMBEDDING is not set');
     }
     const embeddingConfigs = await this.lettaClient.embeddingModels.list();
-    this.embeddingConfig = embeddingConfigs.find(config => config.handle === embeddingConfig) as EmbeddingConfig;
+    this.embeddingConfig = embeddingConfigs.find(
+      (config) => config.handle === embeddingConfig,
+    ) as EmbeddingConfig;
     if (!this.embeddingConfig) {
       throw new Error(`Embedding config ${embeddingConfig} not found`);
     }
@@ -34,14 +36,18 @@ class DataSourceManager {
    * @param MAIN_DATA_SOURCE_FILE_PATH - The path to the file to add to the main data source
    * @returns The ID of the main data source
    */
-  public async getOrCreateMainDataSource(mainDataSourceName: string, mainDataSourceFilePath?: string): Promise<string> {
-    const mainDataSourceId = await this.getOrCreateDataSource(mainDataSourceName);
+  public async getOrCreateMainDataSource(
+    mainDataSourceName: string,
+    mainDataSourceFilePath?: string,
+  ): Promise<string> {
+    const mainDataSourceId =
+      await this.getOrCreateDataSource(mainDataSourceName);
     try {
       if (mainDataSourceFilePath) {
         await this.addFileToSource(mainDataSourceId, mainDataSourceFilePath);
       }
     } catch (error) {
-      console.error("Error adding file to main data source: ", error);
+      console.error('Error adding file to main data source: ', error);
       throw error;
     }
     return mainDataSourceId;
@@ -55,16 +61,15 @@ class DataSourceManager {
   public async getOrCreateDataSource(name: string): Promise<string> {
     try {
       const allDataSources = await this.lettaClient.sources.list();
-      const dataSource = allDataSources.find(source => source.name === name);
+      const dataSource = allDataSources.find((source) => source.name === name);
       if (dataSource && dataSource.id) {
         return dataSource.id;
       }
 
-
       const dataSourceId = await this.createSource(name);
       return dataSourceId;
     } catch (error) {
-      console.error("Error getting or creating data source: ", error);
+      console.error('Error getting or creating data source: ', error);
       throw error;
     }
   }
@@ -78,14 +83,14 @@ class DataSourceManager {
     try {
       const source = await this.lettaClient.sources.create({
         name: name,
-        embeddingConfig: this.embeddingConfig
+        embeddingConfig: this.embeddingConfig,
       });
       if (!source.id) {
-        throw new Error("Failed to create source");
+        throw new Error('Failed to create source');
       }
       return source.id;
     } catch (error) {
-      console.error("Error creating source: ", error);
+      console.error('Error creating source: ', error);
       throw error;
     }
   }
@@ -96,42 +101,46 @@ class DataSourceManager {
    * @param fileUrl - The URL of the file to add
    * ps: doesn't return anything because it's the source that should be added to the agent, not the file
    */
-  public async addFileToSource(sourceId: string, fileUrl: string): Promise<void> {
+  public async addFileToSource(
+    sourceId: string,
+    fileUrl: string,
+  ): Promise<void> {
     try {
       // Check if file has already been uploaded to this source
       if (isFileUploaded(sourceId, fileUrl)) {
-        console.log(`File ${fileUrl} already uploaded to source ${sourceId}, skipping upload`);
+        console.log(
+          `File ${fileUrl} already uploaded to source ${sourceId}, skipping upload`,
+        );
         return;
       }
 
-      
-      console.log("uploading file to source : ", sourceId, fileUrl);
+      console.log('uploading file to source : ', sourceId, fileUrl);
       // upload a file into the source
       const uploadJob = await this.lettaClient.sources.files.upload(
         createReadStream(fileUrl),
         sourceId,
       );
       if (!uploadJob.id) {
-        throw new Error("Failed to upload file");
+        throw new Error('Failed to upload file');
       }
-      console.log("file upload job created")
+      console.log('file upload job created');
 
       // wait until the job is completed
       while (true) {
         const job = await this.lettaClient.jobs.retrieve(uploadJob.id);
-        if (job.status === "completed") {
+        if (job.status === 'completed') {
           // Mark this file as uploaded to this source in the database
           markFileAsUploaded(sourceId, fileUrl);
           break;
-        } else if (job.status === "failed") {
+        } else if (job.status === 'failed') {
           throw new Error(`Job failed: ${job.metadata}`);
         }
         console.log(`Job status: ${job.status}`);
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }
-      console.log("file uploaded")
+      console.log('file uploaded');
     } catch (error) {
-      console.error("Error adding file to source: ", error);
+      console.error('Error adding file to source: ', error);
       throw error;
     }
   }
@@ -141,11 +150,14 @@ class DataSourceManager {
    * @param agentId - The ID of the agent
    * @param sourceId - The ID of the source
    */
-  public async attachSourceToAgent(agentId: string, sourceId: string): Promise<void> {
+  public async attachSourceToAgent(
+    agentId: string,
+    sourceId: string,
+  ): Promise<void> {
     try {
       await this.lettaClient.agents.sources.attach(agentId, sourceId);
     } catch (error) {
-      console.error("Error attaching source to agent: ", error);
+      console.error('Error attaching source to agent: ', error);
       throw error;
     }
   }

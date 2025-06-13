@@ -1,10 +1,10 @@
-import { LettaClient } from "@letta-ai/letta-client";
-import { config } from "../../config";
+import { LettaClient } from '@letta-ai/letta-client';
+import { config } from '../../config';
 
 class LettaManager {
   private static readonly client = new LettaClient({
     baseUrl: config.letta.baseUrl,
-    token: config.letta.token
+    token: config.letta.token,
   });
 
   private constructor() {}

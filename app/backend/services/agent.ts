@@ -21,7 +21,7 @@ export const agentService = {
         } catch {
           return { ...agent, letta: null };
         }
-      })
+      }),
     );
     return enriched;
   },
@@ -52,7 +52,10 @@ export const agentService = {
       await db.createAgent({ ...agent, id: agentId });
       return agentId;
     } catch (error) {
-      console.error(`Error in agentService.create for agent ID ${agent.id}:`, error);
+      console.error(
+        `Error in agentService.create for agent ID ${agent.id}:`,
+        error,
+      );
       throw error;
     }
   },
@@ -66,9 +69,21 @@ export const agentService = {
       try {
         const letta = await agentManager.getAgentById(agent.id);
         if (letta) {
-          await agentManager.updateMemoryBlock(letta.id, 'persona', agent.details.persona || '');
-          if (agent.details.name === 'analyst-agent' && agent.status === 'enabled') analystAgent.enable();
-          if (agent.details.name === 'analyst-agent' && agent.status === 'disabled') analystAgent.disable();
+          await agentManager.updateMemoryBlock(
+            letta.id,
+            'persona',
+            agent.details.persona || '',
+          );
+          if (
+            agent.details.name === 'analyst-agent' &&
+            agent.status === 'enabled'
+          )
+            analystAgent.enable();
+          if (
+            agent.details.name === 'analyst-agent' &&
+            agent.status === 'disabled'
+          )
+            analystAgent.disable();
           // TODO: update other letta fields
           // TODO: extend the update so "template agents" can have a custom update
           lettaId = letta.id;
@@ -76,14 +91,20 @@ export const agentService = {
           lettaId = await agentService.getOrCreateLettaAgent(agent);
         }
       } catch (lettaError) {
-        console.error(`Failed to update or create Letta agent for ID ${agent.id}:`, lettaError);
+        console.error(
+          `Failed to update or create Letta agent for ID ${agent.id}:`,
+          lettaError,
+        );
         throw lettaError;
       }
       // Only update local DB if Letta succeeded
       await db.updateAgent({ ...agent, id: lettaId });
       return lettaId;
     } catch (error) {
-      console.error(`Error in agentService.update for agent ID ${agent.id}:`, error);
+      console.error(
+        `Error in agentService.update for agent ID ${agent.id}:`,
+        error,
+      );
       throw error;
     }
   },
@@ -97,7 +118,10 @@ export const agentService = {
           await agentManager.deleteAgent(letta.id);
         }
       } catch (error) {
-        console.error(`Failed to delete Letta agent for name ${agentName}:`, error);
+        console.error(
+          `Failed to delete Letta agent for name ${agentName}:`,
+          error,
+        );
         throw error;
       }
     }
@@ -132,7 +156,7 @@ export const agentService = {
       contextWindowLimit: number;
       embedding: any;
       memoryBlocks: any[];
-    }> = {}
+    }> = {},
   ): Promise<string> => {
     return agentManager.getOrCreateAgent({
       agentName: agent.details.name,
@@ -185,7 +209,7 @@ export const agentService = {
   // The main agent is the one connected to the public Discord / Telegram server
   getOrCreateMainAgent: async () => {
     const agentName = 'main-agent';
-    let agent = db.listAgents().find(a => a.details.name === agentName);
+    let agent = db.listAgents().find((a) => a.details.name === agentName);
     if (agent && agent.id) return agent.id;
 
     // Create agent config
@@ -206,7 +230,11 @@ export const agentService = {
       memoryBlocks: [
         { label: 'human', value: templates.mainAgentHumanMemory, limit: 1000 },
         { label: 'persona', value: templates.p33lPersona, limit: 6000 },
-        { label: 'crypto-news', value: config.analystAgent.cryptoNewsMemoryBlockLabel, limit: 6000 },
+        {
+          label: 'crypto-news',
+          value: config.analystAgent.cryptoNewsMemoryBlockLabel,
+          limit: 6000,
+        },
       ],
     });
 
@@ -214,20 +242,28 @@ export const agentService = {
     await db.createAgent({ ...newAgent, id: lettaId });
 
     // Attach data source to agent in Letta
-    if (config.dataSource.mainDataSourceName && config.dataSource.mainDataSourceFilePath) {
-      const mainDataSourceId = await dataSourceManager.getOrCreateMainDataSource(
-        config.dataSource.mainDataSourceName,
-        config.dataSource.mainDataSourceFilePath
-      );
+    if (
+      config.dataSource.mainDataSourceName &&
+      config.dataSource.mainDataSourceFilePath
+    ) {
+      const mainDataSourceId =
+        await dataSourceManager.getOrCreateMainDataSource(
+          config.dataSource.mainDataSourceName,
+          config.dataSource.mainDataSourceFilePath,
+        );
       await dataSourceManager.attachSourceToAgent(lettaId, mainDataSourceId);
     }
     return lettaId;
   },
 
   // Get or create a DM agent (local + Letta)
-  getOrCreateDmAgent: async (userId: string, channelId: string, username: string): Promise<string> => {
+  getOrCreateDmAgent: async (
+    userId: string,
+    channelId: string,
+    username: string,
+  ): Promise<string> => {
     const agentName = agentManager.generateAgentName(userId, channelId);
-    let agent = db.listAgents().find(a => a.details.name === agentName);
+    let agent = db.listAgents().find((a) => a.details.name === agentName);
     if (agent && agent.id) return agent.id;
 
     // Create agent config
@@ -253,11 +289,15 @@ export const agentService = {
     await db.createAgent({ ...newAgent, id: lettaId });
 
     // Attach data source to agent in Letta if needed
-    if (config.dataSource.mainDataSourceName && config.dataSource.mainDataSourceFilePath) {
-      const mainDataSourceId = await dataSourceManager.getOrCreateMainDataSource(
-        config.dataSource.mainDataSourceName,
-        config.dataSource.mainDataSourceFilePath
-      );
+    if (
+      config.dataSource.mainDataSourceName &&
+      config.dataSource.mainDataSourceFilePath
+    ) {
+      const mainDataSourceId =
+        await dataSourceManager.getOrCreateMainDataSource(
+          config.dataSource.mainDataSourceName,
+          config.dataSource.mainDataSourceFilePath,
+        );
       await dataSourceManager.attachSourceToAgent(lettaId, mainDataSourceId);
     }
     return lettaId;
@@ -278,5 +318,4 @@ export const agentService = {
     }
     // Optionally: call a hook for agent-specific logic
   },
-
 };

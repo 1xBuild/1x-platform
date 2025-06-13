@@ -1,23 +1,27 @@
-import type { Agent } from "@/types/types";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import type { Agent } from '@/types/types';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface MainContentProps {
   agent?: Agent | null;
   selectedSection: string;
-  onEdit?: (field: "systemPrompt" | "persona", value: string) => void;
+  onEdit?: (field: 'systemPrompt' | 'persona', value: string) => void;
   hasEdits?: boolean;
 }
 
-export default function MainContent({ agent, selectedSection, onEdit }: MainContentProps) {
-  const systemPrompt = agent?.details?.systemPrompt || "";
-  const persona = agent?.details?.persona || "";
-  const showPrompt = selectedSection === "system-prompt";
-  const showPersona = selectedSection === "persona";
+export default function MainContent({
+  agent,
+  selectedSection,
+  onEdit,
+}: MainContentProps) {
+  const systemPrompt = agent?.details?.systemPrompt || '';
+  const persona = agent?.details?.persona || '';
+  const showPrompt = selectedSection === 'system-prompt';
+  const showPersona = selectedSection === 'persona';
 
   const currentValue = showPrompt ? systemPrompt : persona;
-  const field = showPrompt ? "systemPrompt" : "persona";
+  const field = showPrompt ? 'systemPrompt' : 'persona';
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (onEdit) onEdit(field, e.target.value);
@@ -30,7 +34,9 @@ export default function MainContent({ agent, selectedSection, onEdit }: MainCont
           {(showPrompt || showPersona) && (
             <Card>
               <CardHeader>
-                <CardTitle>{showPrompt ? "System Prompt" : "Persona"}</CardTitle>
+                <CardTitle>
+                  {showPrompt ? 'System Prompt' : 'Persona'}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 {!agent ? (
@@ -41,7 +47,7 @@ export default function MainContent({ agent, selectedSection, onEdit }: MainCont
                     value={currentValue}
                     onChange={handleChange}
                     disabled={!agent || showPrompt}
-                    placeholder={showPrompt ? "No system prompt" : "No persona"}
+                    placeholder={showPrompt ? 'No system prompt' : 'No persona'}
                   />
                 )}
               </CardContent>
