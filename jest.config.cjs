@@ -4,20 +4,14 @@ const config = {
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts'],
   moduleNameMapper: {
-    '^(\\.{1,2}/.*)\\.js$': '$1',
-    '^@/(.*)\\.js$': '<rootDir>/api/$1',
-    '^@/(.*)$': '<rootDir>/api/$1',
-    '^@controllers/(.*)$': '<rootDir>/api/controllers/$1',
-    '^@services/(.*)$': '<rootDir>/api/services/$1',
-    '^@dtos/(.*)$': '<rootDir>/api/dtos/$1',
-    '^@utils/(.*)$': '<rootDir>/api/utils/$1'
+    '^@/(.*)$': '<rootDir>/app/$1',
   },
   transform: {
     '^.+\\.tsx?$': [
       'ts-jest',
       {
         useESM: true,
-        tsconfig: 'tsconfig.json'
+        tsconfig: 'tsconfig.json',
       },
     ],
   },
@@ -29,7 +23,7 @@ const config = {
   verbose: true,
   clearMocks: true,
   resetMocks: true,
-  restoreMocks: true
+  restoreMocks: true,
 };
 
-module.exports = config; 
+module.exports = config;

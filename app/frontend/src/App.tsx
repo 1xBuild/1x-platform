@@ -3,7 +3,7 @@ import Login from '@/pages/Login';
 import Admin from '@/pages/Admin';
 import AuthGuard from '@/components/AuthGuard';
 import { Toaster } from '@/components/ui/sonner';
-import { ThemeProvider } from '@/components/theme-provider';
+import { ThemeProvider } from '@/hooks/theme-provider';
 
 function App() {
   return (
