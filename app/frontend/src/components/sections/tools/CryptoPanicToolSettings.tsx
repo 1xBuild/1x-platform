@@ -3,6 +3,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import type { Agent } from '@/types/types';
 import { Dispatch, SetStateAction } from 'react';
+import { SERVER_URL } from '@/config';
 
 interface CryptoPanicToolSettingsProps {
   agent: Agent;
@@ -22,7 +23,7 @@ export default function CryptoPanicToolSettings({
   const handleCryptoPanicSwitch = async (checked: boolean) => {
     setLoading(true);
     try {
-      const response = await fetch('/api/tools/crypto-panic', {
+      const response = await fetch(`${SERVER_URL}/api/tools/crypto-panic`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ enabled: checked, agentId: agent?.id }),
