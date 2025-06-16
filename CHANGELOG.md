@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.1](https://github.com/1xBuild/thep33l/compare/v2.0.0...v2.0.1) (2025-06-06)
+
+
+### Features
+
+* display a header message in staging env ([aba4345](https://github.com/1xBuild/thep33l/commit/aba4345483c4af6c902cb92c60422f3f1a9d2964))
+* set system template by default ([41985cb](https://github.com/1xBuild/thep33l/commit/41985cbd57c420dfdad7f35d22dabf9502346b7f))
+
+
+### Bug Fixes
+
+* fix the status indicator of tools & trigger ([c346c9d](https://github.com/1xBuild/thep33l/commit/c346c9d01ee39ca30cb55a2ae28cb04bc632f5f0))
+
 ## 2.0.0 (2025-06-06)
 
 
