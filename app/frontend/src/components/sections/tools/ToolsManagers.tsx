@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Agent } from '@/types/types';
 import CryptoPanicToolSettings from './CryptoPanicToolSettings';
+import { SERVER_URL } from '@/config';
 
 const AGENTS = {
   MAIN: 'main-agent',
@@ -37,7 +38,7 @@ export default function ToolsManager({ agent }: { agent: Agent }) {
 
   useEffect(() => {
     if (!agent?.id) return;
-    fetch(`/api/tools/crypto-panic?agentId=${agent.id}`)
+    fetch(`${SERVER_URL}/api/tools/crypto-panic?agentId=${agent.id}`)
       .then((res) => res.json())
       .then((data) => {
         setConnected((prev) => ({ ...prev, CryptoPanic: !!data.enabled }));
