@@ -1,4 +1,5 @@
 import { TelegramBot } from './telegram-bot';
+import { config } from '../config';
 
 export class TelegramBotManager {
   private bots: Map<string, TelegramBot> = new Map();
@@ -22,6 +23,17 @@ export class TelegramBotManager {
 
   public isRunning(agentId: string) {
     return this.bots.has(agentId) && this.bots.get(agentId)!.isRunning();
+  }
+
+  public async sendMessageToGroup(agentId: string, message: string): Promise<void> {
+    if (!this.bots.has(agentId)) {
+      throw new Error('Telegram bot not running for this agent');
+    }
+    const bot = this.bots.get(agentId)!;
+    if (!config.telegram.mainChatId) {
+      throw new Error('TELEGRAM_MAIN_CHAT_ID is not configured');
+    }
+    await bot['bot'].telegram.sendMessage(config.telegram.mainChatId, message);
   }
 }
 
