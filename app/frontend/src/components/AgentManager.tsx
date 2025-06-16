@@ -12,7 +12,7 @@ export default function AgentManager() {
   const [selectedSection, setSelectedSection] = useState('persona');
   const [pendingSection, setPendingSection] = useState<string | null>(null);
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
-  const [activeMainContent, setActiveMainContent] = useState<string>('');
+  const [_activeMainContent, setActiveMainContent] = useState<string>('');
   const {
     agents,
     agent,
@@ -63,15 +63,6 @@ export default function AgentManager() {
       setShowUnsavedModal(true);
     } else {
       setSelectedAgentId(agentId);
-    }
-  };
-
-  const handleActiveMainContentChange = (mainContent: string) => {
-    if (hasEdits) {
-      setPendingMainContent(mainContent);
-      setShowUnsavedModal(true);
-    } else {
-      setActiveMainContent(mainContent);
     }
   };
 
