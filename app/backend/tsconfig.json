@@ -8,13 +8,8 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "rootDir": "./",
-    "outDir": "./dist",
+    "outDir": "./dist"
   },
-  "include": [
-    "app/**/*",
-    "tests/**/*"
-  ],
-  "exclude": [
-    "node_modules"
-  ],
+  "include": ["app/**/*", "tests/**/*"],
+  "exclude": ["node_modules"]
 }

@@ -1,30 +1,33 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Lock } from "lucide-react";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Lock } from 'lucide-react';
 
-export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
-  const [id, setId] = useState("");
-  const [pw, setPw] = useState("");
-  const [error, setError] = useState("");
+export function LoginForm({
+  className,
+  ...props
+}: React.ComponentProps<'div'>) {
+  const [id, setId] = useState('');
+  const [pw, setPw] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (id === "Rick" && pw === "ricksanchez") {
-      localStorage.setItem("isAuthenticated", "true");
-      navigate("/admin");
+    if (id === 'Rick' && pw === 'ricksanchez') {
+      localStorage.setItem('isAuthenticated', 'true');
+      navigate('/admin');
     } else {
-      setError("Invalid credentials");
+      setError('Invalid credentials');
     }
   }
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div className={cn('flex flex-col gap-6', className)} {...props}>
       <Card className="w-full max-w-md md:max-w-3xl mx-auto overflow-hidden">
         <CardContent className="grid p-0 md:grid-cols-2">
           <form className="p-6 md:p-8 w-full" onSubmit={handleSubmit}>
@@ -42,7 +45,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                   type="text"
                   placeholder="Rick"
                   value={id}
-                  onChange={e => setId(e.target.value)}
+                  onChange={(e) => setId(e.target.value)}
                   required
                 />
               </div>
@@ -53,11 +56,13 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                   type="password"
                   placeholder="ricksanchez"
                   value={pw}
-                  onChange={e => setPw(e.target.value)}
+                  onChange={(e) => setPw(e.target.value)}
                   required
                 />
               </div>
-              {error && <div className="text-red-500 text-sm mb-2">{error}</div>}
+              {error && (
+                <div className="text-red-500 text-sm mb-2">{error}</div>
+              )}
               <Button type="submit" className="w-full">
                 Login
               </Button>
@@ -71,9 +76,9 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
         </CardContent>
       </Card>
       <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
+        By clicking continue, you agree to our <a href="#">Terms of Service</a>{' '}
         and <a href="#">Privacy Policy</a>.
       </div>
     </div>
   );
-} 
+}
