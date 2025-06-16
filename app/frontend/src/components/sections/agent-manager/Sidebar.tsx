@@ -52,7 +52,7 @@ export default function Sidebar({
       label: 'Tools',
       icon: Wrench,
       description: 'Used by agents to complete tasks',
-      disabled: true,
+      disabled: false,
     },
     {
       id: 'knowledge',

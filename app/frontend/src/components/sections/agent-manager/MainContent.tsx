@@ -1,9 +1,10 @@
+import { useEffect } from 'react';
 import type { Agent } from '@/types/types';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import TriggersManager from '../triggers/TriggersManagers';
-import { useEffect } from 'react';
+import ToolsManager from '../tools/ToolsManagers';
 
 interface MainContentProps {
   agent?: Agent | null;
@@ -21,6 +22,9 @@ export default function MainContent({
 }: MainContentProps) {
   if (selectedSection === 'triggers' && agent) {
     return <TriggersManager agent={agent} />;
+  }
+  if (selectedSection === 'tools' && agent) {
+    return <ToolsManager agent={agent} />;
   }
 
   const systemPrompt = agent?.details?.systemPrompt || '';
