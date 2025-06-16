@@ -27,7 +27,6 @@ app.use(express.json({ limit: config.app.uploadMaxJsonSize }));
 app.use(createApiLimiter);
 
 // --- Middlewares globaux ---
-//app.use(cors());
 app.use(express.json());
 
 // --- Routes API ---
