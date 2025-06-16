@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# 1. Format all code with Prettier
+pnpm exec prettier --write "**/*.{ts,tsx,js,json,md}"
+
+# 2. Apply lint-staged (ESLint + Prettier on staged files)
+pnpm exec lint-staged || echo "⚠️  lint-staged failed, but the commit will continue (warning only)"
