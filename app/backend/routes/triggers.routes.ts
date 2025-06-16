@@ -1,11 +1,13 @@
-import express from 'express';
+import { Router } from 'express';
 import {
   enableTelegram,
   getTelegramStatus,
 } from '../controllers/triggers.controller';
-const router = express.Router();
+import { validateTelegramPayload } from '../middlewares/validateTelegramPayload';
 
-router.post('/telegram', enableTelegram);
+const router = Router();
+
+router.post('/telegram', validateTelegramPayload, enableTelegram);
 router.get('/telegram', getTelegramStatus);
 
 export default router;

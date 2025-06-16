@@ -21,8 +21,8 @@ export default function MainContent({
   onEdit,
   activeMainContent,
 }: MainContentProps) {
-  if (activeMainContent === 'triggers') {
-    return <TriggersManager />;
+  if (activeMainContent === 'triggers' && agent) {
+    return <TriggersManager agent={agent} />;
   }
 
   const systemPrompt = agent?.details?.systemPrompt || '';
