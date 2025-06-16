@@ -23,6 +23,7 @@ export class TelegramBot {
   private messageHistory: Map<string, Array<{ text: string; sender: string }>> =
     new Map(); // chatId -> message history with sender info
   private startTime: number = Math.floor(Date.now() / 1000); // UNIX timestamp in seconds
+  private running = false;
 
   constructor() {
     if (!config.telegram || !config.telegram.token) {
@@ -34,6 +35,17 @@ export class TelegramBot {
 
     // Set up event handlers
     this.setupEventHandlers();
+  }
+
+  public async start(mainAgentId?: string) {
+    if (mainAgentId) {
+      this.mainAgentId = mainAgentId;
+    }
+    if (!this.mainAgentId) {
+      throw new Error('mainAgentId is not set');
+    }
+    await this.initialize(this.mainAgentId);
+    this.running = true;
   }
 
   /**
@@ -510,6 +522,15 @@ export class TelegramBot {
       console.error('Error getting LLM decision for shouldAnswer:', error);
       return { answer: 'no', reason: 'Error in LLM decision process.' }; // Default to no on error
     }
+  }
+
+  public isRunning() {
+    return this.running;
+  }
+
+  public stop() {
+    this.bot.stop();
+    this.running = false;
   }
 
   // We might not need getRecentMessages and truncateMessage here if `sendMessage` and services handle this.
