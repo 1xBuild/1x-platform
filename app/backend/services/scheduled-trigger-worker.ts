@@ -1,4 +1,4 @@
-import { listScheduledTriggersToFire, listAllScheduledTriggers } from '../database/db';
+import { listScheduledTriggersToFire } from '../database/db';
 import { lettaMessageAdapter } from './letta/letta-messages';
 import { telegramBotManager } from './telegram-bot-manager';
 import { config } from '../config';

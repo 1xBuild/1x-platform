@@ -243,8 +243,6 @@ export class TelegramBot {
         );
         if (decision.answer === 'yes') {
           console.log(`🤖 LLM says YES to responding: ${decision.reason}`);
-          // Small delay to avoid rate limiting 0.5 seconds
-          await new Promise((resolve) => setTimeout(resolve, 500));
           await this.handleGenericMessage(ctx);
         } else {
           console.log(`🤖 LLM says NO to responding: ${decision.reason}`);
