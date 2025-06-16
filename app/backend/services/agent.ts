@@ -5,7 +5,7 @@ import { parseTemplate } from '../data/prompt';
 import * as templates from '../data/prompt';
 import { config } from '../config/index';
 import { dataSourceManager } from './letta/letta-datasource';
-import { analystAgent } from './analyst-agent';
+// import { analystAgent } from './analyst-agent';
 
 export const agentService = {
   // List all local agents, optionally enriched with Letta data
@@ -74,16 +74,16 @@ export const agentService = {
             'persona',
             agent.details.persona || '',
           );
-          if (
-            agent.details.name === 'analyst-agent' &&
-            agent.status === 'enabled'
-          )
-            analystAgent.enable();
-          if (
-            agent.details.name === 'analyst-agent' &&
-            agent.status === 'disabled'
-          )
-            analystAgent.disable();
+          // if (
+          //   agent.details.name === 'analyst-agent' &&
+          //   agent.status === 'enabled'
+          // )
+          //   analystAgent.enable();
+          // if (
+          //   agent.details.name === 'analyst-agent' &&
+          //   agent.status === 'disabled'
+          // )
+          //   analystAgent.disable();
           // TODO: update other letta fields
           // TODO: extend the update so "template agents" can have a custom update
           lettaId = letta.id;
@@ -230,11 +230,6 @@ export const agentService = {
       memoryBlocks: [
         { label: 'human', value: templates.mainAgentHumanMemory, limit: 1000 },
         { label: 'persona', value: templates.p33lPersona, limit: 6000 },
-        {
-          label: 'crypto-news',
-          value: config.analystAgent.cryptoNewsMemoryBlockLabel,
-          limit: 6000,
-        },
       ],
     });
 

@@ -10,7 +10,7 @@ import { errorHandler } from './middlewares/error.middleware';
 import { notFoundHandler } from './middlewares/not-found.middleware';
 import { createApiLimiter } from './config/rateLimiter';
 import { agentService } from './services/agent';
-import { analystAgent } from './services/analyst-agent';
+// import { analystAgent } from './services/analyst-agent';
 
 // Initialize express app
 const app = express();
@@ -27,7 +27,6 @@ app.use(express.json({ limit: config.app.uploadMaxJsonSize }));
 app.use(createApiLimiter);
 
 // --- Middlewares globaux ---
-//app.use(cors());
 app.use(express.json());
 
 // --- Routes API ---
@@ -46,11 +45,11 @@ async function initServices() {
     const mainAgentId = await agentService.getOrCreateMainAgent();
     console.log(`🤖 Main agent ID: ${mainAgentId}`);
 
-    // Set mainAgentId for analystAgent and start it
-    await analystAgent.setMainAgentId(mainAgentId);
-    const analystAgentId = await analystAgent.getOrCreateAnalystAgent();
-    console.log(`🤖 Analyst agent ID: ${analystAgentId}`);
-    analystAgent.start();
+    // Set mainAgentId for analystAgent and start it // TODO: Uncomment this to enable analystAgent
+    // await analystAgent.setMainAgentId(mainAgentId);
+    // const analystAgentId = await analystAgent.getOrCreateAnalystAgent();
+    // console.log(`🤖 Analyst agent ID: ${analystAgentId}`);
+    // analystAgent.start();
 
     // Initialize the telegram bot
     await telegramBotManager.start(mainAgentId);

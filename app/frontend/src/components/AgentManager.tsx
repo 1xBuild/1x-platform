@@ -143,12 +143,10 @@ export default function AgentManager() {
               setSelectedSection={setSelectedSection}
               onEdit={(field, value) => editField(field, value)}
               hasEdits={hasEdits}
-              activeMainContent={activeMainContent}
             />
           </div>
           <RightSidebar
             agent={agent}
-            setActiveMainContent={handleActiveMainContentChange}
           />
         </div>
         {showUnsavedModal && (

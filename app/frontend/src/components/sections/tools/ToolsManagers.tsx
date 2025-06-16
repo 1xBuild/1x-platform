@@ -4,8 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Agent } from '@/types/types';
-import TelegramTriggerSettings from './TelegramTriggerSettings';
-import ScheduleTriggerSettings from './ScheduleTriggerSettings';
+import CryptoPanicToolSettings from './CryptoPanicToolSettings';
 
 const AGENTS = {
   MAIN: 'main-agent',
@@ -13,49 +12,44 @@ const AGENTS = {
   // etc.
 };
 
-const availableTriggers = [
-  { name: 'Telegram', disabled: false, agents: [AGENTS.MAIN] },
-  {
-    name: 'Schedule',
-    disabled: false,
-    agents: [AGENTS.MAIN, AGENTS.ANALYST],
-  },
+const availableTools = [
+  { name: 'CryptoPanic', disabled: false, agents: [AGENTS.MAIN] },
 ];
 
-export default function TriggersManager({ agent }: { agent: Agent }) {
-  const filteredTriggers = availableTriggers.filter(
-    (trigger) =>
-      agent?.details?.name && trigger.agents.includes(agent.details.name),
+export default function ToolsManager({ agent }: { agent: Agent }) {
+  const filteredTools = availableTools.filter(
+    (tool) =>
+      agent?.details?.name && tool.agents.includes(agent.details.name),
   );
 
-  const showTriggers = filteredTriggers.length > 0;
+  const showTools = filteredTools.length > 0;
   const [connected, setConnected] = useState(
-    availableTriggers.reduce(
-      (acc, trigger) => {
-        acc[trigger.name] = false;
+    availableTools.reduce(
+      (acc, tool) => {
+        acc[tool.name] = false;
         return acc;
       },
       {} as Record<string, boolean>,
     ),
   );
-  const [selectedTrigger, setSelectedTrigger] = useState<string | null>(null);
+  const [selectedTool, setSelectedTool] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!agent?.id) return;
-    fetch(`/api/triggers/telegram?agentId=${agent.id}`)
+    fetch(`/api/tools/crypto-panic?agentId=${agent.id}`)
       .then((res) => res.json())
       .then((data) => {
-        setConnected((prev) => ({ ...prev, Telegram: !!data.enabled }));
+        setConnected((prev) => ({ ...prev, CryptoPanic: !!data.enabled }));
       });
   }, [agent?.id]);
 
   useEffect(() => {
-    setSelectedTrigger(null);
+    setSelectedTool(null);
     setConnected(
-      availableTriggers.reduce(
-        (acc, trigger) => {
-          acc[trigger.name] = false;
+      availableTools.reduce(
+        (acc, tool) => {
+          acc[tool.name] = false;
           return acc;
         },
         {} as Record<string, boolean>,
@@ -72,29 +66,29 @@ export default function TriggersManager({ agent }: { agent: Agent }) {
       </p>
 
       {/* Available Triggers */}
-      {showTriggers ? (
+      {showTools ? (
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle>Available triggers</CardTitle>
+            <CardTitle>Available tools</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-3">
-              {filteredTriggers.map((trigger) => (
+              {filteredTools.map((tool) => (
                 <Badge
-                  key={trigger.name}
+                  key={tool.name}
                   variant="outline"
-                  className={`flex items-center gap-2 px-4 py-2 ${trigger.disabled ? 'opacity-50' : ''}`}
+                  className={`flex items-center gap-2 px-4 py-2 ${tool.disabled ? 'opacity-50' : ''}`}
                 >
                   <span
-                    className={`inline-block w-2 h-2 rounded-full mr-1 ${connected[trigger.name] ? 'bg-green-500' : 'bg-red-500'}`}
+                    className={`inline-block w-2 h-2 rounded-full mr-1 ${connected[tool.name] ? 'bg-green-500' : 'bg-red-500'}`}
                   />
-                  {trigger.name}
+                  {tool.name}
                   <Button
                     size="sm"
                     variant="default"
                     className="ml-2"
-                    disabled={trigger.disabled}
-                    onClick={() => setSelectedTrigger(trigger.name)}
+                    disabled={tool.disabled}
+                    onClick={() => setSelectedTool(tool.name)}
                   >
                     Settings
                   </Button>
@@ -113,23 +107,15 @@ export default function TriggersManager({ agent }: { agent: Agent }) {
 
       <Separator className="my-6" />
 
-      {/* Trigger Settings Panel */}
-      {showTriggers && selectedTrigger && (
+      {/* Tool Settings Panel */}
+      {showTools && selectedTool && (
         <Card>
           <CardHeader>
-            <CardTitle>{selectedTrigger} Settings</CardTitle>
+            <CardTitle>{selectedTool} Settings</CardTitle>
           </CardHeader>
           <CardContent>
-            {selectedTrigger === 'Telegram' ? (
-              <TelegramTriggerSettings
-                agent={agent}
-                connected={connected}
-                setConnected={setConnected}
-                loading={loading}
-                setLoading={setLoading}
-              />
-            ) : selectedTrigger === 'Schedule' ? (
-              <ScheduleTriggerSettings
+            {selectedTool === 'CryptoPanic' ? (
+              <CryptoPanicToolSettings
                 agent={agent}
                 connected={connected}
                 setConnected={setConnected}
@@ -139,7 +125,7 @@ export default function TriggersManager({ agent }: { agent: Agent }) {
             ) : null}
             <Button
               variant="outline"
-              onClick={() => setSelectedTrigger(null)}
+              onClick={() => setSelectedTool(null)}
               className="mt-2"
             >
               Close

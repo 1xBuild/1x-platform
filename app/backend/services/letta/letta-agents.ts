@@ -365,6 +365,80 @@ class AgentManager {
       throw new Error(`Failed to get memory block: ${error}`);
     }
   }
+
+  public async attachTool(agentId: string, toolId: string) {
+    try {
+      const response = await fetch(
+        `${config.letta.baseUrl}/v1/agents/${agentId}/tools/attach/${toolId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${config.letta.token}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+      if (!response.ok) {
+        const errorResponse = await response.text();
+        console.error('Attach tool response:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorResponse,
+        });
+        try {
+          const errorJson = JSON.parse(errorResponse);
+          throw new Error(
+            `Failed to attach tool: ${errorJson.detail || JSON.stringify(errorJson)}`,
+          );
+        } catch (e) {
+          throw new Error(
+            `Failed to attach tool: ${errorResponse || response.statusText}`,
+          );
+        }
+      }
+      return await response.json();
+    } catch (error) {
+      console.error(`Failed to attach tool ${toolId} to agent ${agentId}:`, error);
+      throw new Error('Failed to attach tool to agent');
+    }
+  }
+  
+  public async detachTool(agentId: string, toolId: string) {
+    try {
+      const response = await fetch(
+        `${config.letta.baseUrl}/v1/agents/${agentId}/tools/detach/${toolId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${config.letta.token}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+      if (!response.ok) {
+        const errorResponse = await response.text();
+        console.error('Detach tool response:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorResponse,
+        });
+        try {
+          const errorJson = JSON.parse(errorResponse);
+          throw new Error(
+            `Failed to detach tool: ${errorJson.detail || JSON.stringify(errorJson)}`,
+          );
+        } catch (e) {
+          throw new Error(
+            `Failed to detach tool: ${errorResponse || response.statusText}`,
+          );
+        }
+      }
+      return await response.json();
+    } catch (error) {
+      console.error(`Failed to detach tool ${toolId} from agent ${agentId}:`, error);
+      throw new Error('Failed to detach tool from agent');
+    }
+  }
 }
 
 export const agentManager = new AgentManager();
