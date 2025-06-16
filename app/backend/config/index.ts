@@ -50,6 +50,7 @@ const envSchema = z.object({
   TELEGRAM_TOKEN: z.string().min(1).optional(), // Optional for now, so it doesn't break existing setups
   TELEGRAM_BOT_ID: z.string().optional(),
   TELEGRAM_CHAT_ID_FOR_TIMER: z.string().optional(), // For sending timer event messages
+  TELEGRAM_MAIN_CHAT_ID: z.string().optional(), // For scheduled triggers
   TELEGRAM_RESPOND_TO_DMS: z
     .preprocess((val: unknown) => val === 'true', z.boolean())
     .default(true),
@@ -211,6 +212,7 @@ export const config = {
     token: envVars.data.TELEGRAM_TOKEN,
     botId: envVars.data.TELEGRAM_BOT_ID,
     chatIdForTimer: envVars.data.TELEGRAM_CHAT_ID_FOR_TIMER,
+    mainChatId: envVars.data.TELEGRAM_MAIN_CHAT_ID,
     respondToDms: envVars.data.TELEGRAM_RESPOND_TO_DMS,
     respondToMentions: envVars.data.TELEGRAM_RESPOND_TO_MENTIONS,
     respondToGeneric: envVars.data.TELEGRAM_RESPOND_TO_GENERIC,

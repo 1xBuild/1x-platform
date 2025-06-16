@@ -13,61 +13,13 @@ import { useState } from 'react';
 import { Switch } from '@/components/ui/switch';
 import { SERVER_URL } from '@/config';
 import { toast } from 'sonner';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 
 interface HeaderProps {
   agent?: Agent | null;
   onPublish: () => void;
   publishDisabled: boolean;
   onAgentStatusChange?: (agent: Agent) => void;
-}
-
-function ConfirmModal({
-  open,
-  onConfirm,
-  onCancel,
-  futureStatus,
-}: {
-  open: boolean;
-  onConfirm: () => void;
-  onCancel: () => void;
-  futureStatus?: 'enabled' | 'disabled' | null;
-}) {
-  if (!open) return null;
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-background rounded-lg shadow-lg p-6 w-full max-w-sm">
-        <h2 className="text-lg font-semibold mb-4">Confirm publish</h2>
-        <p className="mb-6">Are you sure you want to apply your changes?</p>
-        {futureStatus && (
-          <div className="mb-4 text-center text-sm">
-            The agent will be{' '}
-            <span
-              className={
-                futureStatus === 'enabled' ? 'text-green-500' : 'text-red-500'
-              }
-            >
-              {futureStatus}
-            </span>
-            .
-          </div>
-        )}
-        <div className="flex justify-end gap-2">
-          <button
-            onClick={onCancel}
-            className="px-4 py-2 rounded bg-muted text-foreground hover:bg-muted-foreground/10"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            className="px-4 py-2 rounded bg-primary text-primary-foreground hover:bg-primary/90"
-          >
-            Confirm
-          </button>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 export default function Header({
