@@ -9,4 +9,4 @@ router.post('/', agentController.create);
 router.put('/:id', agentController.update);
 router.delete('/:id', agentController.delete);
 
-export default router; 
+export default router;

@@ -9,21 +9,20 @@ const DELAY_BETWEEN_FETCHES = 8 * 60 * 60 * 1000; // 8 hours
 const CACHE_DURATION = 2 * 60 * 60 * 1000; // 2 hours in ms
 
 export interface CryptopanicData {
-  next: any
-  previous: any
-  results: Result[]
+  next: any;
+  previous: any;
+  results: Result[];
 }
 
 export interface Result {
-  id: number
-  slug: string
-  title: string
-  description: string
-  published_at: string
-  created_at: string
-  kind: string
+  id: number;
+  slug: string;
+  title: string;
+  description: string;
+  published_at: string;
+  created_at: string;
+  kind: string;
 }
-
 
 class AnalystAgentService {
   private timer: NodeJS.Timeout | null = null;
@@ -97,7 +96,9 @@ class AnalystAgentService {
         grouped[date].push(item);
       }
       // Sort dates descending (most recent first)
-      const sortedDates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
+      const sortedDates = Object.keys(grouped).sort((a, b) =>
+        b.localeCompare(a),
+      );
       // Build memory block
       let value = '';
       let totalLength = 0;
@@ -117,7 +118,11 @@ class AnalystAgentService {
           const newsBlock = `-\nDate: ${item.published_at.slice(0, 10)}\nTitle: ${item.title}\nDesc: ${item.description || ''}\n`;
           if (totalLength + newsBlock.length > MAX_MEMORY_LENGTH) {
             value = value.trimEnd();
-            await agentManager.updateMemoryBlock(this.mainAgentId, MEMORY_BLOCK_LABEL, value);
+            await agentManager.updateMemoryBlock(
+              this.mainAgentId,
+              MEMORY_BLOCK_LABEL,
+              value,
+            );
             return;
           }
           value += newsBlock;
@@ -127,7 +132,11 @@ class AnalystAgentService {
         totalLength += 1;
       }
       value = value.trimEnd();
-      await agentManager.updateMemoryBlock(this.mainAgentId, MEMORY_BLOCK_LABEL, value);
+      await agentManager.updateMemoryBlock(
+        this.mainAgentId,
+        MEMORY_BLOCK_LABEL,
+        value,
+      );
     } catch (err) {
       console.error('AnalystAgent fetch/store error:', err);
     }
@@ -136,7 +145,10 @@ class AnalystAgentService {
   private async fetchCryptopanicData(): Promise<Result[]> {
     console.log('🔍 Fetching Cryptopanic data');
     const now = Date.now();
-    if (this.cryptopanicCache && (now - this.cryptopanicCache.timestamp < CACHE_DURATION)) {
+    if (
+      this.cryptopanicCache &&
+      now - this.cryptopanicCache.timestamp < CACHE_DURATION
+    ) {
       console.log('🔍 Returning cached Cryptopanic data');
       try {
         return JSON.parse(this.cryptopanicCache.data);
@@ -187,7 +199,9 @@ class AnalystAgentService {
    */
   public async getOrCreateAnalystAgent() {
     const agentName = 'analyst-agent';
-    let agent = (await agentService.list()).find(a => a.details.name === agentName);
+    let agent = (await agentService.list()).find(
+      (a) => a.details.name === agentName,
+    );
     if (agent && agent.id) return agent.id;
     const newAgent = agentService.buildAgentConfig({
       name: agentName,
@@ -199,7 +213,11 @@ class AnalystAgentService {
     newAgent.status = 'disabled';
     const lettaId = await agentService.getOrCreateLettaAgent(newAgent, {
       memoryBlocks: [
-        { label: 'crypto-news', value: config.analystAgent.cryptoNewsMemoryBlockLabel, limit: 6000 },
+        {
+          label: 'crypto-news',
+          value: config.analystAgent.cryptoNewsMemoryBlockLabel,
+          limit: 6000,
+        },
       ],
     });
     await agentService.create({ ...newAgent, id: lettaId, status: 'enabled' });
@@ -207,4 +225,4 @@ class AnalystAgentService {
   }
 }
 
-export const analystAgent = new AnalystAgentService(); 
+export const analystAgent = new AnalystAgentService();
