@@ -29,9 +29,11 @@ export default function Sidebar({
   selectedAgentId,
 }: SidebarProps) {
   const selectedAgent = agents.find((a) => a.id === selectedAgentId);
+
   const isAnalystAgent =
     selectedAgent?.details.name === 'analyst-agent' ||
     selectedAgent?.details.name === 'analyst-agent-dev';
+
   const sidebarItems = [
     {
       id: 'system-prompt',
@@ -54,6 +56,7 @@ export default function Sidebar({
       disabled: true,
     },
   ];
+
   if (!isAnalystAgent) {
     sidebarItems.unshift({
       id: 'persona',

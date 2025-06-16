@@ -12,6 +12,7 @@ export default function AgentManager() {
   const [selectedSection, setSelectedSection] = useState('persona');
   const [pendingSection, setPendingSection] = useState<string | null>(null);
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
+  const [activeMainContent, setActiveMainContent] = useState<string>('');
   const {
     agents,
     agent,
@@ -49,6 +50,7 @@ export default function AgentManager() {
       setShowUnsavedModal(true);
     } else {
       setSelectedSection(section);
+      setActiveMainContent('');
     }
   };
 
@@ -57,6 +59,7 @@ export default function AgentManager() {
     setSelectedSection(pendingSection!);
     setPendingSection(null);
     reset();
+    setActiveMainContent('');
   };
 
   const handleCancelSectionChange = () => {
@@ -102,9 +105,13 @@ export default function AgentManager() {
               selectedSection={selectedSection}
               onEdit={(field, value) => editField(field, value)}
               hasEdits={hasEdits}
+              activeMainContent={activeMainContent}
             />
           </div>
-          <RightSidebar agent={agent} />
+          <RightSidebar
+            agent={agent}
+            setActiveMainContent={setActiveMainContent}
+          />
         </div>
         {showUnsavedModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">

@@ -2,29 +2,40 @@ import type { Agent } from '@/types/types';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import TriggersManager from '../triggers/TriggersManagers';
 
 interface MainContentProps {
   agent?: Agent | null;
   selectedSection: string;
   onEdit?: (field: 'systemPrompt' | 'persona', value: string) => void;
   hasEdits?: boolean;
+  activeMainContent: string;
 }
 
 export default function MainContent({
   agent,
   selectedSection,
   onEdit,
+  activeMainContent,
 }: MainContentProps) {
+  if (activeMainContent === 'triggers') {
+    return <TriggersManager />;
+  }
+
   const systemPrompt = agent?.details?.systemPrompt || '';
   const persona = agent?.details?.persona || '';
   const showPrompt = selectedSection === 'system-prompt';
   const showPersona = selectedSection === 'persona';
 
-  const currentValue = showPrompt ? systemPrompt : persona;
-  const field = showPrompt ? 'systemPrompt' : 'persona';
+  const currentValue = showPrompt ? systemPrompt : showPersona ? persona : '';
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    if (onEdit) onEdit(field, e.target.value);
+    if (!onEdit) return;
+
+    const value = e.target.value;
+
+    if (showPrompt) onEdit('systemPrompt', value);
+    else if (showPersona) onEdit('persona', value);
   };
 
   return (
@@ -47,7 +58,13 @@ export default function MainContent({
                     value={currentValue}
                     onChange={handleChange}
                     disabled={!agent || showPrompt}
-                    placeholder={showPrompt ? 'No system prompt' : 'No persona'}
+                    placeholder={
+                      showPrompt
+                        ? 'No system prompt'
+                        : showPersona
+                          ? 'No persona'
+                          : 'No system prompt'
+                    }
                   />
                 )}
               </CardContent>
