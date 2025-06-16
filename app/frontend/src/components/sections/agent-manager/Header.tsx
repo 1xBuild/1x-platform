@@ -127,8 +127,20 @@ export default function Header({
     setPendingStatus(null);
   };
 
+  const env =
+    import.meta.env.VITE_VERCEL_TARGET_ENV === 'preview'
+      ? 'Preview'
+      : window.location.hostname === 'localhost'
+        ? 'Local'
+        : 'Production';
+
   return (
     <Card className="border-b-0 rounded-none shadow-none">
+      {env !== 'Production' && (
+        <div className="w-full bg-yellow-200 text-yellow-900 text-center py-2 font-semibold rounded-t-lg border-b border-yellow-400">
+          Warning: You are connected to the {env} environment.
+        </div>
+      )}
       <CardHeader className="flex flex-row items-center justify-between gap-4 p-6 pb-4">
         <div className="flex items-center gap-4 flex-1 min-w-0">
           <div className="flex items-center gap-3">
