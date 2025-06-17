@@ -1,0 +1,178 @@
+---
+description: Apply these rules when creating the project
+globs: 
+alwaysApply: true
+---
+## Project Overview
+
+*   **Type:** cursor_project_rules
+*   **Description:** A full-stack platform for marketing teams to manage and dynamically update AI agents, including their prompts and model versions, and integrate them with communication channels (Discord, Telegram) and external data sources (e.g., CryptoPanic). The aim is to streamline the deployment and management of AI-driven interactions.
+*   **Primary Goal:** To provide a unified interface for CRUD operations on AI agents, seamless bot integrations, tool configuration, and scheduled triggers, all secured behind an admin dashboard.
+
+## Project Structure
+
+### Framework-Specific Routing
+
+*   **Directory Rules:**
+
+    *   React Router 6: `src/routes/` for route definitions; use `createBrowserRouter` in `src/routes/index.tsx`.
+    *   Example 3: "React Router 6" → `src/routes/` with `createBrowserRouter`
+
+### Core Directories
+
+*   **Versioned Structure:**
+
+    *   `app/frontend/`: Vite + React application entry in `frontend/src/` with `main.tsx`, `components/`, `pages/`
+    *   `app/backend/`: Express API server in `backend/src/` with `routes/`, `controllers/`, `services/`, and `bots/`
+    *   `packages/shared/`: Shared types and utilities for both frontend and backend
+
+    *   Example 1: `app/api` → "Next.js 14 API routes with Route Handlers"
+    *   Example 2: `src/views` → "Vue 3 composition API components"
+
+### Key Files
+
+*   **Stack-Versioned Patterns:**
+
+    *   `vite.config.ts`: Vite configuration for React and Tailwind integration
+    *   `tailwind.config.ts`: Project-wide Tailwind CSS settings
+    *   `src/main.tsx`: React 18 entry point with `createRoot`
+    *   `backend/src/index.ts`: Express.js server bootstrap in TypeScript
+    *   `backend/src/routes/agent.ts`: CRUD routes for AI agent management
+
+## Tech Stack Rules
+
+*   **Version Enforcement:**
+
+    *   react@18: Use Hooks API; no legacy class components
+    *   vite@4: Use ES modules; no CommonJS imports
+    *   tailwindcss@3: Enable JIT mode and purge unused styles
+    *   typescript@5: Enable `strict` and `noImplicitAny`
+    *   node@18: Use native ESM modules; avoid `require`
+    *   express@4: Typed route handlers; explicit middleware
+    *   sqlite@3: Single-file database with migrations
+    *   pnpm@7: Workspace protocols for local packages
+    *   eslint@8 & prettier@2: Run on pre-commit; use `eslint-config-prettier`
+    *   husky@8: Hook `pre-commit` for lint and tests
+    *   jest@29: Unit and integration tests; snapshot coverage
+    *   vercel: Frontend deploy uses `vercel.json` with `vite build`
+    *   docker: Backend Dockerfile must use `node:18-alpine`
+
+## PRD Compliance
+
+*   "Agent CRUD: create, read, update, delete AI agents with prompts/personas/model selection": Must implement REST endpoints (`/api/agent`) and corresponding UI forms for create, edit, delete, and list.
+*   "Admin authentication: simple login (hardcoded credentials)": Use `/api/auth/login` with hardcoded ID `Rick` / PW `ricksanchez` and store session token in memory or cookie.
+*   "Bot integration: Discord.js and Telegraf bots that route user messages to agents": Bot services should live in `backend/src/bots/discord-bot.ts` and `telegram-bot.ts`, importing the agent service layer.
+*   "External tool system: enable/disable/configure CryptoPanic news integration": UI toggles bind to `/api/tools` endpoints; backend applies toggles per agent in the database.
+*   "Scheduled triggers: define and run time-based or condition-based agent actions": Use `node-cron` in `backend/src/services/scheduler.ts`; endpoints under `/api/triggers` to configure schedules.
+
+## App Flow Integration
+
+*   **Stack-Aligned Flow:**
+
+    *   React Router Client Flow → `src/routes/index.tsx` → `src/pages/Login.tsx`, `Admin.tsx`, `AgentManager.tsx`
+    *   Express Auth Flow → `backend/src/routes/auth.ts` with middleware stub for v1 basic auth
+    *   Bot Integration Flow → `backend/src/bots/discord-bot.ts`, `telegram-bot.ts` import `backend/src/services/letta-agents.ts`
+    *   API Catalog → `backend/src/routes/agent.ts`, `tools.ts`, `triggers.ts`, each mapping to controller methods
+
+## Best Practices
+
+*   React
+    *   Use function components and Hooks exclusively
+    *   Separate UI and logic with custom hooks
+    *   Memoize expensive components with `React.memo`
+*   Vite
+    *   Leverage HMR for fast feedback
+    *   Define path aliases in `vite.config.ts`
+    *   Optimize dependencies with `optimizeDeps`
+*   Tailwind CSS
+    *   Enable JIT and purge in production
+    *   Define theme extensions in `tailwind.config.ts`
+    *   Favor utility classes over custom CSS files
+*   shadcn/ui
+    *   Use provided Radix primitives for accessibility
+    *   Apply overrides via `className` and tokens
+    *   Organize custom UI components under `src/ui/`
+*   Node.js
+    *   Use native `import`/`export`
+    *   Handle uncaught exceptions and rejections
+    *   Prefer async/await over callbacks
+*   Express.js
+    *   Keep routes, controllers, and services separated
+    *   Validate inputs with `zod` or `Joi`
+    *   Apply `helmet` for security headers
+*   TypeScript
+    *   Enable `strict`, `noImplicitAny`, `strictNullChecks`
+    *   Declare explicit return types on public APIs
+    *   Use path aliases for cleaner imports
+*   SQLite
+    *   Use migration tool (e.g., `knex`, `umzug`)
+    *   Maintain a single connection or pool
+    *   Avoid long-lived transactions
+*   pnpm
+    *   Use `workspace:` protocol for internal packages
+    *   Lock file with `--frozen-lockfile`
+    *   Run `pnpm install` in CI to validate lockfile
+*   Letta AI
+    *   Abstract API calls in a service layer
+    *   Implement client-side session caching
+    *   Handle rate limits with retries and backoff
+*   OpenAI
+    *   Stream responses where possible
+    *   Centralize API error handling and retries
+    *   Use a unified interface for model calls
+*   Discord.js
+    *   Respect rate limits; use built-in managers
+    *   Shard clients for large-scale usage
+    *   Validate and sanitize incoming payloads
+*   Telegraf
+    *   Use session middleware (e.g., Redis) for state
+    *   Graceful shutdown handling
+    *   Stack middleware for logging and errors
+*   ESLint
+    *   Extend `eslint:recommended` and `@typescript-eslint/recommended`
+    *   Integrate with Prettier via `eslint-config-prettier`
+    *   Run on pre-commit and CI
+*   Prettier
+    *   Single config file at repo root
+    *   Enforce on commit and CI
+*   Husky
+    *   Hook `pre-commit` for `eslint --fix` and `jest`
+    *   Hook `commit-msg` to enforce conventional commits
+*   Jest
+    *   Write unit tests for all service modules
+    *   Mock external APIs
+    *   Maintain ≥ 90% coverage for critical paths
+*   Vercel
+    *   Configure environment variables in project settings
+    *   Define `build` and `routes` in `vercel.json`
+    *   Auto-deploy preview branches
+*   Docker
+    *   Multi-stage builds to minimize image size
+    *   Pin base images to specific tags
+    *   Run as non-root user
+
+## Rules
+
+*   Derive folder/file patterns directly from `techStackDoc` versions.
+*   Mirror this logic for React Router, SvelteKit, etc.
+*   Never mix version patterns (e.g., no `pages/` in App Router projects).
+
+## Rules Metrics
+
+Before starting development, create a metrics file in the root:
+
+`cursor_metrics.md`
+
+### Instructions:
+
+*   Each time a cursor rule is used as context, update `cursor_metrics.md`.
+*   Use this format:
+
+    # Rules Metrics
+    
+    ## Usage
+    The number of times rules is used as context
+    
+    *   rule-name.mdc: 5
+    *   another-rule.mdc: 2
+    *   ...other rules
