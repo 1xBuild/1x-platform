@@ -14,9 +14,8 @@ import {
   sendMessage,
   sendTimerMessage,
   MessageType,
-  MessagePayload,
 } from './message-service';
-
+import * as LettaTypes from '@letta-ai/letta-client/api/types';
 export class DiscordBot {
   private client: Client;
   private mainAgentId: string = '';
@@ -198,10 +197,11 @@ export class DiscordBot {
       }
 
       // Construct MessagePayload
-      const payload: MessagePayload = {
+      const payload: LettaTypes.MessageCreate = {
         content: finalContent,
         senderId: message.author.id,
-        senderName: message.author.username,
+        name: message.author.username,
+        role: 'user',
       };
       const agentToUse = this.mainAgentId;
       const msg = await sendMessage(payload, MessageType.REPLY, agentToUse);
@@ -215,10 +215,11 @@ export class DiscordBot {
         return;
       }
       // Construct MessagePayload
-      const payload: MessagePayload = {
+      const payload: LettaTypes.MessageCreate = {
         content: Ccontent,
         senderId: message.author.id,
-        senderName: message.author.username,
+        name: message.author.username,
+        role: 'user',
       };
       const agentToUse = this.mainAgentId;
       const msg = await sendMessage(payload, MessageType.MENTION, agentToUse);
@@ -268,10 +269,11 @@ export class DiscordBot {
         );
         return;
       }
-      const payload: MessagePayload = {
+      const payload: LettaTypes.MessageCreate = {
         content: message.content,
         senderId: message.author.id,
-        senderName: message.author.username,
+        name: message.author.username,
+        role: 'user',
       };
       const agentToUse = agentId; // agentId is already string | undefined here from parameter
       const msg = await sendMessage(payload, messageType, agentToUse);
