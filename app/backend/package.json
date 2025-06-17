@@ -17,30 +17,30 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@letta-ai/letta-client": "^0.1.80",
-    "better-sqlite3": "^11.9.1",
+    "@letta-ai/letta-client": "^0.1.127",
+    "better-sqlite3": "^11.10.0",
     "cors": "^2.8.5",
-    "discord.js": "^14.18.0",
-    "dotenv": "^16.4.7",
+    "discord.js": "^14.19.3",
+    "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "express-rate-limit": "^7.5.0",
     "helmet": "^8.1.0",
-    "openai": "^4.28.0",
+    "openai": "^4.104.0",
     "pino": "^9.7.0",
     "telegraf": "^4.16.3",
-    "zod": "^3.24.4"
+    "zod": "^3.25.57"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
-    "@types/cors": "^2.8.18",
-    "@types/express": "^5.0.2",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
     "@types/jest": "^29.5.14",
-    "@types/node": "^22.13.4",
+    "@types/node": "^22.15.31",
     "cross-env": "^7.0.3",
     "jest": "^29.7.0",
-    "ts-jest": "^29.3.2",
+    "ts-jest": "^29.3.4",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.7.3"
+    "typescript": "^5.8.3"
   }
 }
