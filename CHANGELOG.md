@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.3](https://github.com/1xBuild/thep33l/compare/v2.0.2...v2.0.3) (2025-06-12)
+
+
+### Bug Fixes
+
+* update command handler for /start to use dm ([577c19c](https://github.com/1xBuild/thep33l/commit/577c19cd6a79215659d1c46c0d5458fa626ee6a7))
+* update dm handling to respect tg config ([6f9f357](https://github.com/1xBuild/thep33l/commit/6f9f357d417e44dda12cb8a854d73048d089151e))
+
 ### [2.0.2](https://github.com/1xBuild/thep33l/compare/v2.0.1...v2.0.2) (2025-06-11)
 
 
