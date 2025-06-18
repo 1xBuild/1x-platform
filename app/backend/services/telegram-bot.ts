@@ -67,7 +67,7 @@ export class TelegramBot {
    */
   private setupEventHandlers(): void {
     // Handle /start command for DMs (equivalent to starting a coaching session)
-    this.bot.command('start', this.handleStartCommand.bind(this));
+    this.bot.command('start', this.handleDirectMessage.bind(this));
 
     // Handle incoming text messages
     this.bot.on(message('text'), this.handleTextMessage.bind(this));
