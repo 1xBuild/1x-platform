@@ -355,7 +355,7 @@ export class TelegramBot {
     try {
       let agentId = existingAgentId || this.mainAgentId;
 
-      if (messageType === MessageType.DM) {
+      if (messageType === MessageType.DM && config.telegram.respondToDms) {
         agentId = await agentService.getOrCreateDmAgent(
           ctx.from.id.toString(), // Telegram user ID
           ctx.chat.id.toString(), // Telegram chat ID
