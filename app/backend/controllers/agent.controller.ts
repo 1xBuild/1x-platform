@@ -4,9 +4,10 @@ import { agentSchema, agentCreateSchema } from '../middlewares/agent.schema';
 import { IApiErrorResponse } from '../types';
 
 export const agentController = {
-  list: async (_req: Request, res: Response): Promise<void> => {
+  list: async (req: Request, res: Response): Promise<void> => {
+    const withLetta = req.query.withLetta === 'true';
     try {
-      const agents = await agentService.list();
+      const agents = await agentService.list(withLetta);
       res.json(agents);
     } catch (error) {
       let errorResponse: IApiErrorResponse;
