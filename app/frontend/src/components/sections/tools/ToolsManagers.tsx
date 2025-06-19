@@ -101,7 +101,7 @@ export default function ToolsManager({ agent }: { agent: Agent }) {
       ) : (
         <div className="mb-8 p-4 bg-muted rounded">
           <p className="text-muted-foreground">
-            Aucun trigger disponible pour cet agent.
+            Aucun "tool" disponible pour cet agent.
           </p>
         </div>
       )}

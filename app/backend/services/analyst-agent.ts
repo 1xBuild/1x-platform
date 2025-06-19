@@ -24,6 +24,7 @@ export interface Result {
   kind: string;
 }
 
+// @deprecated
 class AnalystAgentService {
   private timer: NodeJS.Timeout | null = null;
   private mainAgentId: string | null = null;
