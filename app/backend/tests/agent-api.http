@@ -6,6 +6,10 @@
 GET {{host}}/api/agents
 Accept: application/json
 
+### List all agents with Letta data
+GET {{host}}/api/agents?withLetta=true
+Accept: application/json
+
 ### Create a new agent
 POST {{host}}/api/agents
 Content-Type: application/json
@@ -18,8 +22,9 @@ Accept: application/json
     "description": "A test agent for API testing.",
     "systemPrompt": "Test system prompt.",
     "persona": "Test persona.",
-    "model": "google_ai/gemini-2.0-flash-001"
-  }
+    "model": "openai/gpt-4o-mini"
+  },
+  "status": "enabled"
 }
 
 ### Get agent by id
