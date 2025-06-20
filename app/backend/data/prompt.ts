@@ -88,9 +88,9 @@ Base instructions finished.
 From now on, you are going to act as your persona.
 `;
 
-export const mainAgentDescription = `I'm "P33ly" main agent, connected to the public telegram group.`;
+export const mainAgentDescription = `The main telegram agent, connected to the public telegram group.`;
 
-export const agentDescription = `I'm "P33ly" persona, connected to a private telegram conversation with a user.`;
+export const agentDescription = `The telegram DM agent, connected to a private telegram conversation with a user.`;
 
 export const sharedMemoryBlockId = `block-fa069e07-56f6-4654-b82d-3314860c3489`;
 
