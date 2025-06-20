@@ -101,17 +101,6 @@ const envSchema = z.object({
   DISCORD_WEBHOOK_URL: z.string().url().optional(),
   SLACK_WEBHOOK_URL: z.string().url().optional(),
 
-  // Langfuse Configuration
-  LANGFUSE_SECRET_KEY: z.string().optional(),
-  LANGFUSE_PUBLIC_KEY: z.string().optional(),
-  LANGFUSE_HOST: z.string().url().optional(),
-  ENABLE_LANGFUSE: z
-    .preprocess((val: unknown) => val === 'true', z.boolean())
-    .default(true),
-  ENABLE_FORMAT_VALIDATION: z
-    .preprocess((val: unknown) => val === 'true', z.boolean())
-    .default(true),
-
   // Data Source Configuration
   MAIN_DATA_SOURCE_NAME: z.string().optional(),
   MAIN_DATA_SOURCE_FILE_PATH: z.string().optional(),
@@ -186,13 +175,6 @@ export const config = {
     slackWebhookUrl: envVars.data.SLACK_WEBHOOK_URL,
     corsOrigin: envVars.data.CORS_ORIGIN,
     uploadMaxJsonSize: envVars.data.UPLOAD_MAX_JSON_SIZE,
-  },
-  langfuse: {
-    secretKey: envVars.data.LANGFUSE_SECRET_KEY,
-    publicKey: envVars.data.LANGFUSE_PUBLIC_KEY,
-    host: envVars.data.LANGFUSE_HOST,
-    enabled: envVars.data.ENABLE_LANGFUSE,
-    formatValidation: envVars.data.ENABLE_FORMAT_VALIDATION,
   },
   model: {
     modelConfig: envVars.data.MODEL_CONFIG,
