@@ -2,14 +2,13 @@ import { Telegraf, Context } from 'telegraf';
 import { message } from 'telegraf/filters';
 import { config } from '../config/index';
 import { agentService } from './agent';
-import {
-  sendMessage,
-  sendTimerMessage,
-  MessageType,
-} from './message-service';
+import { sendMessage, sendTimerMessage, MessageType } from './message-service';
 import { openaiService } from './openai';
 import { p33lyShouldAnswerPromptTemplate, parseTemplate } from '../data/prompt';
 import * as LettaTypes from '@letta-ai/letta-client/api/types';
+import { getTriggersByAgentId, GenericTrigger } from '../database/db';
+import { evaluateShouldAnswerRule, resolveSecrets } from './trigger-manager';
+
 // Define the expected JSON structure from the LLM
 interface ShouldAnswerResponse {
   answer: 'yes' | 'no';
@@ -23,15 +22,12 @@ export class TelegramBot {
     new Map(); // chatId -> message history with sender info
   private startTime: number = Math.floor(Date.now() / 1000); // UNIX timestamp in seconds
   private running = false;
+  private telegramTrigger: GenericTrigger | null = null;
+  private telegramSecrets: Record<string, string> = {};
 
   constructor() {
-    if (!config.telegram || !config.telegram.token) {
-      throw new Error(
-        'Telegram bot token is not configured. Please check your configuration file.',
-      );
-    }
-    this.bot = new Telegraf(config.telegram.token);
-
+    // Bot will be initialized later when we have the agent-specific configuration
+    this.bot = new Telegraf(''); // Temporary empty token
     // Set up event handlers
     this.setupEventHandlers();
   }
@@ -43,23 +39,102 @@ export class TelegramBot {
     if (!this.mainAgentId) {
       throw new Error('mainAgentId is not set');
     }
-    await this.initialize(this.mainAgentId);
-    this.running = true;
+
+    // Fetch the telegram trigger config for this agent
+    const triggers = getTriggersByAgentId(this.mainAgentId);
+    this.telegramTrigger = triggers.find((t) => t.type === 'telegram') || null;
+
+    if (!this.telegramTrigger) {
+      throw new Error('No Telegram trigger found for this agent');
+    }
+
+    // Get secrets from database
+    this.telegramSecrets = resolveSecrets(
+      this.telegramTrigger,
+      this.mainAgentId,
+    );
+
+    // Check for required token
+    if (!this.telegramSecrets.TELEGRAM_BOT_TOKEN) {
+      throw new Error(
+        'TELEGRAM_BOT_TOKEN is required but not found in secrets',
+      );
+    }
+
+    // Initialize bot with the token from database
+    try {
+      this.bot = new Telegraf(this.telegramSecrets.TELEGRAM_BOT_TOKEN);
+      this.setupEventHandlers(); // Re-setup handlers with new bot instance
+      await this.initialize(this.mainAgentId);
+      this.running = true;
+    } catch (error) {
+      console.error('[TELEGRAM-BOT] Error creating bot instance:', error);
+      throw error;
+    }
   }
 
   /**
    * Initialize the Telegram bot
+   * Returns a promise that resolves when bot is successfully launched or rejects with specific error
    */
   public async initialize(mainAgentId: string): Promise<void> {
     this.mainAgentId = mainAgentId;
-    // Launch the bot
-    this.bot.launch();
-    this.startTime = Math.floor(Date.now() / 1000);
-    console.log('🤖 Telegram bot started');
 
-    // Enable graceful stop
-    process.once('SIGINT', () => this.bot.stop('SIGINT'));
-    process.once('SIGTERM', () => this.bot.stop('SIGTERM'));
+    // Use Promise.race to handle bot launch with timeout
+    // bot.launch() never resolves on success, so we race it against a timeout to consider it successful
+    try {
+      await Promise.race([
+        // The actual bot launch
+        this.bot.launch({ dropPendingUpdates: true }),
+
+        // Timeout after 5 seconds - if we reach this, the bot launched successfully
+        new Promise((resolve) => {
+          setTimeout(() => {
+            resolve('success');
+          }, 3000);
+        }),
+      ]);
+
+      // If we get here without error, the bot launched successfully
+      this.startTime = Math.floor(Date.now() / 1000);
+
+      // Enable graceful stop
+      process.once('SIGINT', () => this.bot.stop('SIGINT'));
+      process.once('SIGTERM', () => this.bot.stop('SIGTERM'));
+    } catch (error) {
+      console.error('❌ Failed to launch Telegram bot:', error);
+
+      // Create specific error messages for different failure types
+      if (error && typeof error === 'object' && 'message' in error) {
+        const errorMessage = (error as Error).message;
+        if (
+          errorMessage.includes('404') ||
+          errorMessage.includes('Not Found')
+        ) {
+          throw new Error(
+            'Invalid Telegram bot token. Please check your TELEGRAM_BOT_TOKEN secret.',
+          );
+        }
+        if (
+          errorMessage.includes('401') ||
+          errorMessage.includes('Unauthorized')
+        ) {
+          throw new Error(
+            'Unauthorized Telegram bot token. The token may be revoked or invalid.',
+          );
+        }
+        if (errorMessage.includes('409') || errorMessage.includes('Conflict')) {
+          throw new Error(
+            'Another bot instance is already running with this token. Please stop other instances first.',
+          );
+        }
+      }
+
+      // For any other errors, provide a generic message with the original error
+      const originalError =
+        error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to start Telegram bot: ${originalError}`);
+    }
   }
 
   /**
@@ -109,7 +184,8 @@ export class TelegramBot {
 
     // Determine if the sender is P33ly (the bot)
     const sender =
-      config.telegram.botId && senderId === config.telegram.botId
+      this.telegramSecrets.TELEGRAM_BOT_ID &&
+      senderId === this.telegramSecrets.TELEGRAM_BOT_ID
         ? 'P33ly'
         : `User_${senderId}`;
 
@@ -132,6 +208,19 @@ export class TelegramBot {
    * Handle incoming text messages
    */
   private async handleTextMessage(ctx: Context): Promise<void> {
+    // Always check current database state instead of cached trigger
+    const currentTriggers = getTriggersByAgentId(this.mainAgentId);
+    const currentTelegramTrigger =
+      currentTriggers.find((t) => t.type === 'telegram') || null;
+
+    // If trigger doesn't exist or is disabled, ignore the message
+    if (!currentTelegramTrigger || !currentTelegramTrigger.enabled) {
+      console.log(
+        '🤖 Received message but Telegram trigger is disabled or not found.',
+      );
+      return;
+    }
+
     console.log(
       `📩 Received message from ${ctx.from?.username}: ${ctx.message?.chat.id}`,
     );
@@ -158,8 +247,11 @@ export class TelegramBot {
       return;
     }
 
-    // Ignore messages from the bot itself (if config.telegram.botId is set)
-    if (config.telegram.botId && userId.toString() === config.telegram.botId) {
+    // Ignore messages from the bot itself (if TELEGRAM_BOT_ID is set)
+    if (
+      this.telegramSecrets.TELEGRAM_BOT_ID &&
+      userId.toString() === this.telegramSecrets.TELEGRAM_BOT_ID
+    ) {
       console.log(`📩 Ignoring message from myself...`);
       return;
     }
@@ -204,9 +296,11 @@ export class TelegramBot {
       (ctx.message.reply_to_message &&
         ctx.message.reply_to_message.from?.username === botUsername);
 
-    // BYPASS: Always respond if mentioned or reply to bot
+    // Check if should respond to mentions or replies
+    const respondToMentions =
+      this.telegramSecrets.TELEGRAM_RESPOND_TO_MENTIONS !== 'false';
     if (
-      (config.telegram.respondToMentions && isMentioned) ||
+      (respondToMentions && isMentioned) ||
       (ctx.message.reply_to_message &&
         ctx.message.reply_to_message.from?.username === botUsername)
     ) {
@@ -217,10 +311,15 @@ export class TelegramBot {
 
     // Handle generic messages in groups (if the bot is part of the group and configured to respond)
     // This would typically be for groups where the bot is explicitly added and configured to listen.
-    if (config.telegram.respondToGeneric && ctx.chat) {
+    const respondToGeneric =
+      this.telegramSecrets.TELEGRAM_RESPOND_TO_GENERIC !== 'false';
+    if (respondToGeneric && ctx.chat) {
       console.log(`🤖 Handling generic message in group ${ctx.chat.id}`);
-      // If LLM should decide, call shouldAnswer
-      if (config.telegram.llmDecidesGroupResponse) {
+      // Use shouldAnswer from current trigger config
+      if (
+        currentTelegramTrigger &&
+        currentTelegramTrigger.config.shouldAnswer
+      ) {
         // Add current message to history
         if (ctx.message && 'text' in ctx.message && ctx.from) {
           this.addMessageToHistory(
@@ -235,17 +334,21 @@ export class TelegramBot {
           ctx.chat.id.toString(),
           3,
         );
-
-        console.log(`🤖 Message history: ${messageHistory}`);
-        const decision = await this.shouldAnswer(
-          ctx.message.text,
-          messageHistory.reverse(),
+        const shouldAnswer = await evaluateShouldAnswerRule(
+          currentTelegramTrigger,
+          {
+            message: ctx.message.text,
+            messageType: 'generic',
+            history: messageHistory.reverse(),
+            env: this.telegramSecrets,
+          },
         );
-        if (decision.answer === 'yes') {
-          console.log(`🤖 LLM says YES to responding: ${decision.reason}`);
+        if (shouldAnswer) {
           await this.handleGenericMessage(ctx);
         } else {
-          console.log(`🤖 LLM says NO to responding: ${decision.reason}`);
+          console.log(
+            `🤖 LLM says NO to responding based on user's defined rule.`,
+          );
         }
         return;
       } else {
@@ -268,7 +371,9 @@ export class TelegramBot {
     console.log(
       `📩 Received DM from ${ctx.from.username}: ${ctx.message.text}`,
     );
-    if (config.telegram.respondToDms) {
+    const respondToDms =
+      this.telegramSecrets.TELEGRAM_RESPOND_TO_DMS !== 'false';
+    if (respondToDms) {
       await this.processAndSendMessage(ctx, MessageType.DM);
     } else {
       console.log(`📩 Ignoring DM...`);
@@ -384,11 +489,11 @@ export class TelegramBot {
       if (responseText !== '') {
         await ctx.reply(responseText);
         // Add bot's response to message history
-        if (config.telegram.botId) {
+        if (this.telegramSecrets.TELEGRAM_BOT_ID) {
           this.addMessageToHistory(
             ctx.chat.id.toString(),
             responseText,
-            config.telegram.botId,
+            this.telegramSecrets.TELEGRAM_BOT_ID,
           );
         }
         console.log(`Message sent: ${responseText}`);
@@ -409,11 +514,11 @@ export class TelegramBot {
       try {
         await ctx.reply(errorMessage);
         // Add error message to history as well
-        if (config.telegram.botId && ctx.chat) {
+        if (this.telegramSecrets.TELEGRAM_BOT_ID && ctx.chat) {
           this.addMessageToHistory(
             ctx.chat.id.toString(),
             errorMessage,
-            config.telegram.botId,
+            this.telegramSecrets.TELEGRAM_BOT_ID,
           );
         }
       } catch (replyError) {
@@ -430,7 +535,7 @@ export class TelegramBot {
       console.log('Timer feature is disabled for Telegram bot.');
       return;
     }
-    if (!config.telegram || !config.telegram.chatIdForTimer) {
+    if (!this.telegramSecrets.TELEGRAM_CHAT_ID_FOR_TIMER) {
       console.log(
         '⏰ Telegram chat ID for timer is not configured. Timer events will not be sent.',
       );
@@ -461,12 +566,12 @@ export class TelegramBot {
         if (msg !== '') {
           try {
             await this.bot.telegram.sendMessage(
-              config.telegram.chatIdForTimer!,
+              this.telegramSecrets.TELEGRAM_CHAT_ID_FOR_TIMER!,
               msg,
             );
             console.log(
               '⏰ Telegram Timer message sent to chat ID:',
-              config.telegram.chatIdForTimer,
+              this.telegramSecrets.TELEGRAM_CHAT_ID_FOR_TIMER,
             );
           } catch (error) {
             console.error('⏰ Error sending Telegram timer message:', error);
@@ -524,12 +629,37 @@ export class TelegramBot {
     return this.running;
   }
 
-  public stop() {
-    this.bot.stop();
-    this.running = false;
-    console.log('🤖 Telegram bot stopped');
+  public async stop() {
+    try {
+      console.log('🛑 Stopping Telegram bot instance...');
+
+      // Stop the Telegraf bot instance
+      if (this.bot && this.running) {
+        await this.bot.stop('SIGTERM');
+        await this.bot.stop('SIGINT');
+        console.log('✅ Telegraf bot stopped');
+      }
+
+      // Clear all state
+      this.running = false;
+      this.telegramTrigger = null;
+      this.telegramSecrets = {};
+      this.messageHistory.clear();
+
+      // Create a new empty bot instance to prevent any lingering connections
+      this.bot = new Telegraf('');
+
+      // Add a small delay to ensure cleanup is complete
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      console.log('🤖 Telegram bot stopped and cleaned up');
+    } catch (error) {
+      console.warn('⚠️ Error stopping Telegram bot:', error);
+      this.running = false;
+      this.telegramTrigger = null;
+      this.telegramSecrets = {};
+      this.messageHistory.clear();
+      this.bot = new Telegraf('');
+    }
   }
 }
-
-// Export an instance of the bot
-export const telegramBot = new TelegramBot();
