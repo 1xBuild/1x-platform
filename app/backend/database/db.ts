@@ -61,7 +61,102 @@ db.exec(`
   )
 `);
 
+// --- USER SECRETS TABLE ---
+db.exec(`
+  CREATE TABLE IF NOT EXISTS user_secrets (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    key TEXT NOT NULL,
+    value_encrypted BLOB NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, key)
+  )
+`);
+
 export default db;
+
+// --- USER SECRETS LOGIC ---
+// ⚠️  CRITICAL SECURITY WARNING ⚠️
+// These functions currently have NO user authentication/authorization!
+// Any caller can access, modify, or delete any user's secrets.
+// TODO: Implement proper user authentication before production use.
+
+/**
+ * Set (insert or update) a user secret (encrypted)
+ * ⚠️  SECURITY: No authorization check - caller must verify user ownership!
+ */
+export function setUserSecret(
+  userId: string,
+  key: string,
+  value: string,
+): void {
+  try {
+    const value_encrypted = SecretManager.encrypt(value);
+    db.prepare(
+      `INSERT INTO user_secrets (id, user_id, key, value_encrypted) VALUES (?, ?, ?, ?)
+       ON CONFLICT(user_id, key) DO UPDATE SET value_encrypted=excluded.value_encrypted`,
+    ).run(uuidv4(), userId, key, value_encrypted);
+  } catch (error) {
+    throw new Error(
+      `Failed to store secret for user ${userId}, key ${key}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    );
+  }
+}
+
+/**
+ * Get a user secret (decrypted)
+ * ⚠️  SECURITY: No authorization check - caller must verify user ownership!
+ */
+export function getUserSecret(userId: string, key: string): string | null {
+  try {
+    const row = db
+      .prepare(
+        'SELECT value_encrypted FROM user_secrets WHERE user_id = ? AND key = ?',
+      )
+      .get(userId, key) as { value_encrypted: Buffer } | undefined;
+    if (!row) return null;
+    const value_encrypted = row.value_encrypted;
+    return SecretManager.decrypt(value_encrypted);
+  } catch (error) {
+    throw new Error(
+      `Failed to retrieve secret for user ${userId}, key ${key}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    );
+  }
+}
+
+/**
+ * Delete a user secret
+ * ⚠️  SECURITY: No authorization check - caller must verify user ownership!
+ */
+export function deleteUserSecret(userId: string, key: string): void {
+  try {
+    db.prepare('DELETE FROM user_secrets WHERE user_id = ? AND key = ?').run(
+      userId,
+      key,
+    );
+  } catch (error) {
+    throw new Error(
+      `Failed to delete secret for user ${userId}, key ${key}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    );
+  }
+}
+
+/**
+ * List all secret keys for a user (without values)
+ * ⚠️  SECURITY: No authorization check - caller must verify user ownership!
+ */
+export function listUserSecretKeys(userId: string): string[] {
+  try {
+    const rows = db
+      .prepare('SELECT key FROM user_secrets WHERE user_id = ?')
+      .all(userId) as { key: string }[];
+    return rows.map((row) => row.key);
+  } catch (error) {
+    throw new Error(
+      `Failed to list secrets for user ${userId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    );
+  }
+}
 
 /**
  * Check if a file has been uploaded to a source
