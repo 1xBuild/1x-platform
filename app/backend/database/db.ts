@@ -73,6 +73,24 @@ db.exec(`
   )
 `);
 
+// --- BOTS TABLE ---
+db.exec(`
+  CREATE TABLE IF NOT EXISTS bots (
+    id TEXT PRIMARY KEY,
+    agent_id TEXT NOT NULL,
+    type TEXT NOT NULL, -- e.g., 'telegram', 'discord'
+    status TEXT NOT NULL DEFAULT 'stopped', -- 'running', 'stopped', 'error'
+    config TEXT, -- JSON string for bot-specific config
+    last_started TIMESTAMP,
+    last_stopped TIMESTAMP,
+    error_message TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(agent_id, type),
+    FOREIGN KEY(agent_id) REFERENCES agents(id)
+  )
+`);
+
 export default db;
 
 // --- USER SECRETS LOGIC ---
@@ -156,6 +174,128 @@ export function listUserSecretKeys(userId: string): string[] {
       `Failed to list secrets for user ${userId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
     );
   }
+}
+
+// --- BOT MANAGEMENT FUNCTIONS ---
+export interface BotRecord {
+  id: string;
+  agent_id: string;
+  type: string;
+  status: 'running' | 'stopped' | 'error';
+  config?: any;
+  last_started?: string;
+  last_stopped?: string;
+  error_message?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export function getBotsByAgentId(agent_id: string): BotRecord[] {
+  const stmt = db.prepare('SELECT * FROM bots WHERE agent_id = ?');
+  return stmt.all(agent_id).map((row: any) => ({
+    ...row,
+    config: row.config ? JSON.parse(row.config) : null,
+  }));
+}
+
+export function getBotByAgentAndType(
+  agent_id: string,
+  type: string,
+): BotRecord | null {
+  const stmt = db.prepare('SELECT * FROM bots WHERE agent_id = ? AND type = ?');
+  const row = stmt.get(agent_id, type) as any;
+  return row
+    ? {
+        ...row,
+        config: row.config ? JSON.parse(row.config) : null,
+      }
+    : null;
+}
+
+export function upsertBot(bot: {
+  agent_id: string;
+  type: string;
+  status: 'running' | 'stopped' | 'error';
+  config?: any;
+  last_started?: string;
+  last_stopped?: string;
+  error_message?: string;
+}): void {
+  const stmt = db.prepare(`
+    INSERT INTO bots (id, agent_id, type, status, config, last_started, last_stopped, error_message, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+    ON CONFLICT(agent_id, type) DO UPDATE SET
+      status = excluded.status,
+      config = excluded.config,
+      last_started = excluded.last_started,
+      last_stopped = excluded.last_stopped,
+      error_message = excluded.error_message,
+      updated_at = CURRENT_TIMESTAMP
+  `);
+
+  stmt.run(
+    uuidv4(), // Generate UUID for new bots
+    bot.agent_id,
+    bot.type,
+    bot.status,
+    bot.config ? JSON.stringify(bot.config) : null,
+    bot.last_started,
+    bot.last_stopped,
+    bot.error_message,
+  );
+}
+
+export function deleteBot(agent_id: string, type: string): void {
+  const stmt = db.prepare('DELETE FROM bots WHERE agent_id = ? AND type = ?');
+  stmt.run(agent_id, type);
+}
+
+export function listAllBots(): BotRecord[] {
+  const stmt = db.prepare('SELECT * FROM bots ORDER BY agent_id, type');
+  return stmt.all().map((row: any) => ({
+    ...row,
+    config: row.config ? JSON.parse(row.config) : null,
+  }));
+}
+
+export function getActiveBots(): BotRecord[] {
+  const stmt = db.prepare('SELECT * FROM bots WHERE status = ?');
+  return stmt.all('running').map((row: any) => ({
+    ...row,
+    config: row.config ? JSON.parse(row.config) : null,
+  }));
+}
+
+export function getActiveBotsByType(type: string): BotRecord[] {
+  const stmt = db.prepare('SELECT * FROM bots WHERE status = ? AND type = ?');
+  return stmt.all('running', type).map((row: any) => ({
+    ...row,
+    config: row.config ? JSON.parse(row.config) : null,
+  }));
+}
+
+export function getRunningBotByAgentAndType(
+  agent_id: string,
+  type: string,
+): BotRecord | null {
+  const stmt = db.prepare(
+    'SELECT * FROM bots WHERE agent_id = ? AND type = ? AND status = ?',
+  );
+  const row = stmt.get(agent_id, type, 'running') as any;
+  return row
+    ? {
+        ...row,
+        config: row.config ? JSON.parse(row.config) : null,
+      }
+    : null;
+}
+
+export function getAllRunningBotsByType(type: string): BotRecord[] {
+  const stmt = db.prepare('SELECT * FROM bots WHERE type = ? AND status = ?');
+  return stmt.all(type, 'running').map((row: any) => ({
+    ...row,
+    config: row.config ? JSON.parse(row.config) : null,
+  }));
 }
 
 /**

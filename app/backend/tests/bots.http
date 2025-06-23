@@ -1,0 +1,27 @@
+@host = http://localhost:8000
+@agentId = agent-d8d803b9-caec-4d56-b8d0-4208e12a6ba7
+
+### List bots statuses for an agent
+GET {{host}}/api/bots/status?agentId={{agentId}}
+Content-Type: application/json
+Accept: application/json
+
+### Start a bot
+POST {{host}}/api/bots/start
+Content-Type: application/json
+Accept: application/json
+
+{
+  "agentId": "{{agentId}}",
+  "botType": "telegram"
+}
+
+### Stop a bot
+POST {{host}}/api/bots/stop
+Content-Type: application/json
+Accept: application/json
+
+{
+  "agentId": "{{agentId}}",
+  "botType": "telegram"
+}
