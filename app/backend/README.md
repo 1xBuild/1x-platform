@@ -193,12 +193,6 @@ The following environment variables can be set in the `.env` file:
 
 - `MESSAGE_REPLY_TRUNCATE_LENGTH`: Maximum length for truncated message replies.
 
-- `LANGFUSE_SECRET_KEY`: Secret key for Langfuse integration.
-- `LANGFUSE_PUBLIC_KEY`: Public key for Langfuse integration.
-- `LANGFUSE_HOST`: Host URL for Langfuse.
-- `ENABLE_LANGFUSE`: Whether to enable Langfuse logging.
-- `ENABLE_FORMAT_VALIDATION`: Whether to enable message format validation.
-
 For more settings view the [`.env.template`](/.env.template) file provided.
 
 ### 👾 Create your Letta agent

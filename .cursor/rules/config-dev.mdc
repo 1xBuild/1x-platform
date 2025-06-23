@@ -17,7 +17,7 @@ PRECONFIGURATION
 - OpenAI
 - Express
 - Routing : React Router
-- State management : Zustand ou React Context
+- State management : React Context
 - Fichiers : fs (ou multer pour upload)
 - DOCKER
 

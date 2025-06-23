@@ -7,7 +7,7 @@ flowchart TD
         A2[Trigger: Scheduled - daily news summary]
     end
     
-    subgraph Main-Agent - p33ly
+    subgraph Main-Agent
         direction TB
         B1[Core Memory: persona]
         B2[Agent: Letta]

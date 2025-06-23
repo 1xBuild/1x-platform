@@ -1,10 +1,10 @@
 from typing import Optional
-import requests
+import requests, os
 
 import requests
 
 CRYPTOPANIC_API_URL = "https://cryptopanic.com/api/developer/v2/posts/"
-CRYPTOPANIC_AUTH_TOKEN = "dbce392d43c43e86f45598afab045885a1fc34c4"
+CRYPTOPANIC_AUTH_TOKEN = os.getenv("CRYPTOPANIC_AUTH_TOKEN")
 
 def CryptoPanicTool(
     currencies: Optional[str] = None,
