@@ -54,6 +54,7 @@ export const getTelegramStatus = async (req: Request, res: Response) => {
     res.status(500).json({ status: 'error', code: 500, message: 'Failed to get telegram status', details: err instanceof Error ? err.message : 'Unknown error' });
   }
 };
+
 export const getScheduleTrigger = (req: Request, res: Response) => {
   const agentId = req.query.agentId || req.params.agentId || req.body.agentId;
 
@@ -68,7 +69,6 @@ export const getScheduleTrigger = (req: Request, res: Response) => {
     res.status(500).json({ status: 'error', code: 500, message: 'Failed to get scheduled trigger', details: err instanceof Error ? err.message : 'Unknown error' });
   }
 };
-
 
 export const upsertScheduleTrigger = (req: Request, res: Response) => {
   const { agentId, enabled, hour, minute, message, id } = req.body;
