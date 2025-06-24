@@ -10,18 +10,23 @@ import {
 
 // New endpoint to manage secrets
 export const getUserSecretsController = (req: Request, res: Response) => {
-  const userId = req.query.userId || req.params.userId || req.body.userId;
+  const userId =
+    (req.query.userId as string) ||
+    (req.params.userId as string) ||
+    (req.body.userId as string);
   if (!userId) {
     res.status(400).json({ success: false, error: 'userId is required' });
     return;
   }
 
-  // TODO: CRITICAL SECURITY - Add user authentication/authorization
-  // Currently anyone can list any user's secret keys!
-  // Need to verify that the requesting user owns the userId
+  const authUserId = req.user!.id;
+  if (userId !== authUserId) {
+    res.status(403).json({ success: false, error: 'Forbidden' });
+    return;
+  }
 
   try {
-    const secretKeys = listUserSecretKeys(userId as string);
+    const secretKeys = listUserSecretKeys(userId);
     res.json({ success: true, secrets: secretKeys });
     return;
   } catch (err) {
@@ -45,11 +50,13 @@ export const resolveSecretsController = (req: Request, res: Response) => {
     return;
   }
 
-  try {
-    // TODO: CRITICAL SECURITY - Add user authentication/authorization
-    // Currently anyone can resolve any user's secrets!
-    // Need to verify that the requesting user owns the userId
+  const authUserId = req.user!.id;
+  if (userId !== authUserId) {
+    res.status(403).json({ success: false, error: 'Forbidden' });
+    return;
+  }
 
+  try {
     const secretValue = getUserSecret(userId, key);
     if (secretValue) {
       res.json({ success: true, secret: secretValue });
@@ -78,9 +85,11 @@ export const setUserSecretController = (req: Request, res: Response) => {
     return;
   }
 
-  // TODO: CRITICAL SECURITY - Add user authentication/authorization
-  // Currently anyone can set secrets for any user!
-  // Need to verify that the requesting user owns the userId
+  const authUserId = req.user!.id;
+  if (userId !== authUserId) {
+    res.status(403).json({ success: false, error: 'Forbidden' });
+    return;
+  }
 
   try {
     setUserSecret(userId, key, value);
@@ -107,9 +116,11 @@ export const deleteUserSecretController = (req: Request, res: Response) => {
     return;
   }
 
-  // TODO: CRITICAL SECURITY - Add user authentication/authorization
-  // Currently anyone can delete any user's secrets!
-  // Need to verify that the requesting user owns the userId
+  const authUserId = req.user!.id;
+  if (userId !== authUserId) {
+    res.status(403).json({ success: false, error: 'Forbidden' });
+    return;
+  }
 
   try {
     deleteUserSecret(userId, key);
