@@ -1,6 +1,6 @@
 @host = http://localhost:8000
 @agentId = agent-d8d803b9-caec-4d56-b8d0-4208e12a6ba7
-@triggerId = c3f39574-1d13-4438-b0ef-314856a90c10
+@triggerId = fd0c212f-1676-4acb-a5f1-707c94a4a27a
 
 ### List all triggers for an agent
 GET {{host}}/api/triggers?agentId={{agentId}}
@@ -21,7 +21,10 @@ Accept: application/json
   "config": {
     "message": "Send daily market update to the group",
     "schedule": "0 12 * * *",
-    "timezone": "Europe/Paris"
+    "timezone": "Europe/Paris",
+    "secrets": {
+      "TELEGRAM_MAIN_CHAT_ID": "TELEGRAM_MAIN_CHAT_ID"
+    }
   }
 }
 
@@ -57,7 +60,10 @@ Accept: application/json
   "config": {
     "message": "Quick market pulse check",
     "schedule": "*/5 * * * *",
-    "timezone": "UTC"
+    "timezone": "UTC",
+    "secrets": {
+      "TELEGRAM_MAIN_CHAT_ID": "TELEGRAM_MAIN_CHAT_ID"
+    }
   }
 }
 
@@ -133,26 +139,7 @@ Accept: application/json
 
 ###
 
-### Update a scheduled trigger (change existing trigger)
-POST {{host}}/api/triggers
-Content-Type: application/json
-Accept: application/json
-
-{
-  "id": "{{triggerId}}",
-  "agent_id": "{{agentId}}",
-  "type": "scheduled",
-  "enabled": true,
-  "config": {
-    "message": "Updated message: Enhanced market analysis with AI insights",
-    "schedule": "30 14 * * *",
-    "timezone": "America/Los_Angeles"
-  }
-}
-
-###
-
-### Disable a scheduled trigger (stops execution)
+### Update and disable a scheduled trigger (stops execution)
 POST {{host}}/api/triggers
 Content-Type: application/json
 Accept: application/json

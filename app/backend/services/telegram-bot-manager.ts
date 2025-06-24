@@ -5,7 +5,9 @@ import {
   upsertBot,
   getAllRunningBotsByType,
   listAllTriggers,
+  getTriggersByAgentId,
 } from '../database/db';
+import { resolveTriggerSecrets } from './triggers/trigger-manager';
 
 export class TelegramBotManager {
   // Store active bot instances in memory for reuse
@@ -301,8 +303,25 @@ export class TelegramBotManager {
       throw new Error('No active bot found for this agent');
     }
 
-    if (!config.telegram.mainChatId) {
-      throw new Error('TELEGRAM_MAIN_CHAT_ID is not configured');
+    const telegramTriggers = getTriggersByAgentId(agentId);
+    const telegramTrigger = telegramTriggers.find(
+      (t) => t.type === 'scheduled' && t.enabled && t.config.message,
+    );
+
+    if (!telegramTrigger) {
+      throw new Error(
+        'Telegram trigger is not set - cannot send message to group',
+      );
+    }
+
+    // Get secrets from database
+    const telegramSecrets = resolveTriggerSecrets(telegramTrigger, agentId);
+
+    // Check for required token
+    if (!telegramSecrets.TELEGRAM_MAIN_CHAT_ID) {
+      throw new Error(
+        'TELEGRAM_MAIN_CHAT_ID is required to send message but not found in secrets',
+      );
     }
 
     // Get existing persistent bot instance
@@ -314,8 +333,11 @@ export class TelegramBotManager {
     }
 
     try {
-      // ✅ Use the persistent bot instance - no start/stop cycle needed!
-      await bot.sendDirectMessage(config.telegram.mainChatId, message);
+      // Use the persistent bot instance - no start/stop cycle needed!
+      await bot.sendDirectMessage(
+        telegramSecrets.TELEGRAM_MAIN_CHAT_ID,
+        message,
+      );
       console.log(`📤 Message sent via existing bot for agent ${agentId}`);
     } catch (error) {
       console.error(
