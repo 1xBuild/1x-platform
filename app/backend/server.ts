@@ -8,8 +8,7 @@ import routes from './routes/index';
 import { errorHandler } from './middlewares/error.middleware';
 import { notFoundHandler } from './middlewares/not-found.middleware';
 import { createApiLimiter } from './config/rateLimiter';
-import { telegramBotManager } from './services/telegram-bot-manager';
-import { listAllTriggers } from './database/db';
+import './services/telegram-bot-manager';
 // import { analystAgent } from './services/analyst-agent';
 
 // Initialize express app
@@ -36,62 +35,6 @@ app.use('/api', routes);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-// Main function to initialize essential services
-async function initServices() {
-  try {
-    // Restart previously enabled bots after cleanup
-    await restartPreviouslyEnabledBots();
-
-    console.log(`✅ Essential services initialized successfully!`);
-  } catch (error) {
-    console.error('❌ Error initializing services:', error);
-    process.exit(1);
-  }
-}
-
-/**
- * Restart bots that were enabled before server restart
- * This runs after cleanupOrphanedConnections() has marked all bots as stopped
- */
-async function restartPreviouslyEnabledBots() {
-  try {
-    console.log('🔄 Checking for enabled triggers to restart bots...');
-
-    // Get all enabled telegram triggers
-    const enabledTriggers = listAllTriggers().filter(
-      (t) => t.type === 'telegram' && t.enabled,
-    );
-
-    if (enabledTriggers.length === 0) {
-      console.log('✅ No enabled Telegram triggers found');
-      return;
-    }
-
-    console.log(
-      `🤖 Found ${enabledTriggers.length} enabled Telegram trigger(s), restarting bots...`,
-    );
-
-    for (const trigger of enabledTriggers) {
-      try {
-        console.log(`🤖 Restarting Telegram bot for agent ${trigger.agent_id}`);
-        await telegramBotManager.start(trigger.agent_id);
-        console.log(
-          `✅ Successfully restarted bot for agent ${trigger.agent_id}`,
-        );
-      } catch (error) {
-        console.warn(
-          `⚠️ Failed to restart bot for agent ${trigger.agent_id}:`,
-          error,
-        );
-      }
-    }
-
-    console.log('🔄 Bot restart process completed');
-  } catch (error) {
-    console.warn('⚠️ Error during bot restart process:', error);
-  }
-}
-
 function shutdown() {
   console.log('🛑 Shutting down gracefully...');
   // Add cleanup logic for bots, timers, DB, etc.
@@ -104,5 +47,4 @@ process.on('SIGTERM', shutdown);
 // Start the server
 app.listen(PORT, () => {
   console.log(`🌐 Server listening on port ${PORT}`);
-  initServices();
 });

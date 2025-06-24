@@ -3,24 +3,47 @@ import { config } from '../config';
 import {
   getBotByAgentAndType,
   upsertBot,
-  getActiveBotsByType,
-  getBotsByAgentId,
-  getRunningBotByAgentAndType,
   getAllRunningBotsByType,
+  listAllTriggers,
 } from '../database/db';
 
 export class TelegramBotManager {
-  // Completely stateless - database is the ONLY source of truth
+  // Store active bot instances in memory for reuse
+  private activeBots: Map<string, TelegramBot> = new Map();
 
   constructor() {
     // On startup, clean up any orphaned bot connections
     // This is needed in case of a restart when bot stopped running but are still marked as running in database
     this.cleanupOrphanedConnections();
+
+    // Restart previously enabled bots
+    this.restartPreviouslyEnabledBots();
   }
 
   private async cleanupOrphanedConnections() {
     try {
       console.log('🧹 Checking for orphaned Telegram bot connections...');
+
+      // Store which bots were running before cleanup (for restart decision)
+      const botsRunningBeforeCleanup = getAllRunningBotsByType('telegram').map(
+        (bot) => bot.agent_id,
+      );
+
+      // Clear any existing instances in memory first
+      for (const [agentId, bot] of this.activeBots) {
+        try {
+          console.log(`🛑 Stopping orphaned bot instance for agent ${agentId}`);
+          await bot.stop();
+        } catch (error) {
+          console.warn(
+            `⚠️ Error stopping orphaned bot for agent ${agentId}:`,
+            error,
+          );
+        }
+      }
+      this.activeBots.clear();
+
+      // Mark all bots as stopped in database since we don't have active instances
       const runningBots = getAllRunningBotsByType('telegram');
 
       if (runningBots.length > 0) {
@@ -45,8 +68,86 @@ export class TelegramBotManager {
       } else {
         console.log('✅ No orphaned bot connections found');
       }
+
+      // Store the list for restart logic
+      (this as any).botsToRestart = botsRunningBeforeCleanup;
     } catch (error) {
       console.warn('⚠️ Error during orphaned connection cleanup:', error);
+      (this as any).botsToRestart = [];
+    }
+  }
+
+  /**
+   * Restart bots that were BOTH enabled (trigger) AND running (bot) before server restart
+   */
+  private async restartPreviouslyEnabledBots() {
+    try {
+      console.log('🔄 Checking for enabled triggers to restart bots...');
+
+      // Get which bots were running before cleanup
+      const botsToRestart = (this as any).botsToRestart || [];
+
+      if (botsToRestart.length === 0) {
+        console.log('✅ No bots were running before restart');
+        return;
+      }
+
+      // Get all enabled telegram triggers
+      const enabledTriggers = listAllTriggers().filter(
+        (t) => t.type === 'telegram' && t.enabled,
+      );
+
+      if (enabledTriggers.length === 0) {
+        console.log('✅ No enabled Telegram triggers found');
+        return;
+      }
+
+      // ✅ Only restart bots that were BOTH running before restart AND have enabled triggers
+      const botsToActuallyRestart = enabledTriggers.filter((trigger) =>
+        botsToRestart.includes(trigger.agent_id),
+      );
+
+      if (botsToActuallyRestart.length === 0) {
+        console.log(
+          '✅ No bots need to be restarted (all were intentionally stopped)',
+        );
+        return;
+      }
+
+      console.log(
+        `🤖 Found ${botsToActuallyRestart.length} bot(s) that were running before restart, restarting...`,
+      );
+
+      for (const trigger of botsToActuallyRestart) {
+        try {
+          console.log(
+            `🤖 Restarting Telegram bot for agent ${trigger.agent_id}`,
+          );
+          const result = await this.start(trigger.agent_id);
+
+          if (result.success) {
+            console.log(
+              `✅ Successfully restarted bot for agent ${trigger.agent_id}`,
+            );
+          } else {
+            console.warn(
+              `⚠️ Failed to restart bot for agent ${trigger.agent_id}: ${result.error}`,
+            );
+          }
+        } catch (error) {
+          console.warn(
+            `⚠️ Failed to restart bot for agent ${trigger.agent_id}:`,
+            error,
+          );
+        }
+      }
+
+      console.log('🔄 Bot restart process completed');
+
+      // Clean up the temporary storage
+      delete (this as any).botsToRestart;
+    } catch (error) {
+      console.warn('⚠️ Error during bot restart process:', error);
     }
   }
 
@@ -54,6 +155,12 @@ export class TelegramBotManager {
     agentId: string,
   ): Promise<{ success: boolean; error?: string }> {
     try {
+      // Check if bot is already running in memory
+      if (this.activeBots.has(agentId)) {
+        console.log(`✅ Telegram bot already running for agent ${agentId}`);
+        return { success: true };
+      }
+
       console.log(
         '[TELEGRAM-BOT-MANAGER] Starting Telegram bot for agent:',
         agentId,
@@ -66,6 +173,9 @@ export class TelegramBotManager {
       try {
         await bot.start(agentId);
         console.log('[TELEGRAM-BOT-MANAGER] Bot started successfully');
+
+        // Store the persistent instance in memory
+        this.activeBots.set(agentId, bot);
       } catch (error) {
         // Bot failed to start - capture the specific error message for frontend
         const errorMessage =
@@ -130,8 +240,15 @@ export class TelegramBotManager {
     console.log(`🛑 Stopping Telegram bot for agent ${agentId}`);
 
     try {
-      // Update database status - this will cause the bot to stop responding
-      // The bot checks database state on every message
+      // Stop the actual bot instance if it exists
+      const bot = this.activeBots.get(agentId);
+      if (bot) {
+        await bot.stop();
+        this.activeBots.delete(agentId);
+        console.log(`✅ Stopped and removed bot instance for agent ${agentId}`);
+      }
+
+      // Update database status
       upsertBot({
         agent_id: agentId,
         type: 'telegram',
@@ -145,21 +262,36 @@ export class TelegramBotManager {
         `⚠️ Error stopping Telegram bot for agent ${agentId}:`,
         error,
       );
+      // Even if stopping failed, remove from memory and mark as stopped in DB
+      this.activeBots.delete(agentId);
       throw error;
     }
   }
 
   public isRunning(agentId: string): boolean {
-    // Simple database check - bots self-manage based on this
+    // Check both memory and database for consistency
+    const hasInstance = this.activeBots.has(agentId);
     const dbBot = getBotByAgentAndType(agentId, 'telegram');
-    return dbBot?.status === 'running';
+    const dbRunning = dbBot?.status === 'running';
+
+    // If there's a mismatch, log it for debugging
+    if (hasInstance !== dbRunning) {
+      console.warn(
+        `⚠️ State mismatch for agent ${agentId}: memory=${hasInstance}, db=${dbRunning}`,
+      );
+    }
+
+    // Bot is considered running if both memory and DB agree
+    return hasInstance && dbRunning;
   }
 
   public getActiveBotsCount(): number {
-    // Use the database helper function to get active telegram bots
-    return getActiveBotsByType('telegram').length;
+    return this.activeBots.size;
   }
 
+  /**
+   * Send message using existing persistent bot instance (no more ephemeral bots!)
+   */
   public async sendMessageToGroup(
     agentId: string,
     message: string,
@@ -173,22 +305,42 @@ export class TelegramBotManager {
       throw new Error('TELEGRAM_MAIN_CHAT_ID is not configured');
     }
 
-    try {
-      // Create a temporary bot instance just for sending this message
-      const bot = new TelegramBot();
-      await bot.start(agentId); // This initializes the bot with the correct token
-
-      await bot['bot'].telegram.sendMessage(
-        config.telegram.mainChatId,
-        message,
+    // Get existing persistent bot instance
+    const bot = this.activeBots.get(agentId);
+    if (!bot) {
+      throw new Error(
+        `Bot marked as running in DB but no instance found for agent ${agentId}. This indicates a state synchronization issue.`,
       );
+    }
 
-      // Stop the temporary instance
-      await bot.stop();
+    try {
+      // ✅ Use the persistent bot instance - no start/stop cycle needed!
+      await bot.sendDirectMessage(config.telegram.mainChatId, message);
+      console.log(`📤 Message sent via existing bot for agent ${agentId}`);
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error(
+        `❌ Error sending message via bot for agent ${agentId}:`,
+        error,
+      );
       throw error;
     }
+  }
+
+  /**
+   * Get list of active bot agent IDs
+   */
+  public getActiveBotAgentIds(): string[] {
+    return Array.from(this.activeBots.keys());
+  }
+
+  /**
+   * Get status of all active bots
+   */
+  public getActiveBotsStatus(): Array<{ agentId: string; isRunning: boolean }> {
+    return Array.from(this.activeBots.keys()).map((agentId) => ({
+      agentId,
+      isRunning: this.isRunning(agentId),
+    }));
   }
 }
 
