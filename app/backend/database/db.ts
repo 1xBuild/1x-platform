@@ -2,6 +2,7 @@ import Database from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
 import { IAgent } from '../types';
+import { SecretManager } from '../services/secret-manager';
 
 // Ensure the database directory exists
 const dbDir = path.join(process.cwd(), './data');
@@ -46,15 +47,14 @@ try {
   console.error('Failed to migrate agents table to add status column:', e);
 }
 
-// --- SCHEDULED TRIGGERS TABLE ---
+// --- GENERIC TRIGGERS TABLE ---
 db.exec(`
-  CREATE TABLE IF NOT EXISTS scheduled_triggers (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+  CREATE TABLE IF NOT EXISTS triggers (
+    id TEXT PRIMARY KEY,
     agent_id TEXT NOT NULL,
+    type TEXT NOT NULL, -- e.g., 'telegram', 'schedule', etc.
     enabled INTEGER NOT NULL DEFAULT 1,
-    hour INTEGER NOT NULL,
-    minute INTEGER NOT NULL DEFAULT 0,
-    message TEXT NOT NULL,
+    config TEXT NOT NULL, -- JSON string for type-specific config
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(agent_id) REFERENCES agents(id)
@@ -383,62 +383,96 @@ export function deleteAgent(id: string): void {
   stmt.run(id);
 }
 
-export interface ScheduledTrigger {
-  id: number;
+// --- GENERIC TRIGGERS LOGIC ---
+export interface GenericTrigger {
+  id: string;
   agent_id: string;
+  type: string;
   enabled: boolean;
-  hour: number;
-  minute: number;
-  message: string;
+  config: any; // parsed JSON
   created_at: string;
   updated_at: string;
 }
 
-export function getScheduledTriggerByAgentId(agent_id: string): ScheduledTrigger | null {
-  const stmt = db.prepare('SELECT * FROM scheduled_triggers WHERE agent_id = ? LIMIT 1');
-  const row = stmt.get(agent_id) as
-    | {
-        id: number;
-        agent_id: string;
-        enabled: number;
-        hour: number;
-        minute: number;
-        message: string;
-        created_at: string;
-        updated_at: string;
-      }
-    | undefined;
+export function getTriggersByAgentId(agent_id: string): GenericTrigger[] {
+  const stmt = db.prepare('SELECT * FROM triggers WHERE agent_id = ?');
+  return stmt.all(agent_id).map((row: any) => ({
+    ...row,
+    enabled: !!row.enabled,
+    config: JSON.parse(row.config),
+  }));
+}
+
+export function getTriggerById(id: string): GenericTrigger | null {
+  const stmt = db.prepare('SELECT * FROM triggers WHERE id = ?');
+  const row = stmt.get(id) as any;
   return row
     ? {
         ...row,
         enabled: !!row.enabled,
+        config: JSON.parse(row.config),
       }
     : null;
 }
 
-export function upsertScheduledTrigger(trigger: Omit<ScheduledTrigger, 'id' | 'created_at' | 'updated_at'> & { id?: number }): void {
+export function upsertTrigger(trigger: {
+  id?: string;
+  agent_id: string;
+  type: string;
+  enabled: boolean;
+  config: any;
+}): string {
   if (trigger.id) {
     const stmt = db.prepare(`
-      UPDATE scheduled_triggers
-      SET enabled = ?, hour = ?, minute = ?, message = ?, updated_at = CURRENT_TIMESTAMP
+      UPDATE triggers
+      SET enabled = ?, config = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `);
-    stmt.run(trigger.enabled ? 1 : 0, trigger.hour, trigger.minute, trigger.message, trigger.id);
+    stmt.run(
+      trigger.enabled ? 1 : 0,
+      JSON.stringify(trigger.config),
+      trigger.id,
+    );
+    return trigger.id;
   } else {
+    const id = uuidv4();
     const stmt = db.prepare(`
-      INSERT INTO scheduled_triggers (agent_id, enabled, hour, minute, message)
+      INSERT INTO triggers (id, agent_id, type, enabled, config)
       VALUES (?, ?, ?, ?, ?)
     `);
-    stmt.run(trigger.agent_id, trigger.enabled ? 1 : 0, trigger.hour, trigger.minute, trigger.message);
+    stmt.run(
+      id,
+      trigger.agent_id,
+      trigger.type,
+      trigger.enabled ? 1 : 0,
+      JSON.stringify(trigger.config),
+    );
+    return id;
   }
 }
 
-export function listScheduledTriggersToFire(currentHour: number, currentMinute: number): ScheduledTrigger[] {
-  const stmt = db.prepare('SELECT * FROM scheduled_triggers WHERE enabled = 1 AND hour = ? AND minute = ?');
-  return stmt.all(currentHour, currentMinute).map((row: any) => ({ ...row, enabled: !!row.enabled }));
+export function deleteTrigger(id: string): void {
+  const stmt = db.prepare('DELETE FROM triggers WHERE id = ?');
+  stmt.run(id);
 }
 
-export function listAllScheduledTriggers(): ScheduledTrigger[] {
-  const stmt = db.prepare('SELECT * FROM scheduled_triggers');
-  return stmt.all().map((row: any) => ({ ...row, enabled: !!row.enabled }));
+export function listAllTriggers(): GenericTrigger[] {
+  const stmt = db.prepare('SELECT * FROM triggers');
+  return stmt.all().map((row: any) => ({
+    ...row,
+    enabled: !!row.enabled,
+    config: JSON.parse(row.config),
+  }));
+}
+
+// --- SCHEDULE TRIGGER HELPERS ---
+export function listScheduledTriggers(): GenericTrigger[] {
+  const stmt = db.prepare(
+    'SELECT * FROM triggers WHERE type = ? AND enabled = 1',
+  );
+  return stmt.all('scheduled').map((row: any) => ({
+    ...row,
+    enabled: !!row.enabled,
+    config: JSON.parse(row.config),
+  }));
 }

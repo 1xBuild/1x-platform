@@ -4,13 +4,12 @@ import helmet from 'helmet';
 import cors from 'cors';
 import { config } from './config/index';
 import { discordBot } from './services/discord-bot';
-import { telegramBotManager } from './services/telegram-bot-manager';
 import routes from './routes/index';
 import { errorHandler } from './middlewares/error.middleware';
 import { notFoundHandler } from './middlewares/not-found.middleware';
 import { createApiLimiter } from './config/rateLimiter';
-import { agentService } from './services/agent';
-import { startScheduledTriggerWorker } from './services/scheduled-trigger-worker';
+import { telegramBotManager } from './services/telegram-bot-manager';
+import { listAllTriggers } from './database/db';
 // import { analystAgent } from './services/analyst-agent';
 
 // Initialize express app
@@ -37,34 +36,59 @@ app.use('/api', routes);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-// Main function to initialize all bots services
+// Main function to initialize essential services
 async function initServices() {
   try {
-    console.log('🚀 Starting bots services...');
+    // Restart previously enabled bots after cleanup
+    await restartPreviouslyEnabledBots();
 
-    // Initialize the main agent
-    const mainAgentId = await agentService.getOrCreateMainAgent();
-    console.log(`🤖 Main agent ID: ${mainAgentId}`);
-
-    // Set mainAgentId for analystAgent and start it // TODO: Uncomment this to enable analystAgent
-    // await analystAgent.setMainAgentId(mainAgentId);
-    // const analystAgentId = await analystAgent.getOrCreateAnalystAgent();
-    // console.log(`🤖 Analyst agent ID: ${analystAgentId}`);
-    // analystAgent.start();
-
-    // Initialize the telegram bot
-    await telegramBotManager.start(mainAgentId);
-
-    // Start timers
-    discordBot.startRandomEventTimer();
-
-    // Start scheduled trigger worker
-    startScheduledTriggerWorker();
-
-    console.log(`✅ All services initialized successfully!`);
+    console.log(`✅ Essential services initialized successfully!`);
   } catch (error) {
     console.error('❌ Error initializing services:', error);
     process.exit(1);
+  }
+}
+
+/**
+ * Restart bots that were enabled before server restart
+ * This runs after cleanupOrphanedConnections() has marked all bots as stopped
+ */
+async function restartPreviouslyEnabledBots() {
+  try {
+    console.log('🔄 Checking for enabled triggers to restart bots...');
+
+    // Get all enabled telegram triggers
+    const enabledTriggers = listAllTriggers().filter(
+      (t) => t.type === 'telegram' && t.enabled,
+    );
+
+    if (enabledTriggers.length === 0) {
+      console.log('✅ No enabled Telegram triggers found');
+      return;
+    }
+
+    console.log(
+      `🤖 Found ${enabledTriggers.length} enabled Telegram trigger(s), restarting bots...`,
+    );
+
+    for (const trigger of enabledTriggers) {
+      try {
+        console.log(`🤖 Restarting Telegram bot for agent ${trigger.agent_id}`);
+        await telegramBotManager.start(trigger.agent_id);
+        console.log(
+          `✅ Successfully restarted bot for agent ${trigger.agent_id}`,
+        );
+      } catch (error) {
+        console.warn(
+          `⚠️ Failed to restart bot for agent ${trigger.agent_id}:`,
+          error,
+        );
+      }
+    }
+
+    console.log('🔄 Bot restart process completed');
+  } catch (error) {
+    console.warn('⚠️ Error during bot restart process:', error);
   }
 }
 
