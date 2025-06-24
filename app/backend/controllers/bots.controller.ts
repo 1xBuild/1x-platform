@@ -3,8 +3,15 @@ import {
   getBotsByAgentId,
   getBotByAgentAndType,
   upsertBot,
+  listAllBots,
 } from '../database/db';
 import { telegramBotManager } from '../services/telegram-bot-manager';
+
+// Get all bots
+export const getBots = (req: Request, res: Response) => {
+  const bots = listAllBots();
+  res.json({ success: true, bots });
+};
 
 // Get bot statuses for an agent
 export const getBotStatuses = (req: Request, res: Response) => {

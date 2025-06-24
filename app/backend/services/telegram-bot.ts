@@ -628,6 +628,33 @@ export class TelegramBot {
     }
   }
 
+  /**
+   * ✅ Send a direct message to a specific chat without handling responses
+   * This is used by the manager for scheduled messages and other automated messages
+   */
+  public async sendDirectMessage(
+    chatId: string,
+    message: string,
+  ): Promise<void> {
+    if (!this.running) {
+      throw new Error('Bot is not running - cannot send message');
+    }
+
+    if (!this.bot) {
+      throw new Error('Bot instance is not initialized');
+    }
+
+    try {
+      await this.bot.telegram.sendMessage(chatId, message);
+    } catch (error) {
+      console.error(
+        `❌ Error sending direct message to chat ${chatId}:`,
+        error,
+      );
+      throw error;
+    }
+  }
+
   public isRunning() {
     return this.running;
   }

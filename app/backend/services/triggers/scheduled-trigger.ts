@@ -118,6 +118,14 @@ class ScheduledTriggerManager {
       `[ScheduledTrigger] Executing trigger ${trigger.id} for agent ${trigger.agent_id}`,
     );
 
+    // ✅ Dependency Check: Only execute if telegram bot is running
+    if (!telegramBotManager.isRunning(trigger.agent_id)) {
+      console.log(
+        `📅 [ScheduledTrigger] Skipping trigger ${trigger.id} - telegram bot is not running for agent ${trigger.agent_id}. Will retry on next schedule.`,
+      );
+      return;
+    }
+
     try {
       // Send message to main agent (Letta)
       const stream = await lettaMessageAdapter.sendStreamMessage(
@@ -130,7 +138,7 @@ class ScheduledTriggerManager {
 
       const response = await lettaMessageAdapter.processStream(stream);
 
-      // Send response to Telegram group
+      // Send response to Telegram group (bot is confirmed running)
       await telegramBotManager.sendMessageToGroup(trigger.agent_id, response);
 
       console.log(
