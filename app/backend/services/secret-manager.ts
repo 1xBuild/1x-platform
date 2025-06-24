@@ -2,10 +2,9 @@ import crypto from 'crypto';
 
 const MASTER_KEY = process.env.SECRET_MANAGER_KEY;
 
-/**
- * SECRET_MANAGER_KEY must be a 64-character hexadecimal string
- * (32 bytes) to fulfil the aes-256-gcm key length requirement.
- */
+// SECRET_MANAGER_KEY must be a 64-character hexadecimal string (32 bytes)
+// to fulfil the aes-256-gcm key length requirement.
+
 if (!MASTER_KEY || !/^[0-9a-fA-F]{64}$/.test(MASTER_KEY)) {
   throw new Error(
     'SECRET_MANAGER_KEY env variable must be a 64-character hexadecimal string',
