@@ -61,7 +61,7 @@ export const resolveSecretsController = (req: Request, res: Response) => {
     res.status(500).json({
       status: 'error',
       code: 500,
-      message: 'Failed to resolve user secret',
+      message: 'Failed to resolve secret',
       details: error instanceof Error ? error.message : 'Unknown error',
     });
     return;
