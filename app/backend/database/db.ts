@@ -1,6 +1,7 @@
 import Database from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
+import { v4 as uuidv4 } from 'uuid';
 import { IAgent } from '../types';
 import { SecretManager } from '../services/secret-manager';
 
@@ -17,7 +18,7 @@ const db = new Database(dbPath);
 // Initialize tables
 db.exec(`
   CREATE TABLE IF NOT EXISTS uploaded_files (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id TEXT PRIMARY KEY,
     source_id TEXT NOT NULL,
     file_url TEXT NOT NULL,
     uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -319,9 +320,9 @@ export function isFileUploaded(sourceId: string, fileUrl: string): boolean {
  */
 export function markFileAsUploaded(sourceId: string, fileUrl: string): void {
   const stmt = db.prepare(
-    'INSERT OR IGNORE INTO uploaded_files (source_id, file_url) VALUES (?, ?)',
+    'INSERT OR IGNORE INTO uploaded_files (id, source_id, file_url) VALUES (?, ?, ?)',
   );
-  stmt.run(sourceId, fileUrl);
+  stmt.run(uuidv4(), sourceId, fileUrl);
 }
 
 export function listAgents(): IAgent[] {

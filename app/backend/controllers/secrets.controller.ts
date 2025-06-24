@@ -114,6 +114,7 @@ export const deleteUserSecretController = (req: Request, res: Response) => {
       discord: ['DISCORD_BOT_TOKEN'],
     };
 
+    // Recursively disable bots that depend on this secret
     for (const [botType, requiredSecrets] of Object.entries(
       requiredSecretsByBotType,
     )) {

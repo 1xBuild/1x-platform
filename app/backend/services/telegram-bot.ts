@@ -20,7 +20,7 @@ interface ShouldAnswerResponse {
 
 export class TelegramBot {
   private bot: Telegraf<Context>;
-  private mainAgentId: string = '';
+  private agentId: string = '';
   private messageHistory: Map<string, Array<{ text: string; sender: string }>> =
     new Map(); // chatId -> message history with sender info
   private startTime: number = Math.floor(Date.now() / 1000); // UNIX timestamp in seconds
@@ -35,16 +35,16 @@ export class TelegramBot {
     this.setupEventHandlers();
   }
 
-  public async start(mainAgentId?: string) {
-    if (mainAgentId) {
-      this.mainAgentId = mainAgentId;
+  public async start(agentId?: string) {
+    if (agentId) {
+      this.agentId = agentId;
     }
-    if (!this.mainAgentId) {
+    if (!this.agentId) {
       throw new Error('mainAgentId is not set');
     }
 
     // Fetch the telegram trigger config for this agent
-    const triggers = getTriggersByAgentId(this.mainAgentId);
+    const triggers = getTriggersByAgentId(this.agentId);
     this.telegramTrigger = triggers.find((t) => t.type === 'telegram') || null;
 
     if (!this.telegramTrigger) {
@@ -54,7 +54,7 @@ export class TelegramBot {
     // Get secrets from database
     this.telegramSecrets = resolveTriggerSecrets(
       this.telegramTrigger,
-      this.mainAgentId,
+      this.agentId,
     );
 
     // Check for required token
@@ -68,7 +68,7 @@ export class TelegramBot {
     try {
       this.bot = new Telegraf(this.telegramSecrets.TELEGRAM_BOT_TOKEN);
       this.setupEventHandlers(); // Re-setup handlers with new bot instance
-      await this.initialize(this.mainAgentId);
+      await this.initialize(this.agentId);
       this.running = true;
     } catch (error) {
       console.error('[TELEGRAM-BOT] Error creating bot instance:', error);
@@ -81,7 +81,7 @@ export class TelegramBot {
    * Returns a promise that resolves when bot is successfully launched or rejects with specific error
    */
   public async initialize(mainAgentId: string): Promise<void> {
-    this.mainAgentId = mainAgentId;
+    this.agentId = mainAgentId;
 
     // Use Promise.race to handle bot launch with timeout
     // bot.launch() never resolves on success, so we race it against a timeout to consider it successful
@@ -212,7 +212,7 @@ export class TelegramBot {
    */
   private async handleTextMessage(ctx: Context): Promise<void> {
     // Always check current database state instead of cached trigger
-    const currentTriggers = getTriggersByAgentId(this.mainAgentId);
+    const currentTriggers = getTriggersByAgentId(this.agentId);
     const currentTelegramTrigger =
       currentTriggers.find((t) => t.type === 'telegram') || null;
 
@@ -422,11 +422,7 @@ export class TelegramBot {
       role: 'user',
       // channelId: ctx.chat.id.toString() // Not strictly needed by sendMessage now
     };
-    const responseText = await sendMessage(
-      payload,
-      messageType,
-      this.mainAgentId,
-    );
+    const responseText = await sendMessage(payload, messageType, this.agentId);
 
     if (responseText !== '') {
       await ctx.reply(responseText);
@@ -461,7 +457,7 @@ export class TelegramBot {
     }
 
     try {
-      let agentId = existingAgentId || this.mainAgentId;
+      let agentId = existingAgentId || this.agentId;
 
       if (messageType === MessageType.DM) {
         agentId = await agentService.getOrCreateDmAgent(
@@ -564,7 +560,7 @@ export class TelegramBot {
           `⏰ Telegram Random event triggered (${config.timer.firingProbability * 100}% chance)`,
         );
 
-        const msg = await sendTimerMessage(this.mainAgentId);
+        const msg = await sendTimerMessage(this.agentId);
 
         if (msg !== '') {
           try {
@@ -629,7 +625,7 @@ export class TelegramBot {
   }
 
   /**
-   * ✅ Send a direct message to a specific chat without handling responses
+   * Send a direct message to a specific chat without handling responses
    * This is used by the manager for scheduled messages and other automated messages
    */
   public async sendDirectMessage(

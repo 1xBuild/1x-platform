@@ -11,7 +11,7 @@ import { telegramBotManager } from '../services/telegram-bot-manager';
 import { scheduledTriggerManager } from '../services/triggers/scheduled-trigger';
 
 // List all triggers for an agent
-export const getTriggers = (req: Request, res: Response) => {
+export const getTriggersByAgent = (req: Request, res: Response) => {
   const agentId = req.query.agentId || req.params.agentId || req.body.agentId;
   if (!agentId) {
     res.status(400).json({ success: false, error: 'agentId is required' });
