@@ -1,15 +1,20 @@
 import crypto from 'crypto';
 
 const MASTER_KEY = process.env.SECRET_MANAGER_KEY;
-if (!MASTER_KEY || MASTER_KEY.length < 32) {
+
+/**
+ * SECRET_MANAGER_KEY must be a 64-character hexadecimal string
+ * (32 bytes) to fulfil the aes-256-gcm key length requirement.
+ */
+if (!MASTER_KEY || !/^[0-9a-fA-F]{64}$/.test(MASTER_KEY)) {
   throw new Error(
-    'SECRET_MANAGER_KEY env variable must be set and at least 32 characters long',
+    'SECRET_MANAGER_KEY env variable must be a 64-character hexadecimal string',
   );
 }
 
 const ALGO = 'aes-256-gcm';
 const IV_LENGTH = 12; // AES-GCM recommended IV size
-const KEY = Buffer.from(MASTER_KEY, 'utf-8').slice(0, 32);
+const KEY: Buffer = Buffer.from(MASTER_KEY, 'hex'); // 32-byte key
 
 export class SecretManager {
   static encrypt(plainText: string): Buffer {
