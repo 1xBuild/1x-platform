@@ -7,7 +7,10 @@ import { openaiService } from './openai';
 import { p33lyShouldAnswerPromptTemplate, parseTemplate } from '../data/prompt';
 import * as LettaTypes from '@letta-ai/letta-client/api/types';
 import { getTriggersByAgentId, GenericTrigger } from '../database/db';
-import { evaluateShouldAnswerRule, resolveSecrets } from './trigger-manager';
+import {
+  evaluateShouldAnswerRule,
+  resolveTriggerSecrets,
+} from './triggers/trigger-manager';
 
 // Define the expected JSON structure from the LLM
 interface ShouldAnswerResponse {
@@ -49,7 +52,7 @@ export class TelegramBot {
     }
 
     // Get secrets from database
-    this.telegramSecrets = resolveSecrets(
+    this.telegramSecrets = resolveTriggerSecrets(
       this.telegramTrigger,
       this.mainAgentId,
     );
