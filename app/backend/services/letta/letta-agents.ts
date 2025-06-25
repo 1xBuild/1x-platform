@@ -78,10 +78,29 @@ class AgentManager {
   ): Promise<string> {
     try {
       // First try to find existing identity
-      const existingIdentities = await this.lettaClient.identities.list({
-        identifierKey: userId,
-        limit: 1,
-      });
+      const response = await fetch(
+        `${config.letta.baseUrl}/v1/identities/?identifier_key=${userId}&limit=1`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${config.letta.token}`,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        const errorResponse = await response.text();
+        console.error('List identities response:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorResponse,
+        });
+        throw new Error(
+          `Failed to list identities: ${errorResponse || response.statusText}`,
+        );
+      }
+
+      const existingIdentities = await response.json();
 
       if (existingIdentities && existingIdentities[0]?.id) {
         console.log(
@@ -92,7 +111,8 @@ class AgentManager {
 
       // Create new identity if none exists
       const identity = await this.lettaClient.identities.create({
-        identifierKey: userId,
+        // @ts-ignore working on the old version of the letta client
+        identifier: userId,
         name: username,
         identityType: 'user',
       });
@@ -141,8 +161,9 @@ class AgentManager {
         params.userId,
         params.username,
       );
-      if (!identityId) throw new Error('Failed to get or create user identity');
-      const lettaAgent = await this.lettaClient.agents.create({
+
+      // Create agent with or without identity based on availability
+      const agentConfig: any = {
         name: params.agentName,
         system: params.systemPrompt || '',
         description: params.description || '',
@@ -152,8 +173,14 @@ class AgentManager {
         contextWindowLimit:
           params.contextWindowLimit || this.MAX_CONTEXT_WINDOW_LIMIT,
         embedding: params.embedding || this.EMBEDDING,
-        identityIds: [identityId],
-      });
+      };
+
+      // Only add identityIds if we successfully created an identity
+      if (identityId) {
+        agentConfig.identityIds = [identityId];
+      }
+
+      const lettaAgent = await this.lettaClient.agents.create(agentConfig);
       return lettaAgent.id;
     } else if (params.agentName) {
       // Generic agent creation (without a user identity)
