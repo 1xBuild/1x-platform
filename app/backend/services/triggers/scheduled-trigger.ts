@@ -26,6 +26,7 @@ class ScheduledTriggerManager {
       const triggers = listScheduledTriggers();
 
       for (const trigger of triggers) {
+        if (!trigger.enabled) continue;
         await this.addScheduledTrigger(trigger);
       }
 

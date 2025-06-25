@@ -112,6 +112,7 @@ export const deleteUserSecretController = (req: Request, res: Response) => {
     const requiredSecretsByBotType: Record<string, string[]> = {
       telegram: ['TELEGRAM_BOT_TOKEN'],
       discord: ['DISCORD_BOT_TOKEN'],
+      scheduled: ['TELEGRAM_MAIN_CHAT_ID'],
     };
 
     // Recursively disable bots that depend on this secret
