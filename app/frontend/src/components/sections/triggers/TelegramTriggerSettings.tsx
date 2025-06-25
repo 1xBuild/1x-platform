@@ -12,7 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import SecretManagement from '@/components/ui/SecretManagement';
+import SecretManagement from '@/components/SecretManagement';
 import type { Agent } from '@/types/types';
 import { Dispatch, SetStateAction } from 'react';
 import { SERVER_URL } from '@/config';
