@@ -1,5 +1,8 @@
 import { Router } from 'express';
-import { enableCryptoPanic, getCryptoPanicStatus } from '../controllers/tools.controller';
+import {
+  enableCryptoPanic,
+  getCryptoPanicStatus,
+} from '../controllers/tools.controller';
 
 const router = Router();
 

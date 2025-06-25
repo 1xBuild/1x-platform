@@ -6,13 +6,13 @@ flowchart TD
         A1[Trigger: New message in group]
         A2[Trigger: Scheduled - daily news summary]
     end
-    
+
     subgraph Main-Agent
         direction TB
         B1[Core Memory: persona]
         B2[Agent: Letta]
     end
-    
+
     subgraph Tools
         direction TB
         C1[Tool: answer on tg]
