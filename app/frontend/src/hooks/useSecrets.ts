@@ -6,7 +6,10 @@ export function useSecrets(agentId?: string) {
   const [loading, setLoading] = useState(false);
 
   const fetchSecrets = useCallback(async () => {
-    if (!agentId) return;
+    if (!agentId) {
+      setSecretKeys([]);
+      return;
+    }
 
     try {
       const response = await fetch(
