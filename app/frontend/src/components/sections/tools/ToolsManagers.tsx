@@ -7,23 +7,10 @@ import { Agent } from '@/types/types';
 import CryptoPanicToolSettings from './CryptoPanicToolSettings';
 import { SERVER_URL } from '@/config';
 
-const AGENTS = {
-  MAIN: 'main-agent',
-  ANALYST: 'analyst-agent',
-  // etc.
-};
-
-const availableTools = [
-  { name: 'CryptoPanic', disabled: false, agents: [AGENTS.MAIN] },
-];
+const availableTools = [{ name: 'CryptoPanic', disabled: false }];
 
 export default function ToolsManager({ agent }: { agent: Agent }) {
-  const filteredTools = availableTools.filter(
-    (tool) =>
-      agent?.details?.name && tool.agents.includes(agent.details.name),
-  );
-
-  const showTools = filteredTools.length > 0;
+  const showTools = availableTools.length > 0;
   const [connected, setConnected] = useState(
     availableTools.reduce(
       (acc, tool) => {
@@ -38,6 +25,7 @@ export default function ToolsManager({ agent }: { agent: Agent }) {
 
   useEffect(() => {
     if (!agent?.id) return;
+    console.log(`[ToolsManager] Checking status for agentId: ${agent.id}`);
     fetch(`${SERVER_URL}/api/tools/crypto-panic?agentId=${agent.id}`)
       .then((res) => res.json())
       .then((data) => {
@@ -74,7 +62,7 @@ export default function ToolsManager({ agent }: { agent: Agent }) {
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-3">
-              {filteredTools.map((tool) => (
+              {availableTools.map((tool) => (
                 <Badge
                   key={tool.name}
                   variant="outline"
