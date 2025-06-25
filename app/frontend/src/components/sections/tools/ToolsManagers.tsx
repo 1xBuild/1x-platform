@@ -47,10 +47,10 @@ export default function ToolsManager({ agent }: { agent: Agent }) {
 
   return (
     <div className="max-w-3xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-2">Triggers</h1>
+      <h1 className="text-2xl font-bold mb-2">Tools</h1>
       <p className="text-muted-foreground mb-6">
-        Triggers allow you to create tasks for your agent from schedules or
-        integrations.
+        Tools allow your agent to complete tasks and interact with external
+        services.
       </p>
 
       {/* Available Triggers */}
