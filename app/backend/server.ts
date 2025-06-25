@@ -3,13 +3,11 @@ import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import { config } from './config/index';
-import { discordBot } from './services/discord-bot';
 import routes from './routes/index';
 import { errorHandler } from './middlewares/error.middleware';
 import { notFoundHandler } from './middlewares/not-found.middleware';
 import { createApiLimiter } from './config/rateLimiter';
 import './services/telegram-bot-manager';
-// import { analystAgent } from './services/analyst-agent';
 
 // Initialize express app
 const app = express();

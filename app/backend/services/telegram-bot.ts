@@ -40,7 +40,7 @@ export class TelegramBot {
       this.agentId = agentId;
     }
     if (!this.agentId) {
-      throw new Error('mainAgentId is not set');
+      throw new Error('agentId is not set');
     }
 
     // Fetch the telegram trigger config for this agent
@@ -80,8 +80,8 @@ export class TelegramBot {
    * Initialize the Telegram bot
    * Returns a promise that resolves when bot is successfully launched or rejects with specific error
    */
-  public async initialize(mainAgentId: string): Promise<void> {
-    this.agentId = mainAgentId;
+  public async initialize(agentId: string): Promise<void> {
+    this.agentId = agentId;
 
     // Use Promise.race to handle bot launch with timeout
     // bot.launch() never resolves on success, so we race it against a timeout to consider it successful
