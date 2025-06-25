@@ -21,7 +21,9 @@ class DataSourceManager {
     if (!embeddingConfig) {
       throw new Error('DEFAULT_EMBEDDING is not set');
     }
-    const embeddingConfigs = await this.lettaClient.embeddingModels.list();
+    // const embeddingConfigs = await this.lettaClient.embeddingModels.list(); // this is the new way (since 0.1.80)
+    const embeddingConfigs =
+      await this.lettaClient.models.listEmbeddingModels(); // this is the new way (before 0.1.80)
     this.embeddingConfig = embeddingConfigs.find(
       (config) => config.handle === embeddingConfig,
     ) as EmbeddingConfig;
