@@ -417,6 +417,7 @@ export class TelegramBot {
       return;
     const payload: LettaTypes.MessageCreate = {
       content: ctx.message.text,
+      // @ts-ignore working on the old version of the letta client
       senderId: ctx.from.id.toString(),
       name: ctx.from.username || `User_${ctx.from.id}`,
       role: 'user',
@@ -479,6 +480,7 @@ export class TelegramBot {
       }
       const payload: LettaTypes.MessageCreate = {
         content: ctx.message.text,
+        // @ts-ignore working on the old version of the letta client
         senderId: ctx.from.id.toString(),
         name: ctx.from.username || `User_${ctx.from.id}`,
         role: 'user',

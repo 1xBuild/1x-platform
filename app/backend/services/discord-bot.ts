@@ -195,6 +195,7 @@ export class DiscordBot {
       // Construct MessagePayload
       const payload: LettaTypes.MessageCreate = {
         content: finalContent,
+        // @ts-ignore working on the old version of the letta client
         senderId: message.author.id,
         name: message.author.username,
         role: 'user',
@@ -213,6 +214,7 @@ export class DiscordBot {
       // Construct MessagePayload
       const payload: LettaTypes.MessageCreate = {
         content: Ccontent,
+        // @ts-ignore working on the old version of the letta client
         senderId: message.author.id,
         name: message.author.username,
         role: 'user',
@@ -267,6 +269,7 @@ export class DiscordBot {
       }
       const payload: LettaTypes.MessageCreate = {
         content: message.content,
+        // @ts-ignore working on the old version of the letta client
         senderId: message.author.id,
         name: message.author.username,
         role: 'user',
