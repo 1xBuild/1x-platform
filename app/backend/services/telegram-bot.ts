@@ -375,7 +375,7 @@ export class TelegramBot {
       `📩 Received DM from ${ctx.from.username}: ${ctx.message.text}`,
     );
     const respondToDms =
-      this.telegramSecrets.TELEGRAM_RESPOND_TO_DMS !== 'false';
+      this.telegramSecrets.TELEGRAM_RESPOND_TO_DMS === 'true';
     if (respondToDms) {
       await this.processAndSendMessage(ctx, MessageType.DM);
     } else {

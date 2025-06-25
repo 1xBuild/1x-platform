@@ -161,10 +161,13 @@ export const upsertTriggerController = async (req: Request, res: Response) => {
           console.warn(
             `❌ Failed to start Telegram bot for agent ${agent_id}: ${result.error}`,
           );
+          trigger.enabled = false;
+          upsertTrigger(trigger);
           res.status(500).json({
             status: 'error',
             code: 500,
-            message: 'Failed to start Telegram bot, cannot upsert trigger',
+            message:
+              'Failed to start Telegram bot, verify that your bot bot token is correct',
             details: result.error,
           });
           return;

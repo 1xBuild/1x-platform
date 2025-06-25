@@ -187,6 +187,9 @@ export class TelegramBotManager {
           `❌ Failed to start Telegram bot for agent ${agentId}: ${errorMessage}`,
         );
 
+        bot.stop();
+        this.activeBots.delete(agentId);
+
         // Update database with specific error message for frontend
         upsertBot({
           agent_id: agentId,
