@@ -398,11 +398,14 @@ class AgentManager {
       }
       return await response.json();
     } catch (error) {
-      console.error(`Failed to attach tool ${toolId} to agent ${agentId}:`, error);
+      console.error(
+        `Failed to attach tool ${toolId} to agent ${agentId}:`,
+        error,
+      );
       throw new Error('Failed to attach tool to agent');
     }
   }
-  
+
   public async detachTool(agentId: string, toolId: string) {
     try {
       const response = await fetch(
@@ -435,7 +438,10 @@ class AgentManager {
       }
       return await response.json();
     } catch (error) {
-      console.error(`Failed to detach tool ${toolId} from agent ${agentId}:`, error);
+      console.error(
+        `Failed to detach tool ${toolId} from agent ${agentId}:`,
+        error,
+      );
       throw new Error('Failed to detach tool from agent');
     }
   }

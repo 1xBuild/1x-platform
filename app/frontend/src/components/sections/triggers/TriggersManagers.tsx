@@ -226,11 +226,13 @@ export default function TriggersManager({ agent }: { agent: Agent }) {
                     className={`inline-block w-2 h-2 rounded-full mr-1 ${connected[trigger.name] ? 'bg-green-500' : 'bg-red-500'}`}
                   />
                   {trigger.name}
-                  {trigger.name === 'Telegram' && triggerStatuses.Telegram?.triggerEnabled && !triggerStatuses.Telegram?.botRunning && (
-                    <Badge variant="secondary" className="text-xs ml-1">
-                      Trigger Only
-                    </Badge>
-                  )}
+                  {trigger.name === 'Telegram' &&
+                    triggerStatuses.Telegram?.triggerEnabled &&
+                    !triggerStatuses.Telegram?.botRunning && (
+                      <Badge variant="secondary" className="text-xs ml-1">
+                        Trigger Only
+                      </Badge>
+                    )}
                   <Button
                     size="sm"
                     variant="default"
