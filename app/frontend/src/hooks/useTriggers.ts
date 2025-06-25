@@ -54,7 +54,7 @@ export function useTriggers(agentId: string | undefined) {
   const [secretKeys, setSecretKeys] = useState<string[]>([]);
 
   const fetchTriggers = async () => {
-    // If no agent is selected, immediately clear any stale triggers
+    // Clear stale triggers when no agent is selected
     if (!agentId) {
       setTriggers([]);
       return;
