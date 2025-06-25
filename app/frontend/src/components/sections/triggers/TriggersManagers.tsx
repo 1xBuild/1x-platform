@@ -10,28 +10,13 @@ import { SERVER_URL } from '@/config';
 import { Switch } from '@/components/ui/switch';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 
-const AGENTS = {
-  MAIN: 'main-agent',
-  ANALYST: 'analyst-agent',
-  // etc.
-};
-
 const availableTriggers = [
-  { name: 'Telegram', disabled: false, agents: [AGENTS.MAIN] },
-  {
-    name: 'Schedule',
-    disabled: false,
-    agents: [AGENTS.MAIN, AGENTS.ANALYST],
-  },
+  { name: 'Telegram', disabled: false },
+  { name: 'Schedule', disabled: false },
 ];
 
 export default function TriggersManager({ agent }: { agent: Agent }) {
-  const filteredTriggers = availableTriggers.filter(
-    (trigger) =>
-      agent?.details?.name && trigger.agents.includes(agent.details.name),
-  );
-
-  const showTriggers = filteredTriggers.length > 0;
+  const showTriggers = availableTriggers.length > 0;
   const [connected, setConnected] = useState(
     availableTriggers.reduce(
       (acc, trigger) => {
@@ -47,14 +32,70 @@ export default function TriggersManager({ agent }: { agent: Agent }) {
   const [fetchingTriggers, setFetchingTriggers] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [triggerToDelete, setTriggerToDelete] = useState<any | null>(null);
+  const [triggerStatuses, setTriggerStatuses] = useState<
+    Record<
+      string,
+      {
+        triggerEnabled: boolean;
+        botRunning: boolean;
+        isFullyActive: boolean;
+      }
+    >
+  >({});
+
+  const checkTriggerAndBotStatus = async () => {
+    if (!agent?.id) return;
+
+    try {
+      // Check trigger status
+      const triggersResponse = await fetch(
+        `${SERVER_URL}/api/triggers?agentId=${agent.id}`,
+      );
+      const triggersData = await triggersResponse.json();
+      const telegramTrigger = triggersData.triggers?.find(
+        (t: any) => t.type === 'telegram',
+      );
+
+      // Check bot status
+      const botStatusResponse = await fetch(
+        `${SERVER_URL}/api/bots/status?agentId=${agent.id}`,
+      );
+      const botStatusData = await botStatusResponse.json();
+      const telegramBotStatus = botStatusData.statuses?.telegram;
+
+      console.log('🔍 [TriggersManager] Status check:', {
+        triggerEnabled: !!telegramTrigger?.enabled,
+        botRunning: !!telegramBotStatus?.running,
+        triggerData: telegramTrigger,
+        botData: telegramBotStatus,
+      });
+
+      // Store detailed status information
+      const triggerEnabled = !!telegramTrigger?.enabled;
+      const botRunning = !!telegramBotStatus?.running;
+      const isFullyActive = triggerEnabled && botRunning;
+
+      setTriggerStatuses((prev) => ({
+        ...prev,
+        Telegram: { triggerEnabled, botRunning, isFullyActive },
+      }));
+
+      setConnected((prev) => ({
+        ...prev,
+        Telegram: isFullyActive,
+      }));
+    } catch (error) {
+      console.error('❌ [TriggersManager] Error checking status:', error);
+      // On error, assume disconnected
+      setConnected((prev) => ({
+        ...prev,
+        Telegram: false,
+      }));
+    }
+  };
 
   useEffect(() => {
-    if (!agent?.id) return;
-    fetch(`${SERVER_URL}/api/triggers/telegram?agentId=${agent.id}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setConnected((prev) => ({ ...prev, Telegram: !!data.enabled }));
-      });
+    checkTriggerAndBotStatus();
   }, [agent?.id]);
 
   useEffect(() => {
@@ -73,28 +114,46 @@ export default function TriggersManager({ agent }: { agent: Agent }) {
   useEffect(() => {
     if (!agent?.id) return;
     setFetchingTriggers(true);
-    fetch(`${SERVER_URL}/api/triggers/schedule/all?agentId=${agent.id}`)
+    fetch(`${SERVER_URL}/api/triggers?agentId=${agent.id}`)
       .then((res) => res.json())
       .then((data) => {
-        setScheduledTriggers(data.triggers || []);
+        console.log('data');
+        console.log(data);
+        const scheduleTriggersData =
+          data.triggers?.filter((t: any) => t.type === 'scheduled') || [];
+        // Transform the generic trigger format to the expected schedule format
+        const transformedTriggers = scheduleTriggersData.map((t: any) => ({
+          id: t.id,
+          agent_id: t.agent_id,
+          enabled: t.enabled,
+          message: t.config.message,
+          schedule: t.config.schedule,
+          timezone: t.config.timezone,
+        }));
+        setScheduledTriggers(transformedTriggers);
       })
       .finally(() => setFetchingTriggers(false));
   }, [agent?.id, loading]);
 
   const handleToggleTrigger = async (trigger: any, enabled: boolean) => {
-    // Update only the enabled state
-    await fetch(`${SERVER_URL}/api/triggers/schedule`, {
+    // Update only the enabled state using generic trigger API
+    await fetch(`${SERVER_URL}/api/triggers`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        ...trigger,
-        enabled,
-        agentId: trigger.agent_id,
         id: trigger.id,
+        agent_id: trigger.agent_id,
+        type: 'schedule',
+        enabled,
+        config: {
+          schedule: trigger.schedule,
+          timezone: trigger.timezone,
+          message: trigger.message,
+        },
       }),
     });
     setScheduledTriggers((prev) =>
-      prev.map((t) => (t.id === trigger.id ? { ...t, enabled } : t))
+      prev.map((t) => (t.id === trigger.id ? { ...t, enabled } : t)),
     );
   };
 
@@ -105,12 +164,16 @@ export default function TriggersManager({ agent }: { agent: Agent }) {
 
   const confirmDeleteTrigger = async () => {
     if (!triggerToDelete) return;
-    await fetch(`${SERVER_URL}/api/triggers/schedule`, {
+    await fetch(`${SERVER_URL}/api/triggers`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: triggerToDelete.id, agentId: triggerToDelete.agent_id }),
+      body: JSON.stringify({
+        id: triggerToDelete.id,
+      }),
     });
-    setScheduledTriggers((prev) => prev.filter((t) => t.id !== triggerToDelete.id));
+    setScheduledTriggers((prev) =>
+      prev.filter((t) => t.id !== triggerToDelete.id),
+    );
     setDeleteDialogOpen(false);
     setTriggerToDelete(null);
   };
@@ -118,10 +181,21 @@ export default function TriggersManager({ agent }: { agent: Agent }) {
   const refreshScheduledTriggers = () => {
     if (!agent?.id) return;
     setFetchingTriggers(true);
-    fetch(`${SERVER_URL}/api/triggers/schedule/all?agentId=${agent.id}`)
+    fetch(`${SERVER_URL}/api/triggers?agentId=${agent.id}`)
       .then((res) => res.json())
       .then((data) => {
-        setScheduledTriggers(data.triggers || []);
+        const scheduleTriggersData =
+          data.triggers?.filter((t: any) => t.type === 'schedule') || [];
+        // Transform the generic trigger format to the expected schedule format
+        const transformedTriggers = scheduleTriggersData.map((t: any) => ({
+          id: t.id,
+          agent_id: t.agent_id,
+          enabled: t.enabled,
+          schedule: t.config.schedule,
+          timezone: t.config.timezone,
+          message: t.config.message,
+        }));
+        setScheduledTriggers(transformedTriggers);
       })
       .finally(() => setFetchingTriggers(false));
   };
@@ -142,7 +216,7 @@ export default function TriggersManager({ agent }: { agent: Agent }) {
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-3">
-              {filteredTriggers.map((trigger) => (
+              {availableTriggers.map((trigger) => (
                 <Badge
                   key={trigger.name}
                   variant="outline"
@@ -152,6 +226,11 @@ export default function TriggersManager({ agent }: { agent: Agent }) {
                     className={`inline-block w-2 h-2 rounded-full mr-1 ${connected[trigger.name] ? 'bg-green-500' : 'bg-red-500'}`}
                   />
                   {trigger.name}
+                  {trigger.name === 'Telegram' && triggerStatuses.Telegram?.triggerEnabled && !triggerStatuses.Telegram?.botRunning && (
+                    <Badge variant="secondary" className="text-xs ml-1">
+                      Trigger Only
+                    </Badge>
+                  )}
                   <Button
                     size="sm"
                     variant="default"
@@ -186,21 +265,28 @@ export default function TriggersManager({ agent }: { agent: Agent }) {
             {fetchingTriggers ? (
               <div>Loading triggers...</div>
             ) : scheduledTriggers.length === 0 ? (
-              <div className="text-muted-foreground">No scheduled triggers.</div>
+              <div className="text-muted-foreground">
+                No scheduled triggers.
+              </div>
             ) : (
               <div className="flex flex-col gap-2">
                 {scheduledTriggers.map((trigger) => (
-                  <div key={trigger.id} className="flex items-center gap-4 p-2 border rounded">
+                  <div
+                    key={trigger.id}
+                    className="flex items-center gap-4 p-2 border rounded"
+                  >
                     <span
                       className={`inline-block w-2 h-2 rounded-full ${trigger.enabled ? 'bg-green-500' : 'bg-red-500'}`}
                     />
                     <span className="font-mono text-xs">
-                      {String(trigger.hour).padStart(2, '0')}:{String(trigger.minute).padStart(2, '0')}
+                      {trigger.schedule}
                     </span>
                     <span className="flex-1 truncate">{trigger.message}</span>
                     <Switch
                       checked={trigger.enabled}
-                      onCheckedChange={(checked) => handleToggleTrigger(trigger, checked)}
+                      onCheckedChange={(checked) =>
+                        handleToggleTrigger(trigger, checked)
+                      }
                     />
                     <Button
                       size="sm"
@@ -221,7 +307,11 @@ export default function TriggersManager({ agent }: { agent: Agent }) {
       {showTriggers && selectedTrigger && (
         <Card>
           <CardHeader>
-            <CardTitle>{selectedTrigger === 'Schedule' ? 'Add a new Scheduled Trigger (UTC time)' : `${selectedTrigger} Settings`}</CardTitle>
+            <CardTitle>
+              {selectedTrigger === 'Schedule'
+                ? 'Add a new Scheduled Trigger (UTC time)'
+                : `${selectedTrigger} Settings`}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             {selectedTrigger === 'Telegram' ? (
@@ -231,6 +321,7 @@ export default function TriggersManager({ agent }: { agent: Agent }) {
                 setConnected={setConnected}
                 loading={loading}
                 setLoading={setLoading}
+                onStatusChange={checkTriggerAndBotStatus}
               />
             ) : selectedTrigger === 'Schedule' ? (
               <ScheduleTriggerSettings
