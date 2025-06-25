@@ -57,8 +57,6 @@ export default function TelegramTriggerSettings({
         const triggersResponse = await fetch(
           `${SERVER_URL}/api/triggers?agentId=${agent.id}`,
         );
-        console.log('triggersResponse');
-        console.log(triggersResponse);
         if (triggersResponse.ok) {
           const triggersData = await triggersResponse.json();
           const telegramTrigger = triggersData.triggers?.find(
