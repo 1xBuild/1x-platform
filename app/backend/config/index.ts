@@ -46,24 +46,6 @@ const envSchema = z.object({
     .preprocess((val: unknown) => val === 'true', z.boolean())
     .default(false),
 
-  // Telegram Bot Configuration
-  TELEGRAM_TOKEN: z.string().min(1).optional(), // Optional for now, so it doesn't break existing setups
-  TELEGRAM_BOT_ID: z.string().optional(),
-  TELEGRAM_CHAT_ID_FOR_TIMER: z.string().optional(), // For sending timer event messages
-  TELEGRAM_MAIN_CHAT_ID: z.string().optional(), // For scheduled triggers
-  TELEGRAM_RESPOND_TO_DMS: z
-    .preprocess((val: unknown) => val === 'true', z.boolean())
-    .default(true),
-  TELEGRAM_RESPOND_TO_MENTIONS: z
-    .preprocess((val: unknown) => val === 'true', z.boolean())
-    .default(true),
-  TELEGRAM_RESPOND_TO_GENERIC: z
-    .preprocess((val: unknown) => val === 'true', z.boolean())
-    .default(true), // Default to false for groups, to avoid too much noise
-  TELEGRAM_LLM_DECIDES_GROUP_RESPONSE: z
-    .preprocess((val: unknown) => val === 'true', z.boolean())
-    .default(true), // Default to false
-
   // Timer Configuration
   ENABLE_TIMER: z
     .preprocess((val: unknown) => val === 'true', z.boolean())
@@ -117,9 +99,6 @@ const envSchema = z.object({
 
   // OpenAI Configuration
   OPENAI_API_KEY: z.string().min(1),
-
-  // AnalystAgent Configuration
-  ANALYST_AGENT_MEMORY_BLOCK_LABEL: z.string().default('crypto-news'),
 
   // Cryptopanic Configuration
   CRYPTOPANIC_API_KEY: z.string().min(1).optional(),
@@ -189,19 +168,6 @@ export const config = {
   },
   openai: {
     apiKey: envVars.data.OPENAI_API_KEY,
-  },
-  telegram: {
-    token: envVars.data.TELEGRAM_TOKEN,
-    botId: envVars.data.TELEGRAM_BOT_ID,
-    chatIdForTimer: envVars.data.TELEGRAM_CHAT_ID_FOR_TIMER,
-    mainChatId: envVars.data.TELEGRAM_MAIN_CHAT_ID,
-    respondToDms: envVars.data.TELEGRAM_RESPOND_TO_DMS,
-    respondToMentions: envVars.data.TELEGRAM_RESPOND_TO_MENTIONS,
-    respondToGeneric: envVars.data.TELEGRAM_RESPOND_TO_GENERIC,
-    llmDecidesGroupResponse: envVars.data.TELEGRAM_LLM_DECIDES_GROUP_RESPONSE,
-  },
-  analystAgent: {
-    cryptoNewsMemoryBlockLabel: envVars.data.ANALYST_AGENT_MEMORY_BLOCK_LABEL,
   },
   cryptopanic: {
     apiKey: envVars.data.CRYPTOPANIC_API_KEY,

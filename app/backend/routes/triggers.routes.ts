@@ -1,22 +1,18 @@
 import { Router } from 'express';
 import {
-  enableTelegram,
-  getTelegramStatus,
-  getScheduleTrigger,
-  upsertScheduleTrigger,
-  getAllScheduleTriggers,
-  deleteScheduleTrigger,
+  getTriggersByAgent,
+  getTrigger,
+  upsertTriggerController,
+  deleteTriggerController,
+  getAllTriggers,
 } from '../controllers/triggers.controller';
-import { validateTelegramPayload } from '../middlewares/validateTelegramPayload';
 
 const router = Router();
 
-router.post('/telegram', validateTelegramPayload, enableTelegram);
-router.get('/telegram', getTelegramStatus);
-
-router.get('/schedule', getScheduleTrigger);
-router.post('/schedule', upsertScheduleTrigger);
-router.get('/schedule/all', getAllScheduleTriggers);
-router.delete('/schedule', deleteScheduleTrigger);
+router.get('/all', getAllTriggers); // List all triggers (admin/debug)
+router.get('/', getTriggersByAgent); // List all triggers for an agent (by agentId)
+router.get('/:id', getTrigger); // Get a single trigger by id
+router.post('/', upsertTriggerController); // Create or update a trigger
+router.delete('/', deleteTriggerController); // Delete a trigger by id
 
 export default router;

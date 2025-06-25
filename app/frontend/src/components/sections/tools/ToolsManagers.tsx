@@ -7,23 +7,10 @@ import { Agent } from '@/types/types';
 import CryptoPanicToolSettings from './CryptoPanicToolSettings';
 import { SERVER_URL } from '@/config';
 
-const AGENTS = {
-  MAIN: 'main-agent',
-  ANALYST: 'analyst-agent',
-  // etc.
-};
-
-const availableTools = [
-  { name: 'CryptoPanic', disabled: false, agents: [AGENTS.MAIN] },
-];
+const availableTools = [{ name: 'CryptoPanic', disabled: false }];
 
 export default function ToolsManager({ agent }: { agent: Agent }) {
-  const filteredTools = availableTools.filter(
-    (tool) =>
-      agent?.details?.name && tool.agents.includes(agent.details.name),
-  );
-
-  const showTools = filteredTools.length > 0;
+  const showTools = availableTools.length > 0;
   const [connected, setConnected] = useState(
     availableTools.reduce(
       (acc, tool) => {
@@ -60,10 +47,10 @@ export default function ToolsManager({ agent }: { agent: Agent }) {
 
   return (
     <div className="max-w-3xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-2">Triggers</h1>
+      <h1 className="text-2xl font-bold mb-2">Tools</h1>
       <p className="text-muted-foreground mb-6">
-        Triggers allow you to create tasks for your agent from schedules or
-        integrations.
+        Tools allow your agent to complete tasks and interact with external
+        services.
       </p>
 
       {/* Available Triggers */}
@@ -74,7 +61,7 @@ export default function ToolsManager({ agent }: { agent: Agent }) {
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-3">
-              {filteredTools.map((tool) => (
+              {availableTools.map((tool) => (
                 <Badge
                   key={tool.name}
                   variant="outline"

@@ -1,0 +1,179 @@
+@host = http://localhost:8000
+@agentId = agent-d8d803b9-caec-4d56-b8d0-4208e12a6ba7
+@triggerId = fd0c212f-1676-4acb-a5f1-707c94a4a27a
+
+### List all triggers for an agent
+GET {{host}}/api/triggers?agentId={{agentId}}
+Content-Type: application/json
+Accept: application/json
+
+###
+
+### Create a daily scheduled trigger (12 PM CEST)
+POST {{host}}/api/triggers
+Content-Type: application/json
+Accept: application/json
+
+{
+  "agent_id": "{{agentId}}",
+  "type": "scheduled",
+  "enabled": true,
+  "config": {
+    "message": "Send daily market update to the group",
+    "schedule": "0 12 * * *",
+    "timezone": "Europe/Paris",
+    "secrets": {
+      "TELEGRAM_MAIN_CHAT_ID": "TELEGRAM_MAIN_CHAT_ID"
+    }
+  }
+}
+
+###
+
+### Get a specific trigger by ID
+GET {{host}}/api/triggers/{{triggerId}}
+Content-Type: application/json
+Accept: application/json
+
+###
+
+### Delete a scheduled trigger
+DELETE {{host}}/api/triggers
+Content-Type: application/json
+Accept: application/json
+
+{
+  "id": "{{triggerId}}"
+}
+
+###
+
+### Create a frequent trigger (every 5 minutes) - for testing
+POST {{host}}/api/triggers
+Content-Type: application/json
+Accept: application/json
+
+{
+  "agent_id": "{{agentId}}",
+  "type": "scheduled",
+  "enabled": true,
+  "config": {
+    "message": "Quick market pulse check",
+    "schedule": "*/5 * * * *",
+    "timezone": "UTC",
+    "secrets": {
+      "TELEGRAM_MAIN_CHAT_ID": "TELEGRAM_MAIN_CHAT_ID"
+    }
+  }
+}
+
+###
+
+### Test validation - Invalid cron expression (should fail)
+POST {{host}}/api/triggers
+Content-Type: application/json
+Accept: application/json
+
+{
+  "agent_id": "{{agentId}}",
+  "type": "scheduled",
+  "enabled": true,
+  "config": {
+    "message": "This should fail",
+    "schedule": "invalid cron",
+    "timezone": "UTC"
+  }
+}
+
+###
+
+### Test validation - Missing message (should fail)
+POST {{host}}/api/triggers
+Content-Type: application/json
+Accept: application/json
+
+{
+  "agent_id": "{{agentId}}",
+  "type": "scheduled",
+  "enabled": true,
+  "config": {
+    "schedule": "0 12 * * *",
+    "timezone": "UTC"
+  }
+}
+
+###
+
+### Test validation - Missing schedule (should fail)
+POST {{host}}/api/triggers
+Content-Type: application/json
+Accept: application/json
+
+{
+  "agent_id": "{{agentId}}",
+  "type": "scheduled",
+  "enabled": true,
+  "config": {
+    "message": "This should fail - no schedule",
+    "timezone": "UTC"
+  }
+}
+
+###
+
+### Create a disabled scheduled trigger (won't run until enabled)
+POST {{host}}/api/triggers
+Content-Type: application/json
+Accept: application/json
+
+{
+  "agent_id": "{{agentId}}",
+  "type": "scheduled",
+  "enabled": false,
+  "config": {
+    "message": "Disabled trigger - won't run",
+    "schedule": "0 */2 * * *",
+    "timezone": "UTC"
+  }
+}
+
+###
+
+### Update and disable a scheduled trigger (stops execution)
+POST {{host}}/api/triggers
+Content-Type: application/json
+Accept: application/json
+
+{
+  "id": "{{triggerId}}",
+  "agent_id": "{{agentId}}",
+  "type": "scheduled",
+  "enabled": false,
+  "config": {
+    "message": "This trigger is now disabled",
+    "schedule": "0 12 * * *",
+    "timezone": "UTC"
+  }
+}
+
+###
+
+### CRON EXPRESSION REFERENCE:
+# ┌────────────── second (0 - 59, optional)
+# │ ┌──────────── minute (0 - 59)
+# │ │ ┌────────── hour (0 - 23)
+# │ │ │ ┌──────── day of month (1 - 31)
+# │ │ │ │ ┌────── month (1 - 12)
+# │ │ │ │ │ ┌──── day of week (0 - 7, 0 and 7 are Sunday)
+# │ │ │ │ │ │
+# │ │ │ │ │ │
+# * * * * * *
+
+### EXAMPLES:
+# "0 12 * * *"        - Every day at 12:00 PM
+# "*/15 * * * *"      - Every 15 minutes
+# "0 9 * * 1"         - Every Monday at 9:00 AM
+# "0 9-17 * * 1-5"    - Every hour from 9 AM to 5 PM, Monday to Friday
+# "0 10 1 * *"        - 1st day of every month at 10:00 AM
+# "0 0 1 1 *"         - Every January 1st at midnight
+# "30 14 * * 6"       - Every Saturday at 2:30 PM

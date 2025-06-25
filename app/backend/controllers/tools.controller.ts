@@ -36,7 +36,9 @@ export const getCryptoPanicStatus = async (req: Request, res: Response) => {
     return;
   }
 
-  console.log(`[CryptoPanicToolManager] Checking status for agentId: ${agentId}`);
+  console.log(
+    `[CryptoPanicToolManager] Checking status for agentId: ${agentId}`,
+  );
 
   const isRunning = await cryptoPanicToolManager.isRunning(agentId);
 

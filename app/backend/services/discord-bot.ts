@@ -10,11 +10,7 @@ import {
 } from 'discord.js';
 import { config } from '../config/index';
 import { agentService } from './agent';
-import {
-  sendMessage,
-  sendTimerMessage,
-  MessageType,
-} from './message-service';
+import { sendMessage, sendTimerMessage, MessageType } from './message-service';
 import * as LettaTypes from '@letta-ai/letta-client/api/types';
 export class DiscordBot {
   private client: Client;

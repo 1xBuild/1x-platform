@@ -1,0 +1,60 @@
+@host = http://localhost:8000
+@agentId = agent-d8d803b9-caec-4d56-b8d0-4208e12a6ba7
+@triggerId = 8afde841-909d-4e75-beb0-6540d882776e
+
+### List all triggers for an agent
+GET {{host}}/api/triggers?agentId={{agentId}}
+Content-Type: application/json
+Accept: application/json
+
+### Create a trigger
+POST {{host}}/api/triggers
+Content-Type: application/json
+Accept: application/json
+
+{
+  "agent_id": "{{agentId}}",
+  "type": "telegram",
+  "enabled": true,
+  "config": {
+    "shouldAnswer": {
+      "enabled": true,
+      "prompt": "Is this message directed to me?"
+    },
+    "secrets": {
+      "TELEGRAM_BOT_TOKEN": "TELEGRAM_BOT_TOKEN"
+    }
+  }
+}
+
+### Update a trigger
+POST {{host}}/api/triggers
+Content-Type: application/json
+Accept: application/json
+
+{
+  "id": "{{triggerId}}",
+  "agent_id": "{{agentId}}",
+  "type": "telegram",
+  "enabled": true,
+  "config": {
+    "shouldAnswer": {
+      "enabled": true,
+      "prompt": "Is this message directed to me?"
+    },
+    "secrets": {
+      "TELEGRAM_BOT_TOKEN": "TELEGRAM_BOT_TOKEN"
+    }
+  }
+}
+
+### Delete a trigger
+DELETE {{host}}/api/triggers
+Content-Type: application/json
+Accept: application/json
+
+{
+  "agent_id": "{{agentId}}",
+  "type": "telegram",
+  "id": "{{triggerId}}"
+}

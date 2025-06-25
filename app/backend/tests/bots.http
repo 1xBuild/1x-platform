@@ -1,0 +1,126 @@
+@host = http://localhost:8000
+@agentId = agent-d8d803b9-caec-4d56-b8d0-4208e12a6ba7
+@agentId2 = agent-4c07003b-3022-4960-8df4-6cfb4261a6a8
+
+### 1. List initial bot statuses for an agent
+GET {{host}}/api/bots/status?agentId={{agentId}}
+Content-Type: application/json
+Accept: application/json
+
+###
+
+### 2. Start a telegram bot (should create persistent instance)
+POST {{host}}/api/bots/start
+Content-Type: application/json
+Accept: application/json
+
+{
+  "agentId": "{{agentId}}",
+  "botType": "telegram"
+}
+
+###
+
+### 3. Verify bot is running (should show running status)
+GET {{host}}/api/bots/status?agentId={{agentId}}
+Content-Type: application/json
+Accept: application/json
+
+###
+
+### 4. Try to start the same bot again (should return success without recreating)
+POST {{host}}/api/bots/start
+Content-Type: application/json
+Accept: application/json
+
+{
+  "agentId": "{{agentId}}",
+  "botType": "telegram"
+}
+
+###
+
+### 5. Start a second bot for different agent (test multiple instances)
+### Requires a second agent + working secrets to be set + a telegram trigger
+### ps: this the telegram trigger that will actually start the bot
+POST {{host}}/api/bots/start
+Content-Type: application/json
+Accept: application/json
+
+{
+  "agentId": "{{agentId2}}",
+  "botType": "telegram"
+}
+
+###
+
+### 6. List all bots (should show both agents)
+GET {{host}}/api/bots
+Content-Type: application/json
+Accept: application/json
+
+###
+
+### 7. Test sending message via persistent bot (should use existing instance)
+
+POST {{host}}/api/triggers
+Content-Type: application/json
+Accept: application/json
+
+{
+  "agent_id": "{{agentId}}",
+  "type": "scheduled",
+  "enabled": true,
+  "config": {
+    "message": "Test message via persistent bot - no start/stop logs expected",
+    "schedule": "*/1 * * * *",
+    "timezone": "UTC"
+  }
+}
+
+###
+
+### 8. Stop first bot (should remove from memory but keep in database as stopped)
+POST {{host}}/api/bots/stop
+Content-Type: application/json
+Accept: application/json
+
+{
+  "agentId": "{{agentId}}",
+  "botType": "telegram"
+}
+
+###
+
+### 9. Verify first bot is stopped
+GET {{host}}/api/bots/status?agentId={{agentId}}
+Content-Type: application/json
+Accept: application/json
+
+###
+
+### 10. Verify second bot is still running
+GET {{host}}/api/bots/status?agentId={{agentId2}}
+Content-Type: application/json
+Accept: application/json
+
+###
+
+### 11. Stop second bot
+POST {{host}}/api/bots/stop
+Content-Type: application/json
+Accept: application/json
+
+{
+  "agentId": "{{agentId2}}",
+  "botType": "telegram"
+}
+
+###
+
+### 12. Final status check - both should be stopped
+GET {{host}}/api/bots
+Content-Type: application/json
+Accept: application/json
+
+###

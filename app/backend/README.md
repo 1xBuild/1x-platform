@@ -49,6 +49,37 @@
 
     <img width="400" alt="image" src="https://github.com/user-attachments/assets/0eabe8fa-556b-436f-9fbc-496f198ef482" />
 
+## ⚠️ CRITICAL SECURITY WARNING
+
+> **🚨 IMPORTANT: This application currently has NO user authentication system!**
+>
+> The current implementation has critical security vulnerabilities:
+>
+> - **Any user can access any other user's encrypted secrets**
+> - **No authorization checks on secret management endpoints**
+> - **Agent triggers can be modified by unauthorized users**
+>
+> **DO NOT USE IN PRODUCTION** without implementing proper user authentication and authorization.
+>
+> ### Required Security Fixes Before Production:
+>
+> 1. **Implement user authentication system** (JWT, OAuth, etc.)
+> 2. **Add authorization middleware** to verify user ownership of:
+>    - Secret access (`/api/triggers/secrets`)
+>    - Trigger management (`/api/triggers`)
+>    - Agent operations
+> 3. **Verify user ownership** in all controller functions
+> 4. **Add session management** and proper logout functionality
+>
+> ### Current Vulnerable Endpoints:
+>
+> - `GET /api/triggers/secrets` - Lists any user's secret keys
+> - `POST /api/triggers/secrets` - Can set secrets for any user
+> - `DELETE /api/triggers/secrets` - Can delete any user's secrets
+> - `POST /api/triggers` - Can modify any agent's triggers
+>
+> **Security fixes are marked with `TODO: CRITICAL SECURITY` comments throughout the codebase.**
+
 ## 📦 What's included
 
 - [Letta TypeScript SDK](https://github.com/letta-ai/letta-node)
