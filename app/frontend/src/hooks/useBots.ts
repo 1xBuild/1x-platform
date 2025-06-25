@@ -14,7 +14,10 @@ export function useBots(agentId?: string) {
   const [loading, setLoading] = useState(false);
 
   const fetchBotStatuses = useCallback(async () => {
-    if (!agentId) return;
+    if (!agentId) {
+      setBotStatuses({});
+      return;
+    }
 
     try {
       console.log('fetching bot statuses');
