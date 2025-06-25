@@ -68,6 +68,7 @@ export const sendMessage = async (
   messageType: MessageType,
   agentId?: string,
 ): Promise<string> => {
+  // @ts-ignore working on the old version of the letta client
   const { content: message, senderId, name } = messagePayload;
 
   if (!agentId) {
