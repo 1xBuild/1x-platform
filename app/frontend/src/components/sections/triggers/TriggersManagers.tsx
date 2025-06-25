@@ -63,13 +63,6 @@ export default function TriggersManager({ agent }: { agent: Agent }) {
       const botStatusData = await botStatusResponse.json();
       const telegramBotStatus = botStatusData.statuses?.telegram;
 
-      console.log('🔍 [TriggersManager] Status check:', {
-        triggerEnabled: !!telegramTrigger?.enabled,
-        botRunning: !!telegramBotStatus?.running,
-        triggerData: telegramTrigger,
-        botData: telegramBotStatus,
-      });
-
       // Store detailed status information
       const triggerEnabled = !!telegramTrigger?.enabled;
       const botRunning = !!telegramBotStatus?.running;
@@ -117,8 +110,6 @@ export default function TriggersManager({ agent }: { agent: Agent }) {
     fetch(`${SERVER_URL}/api/triggers?agentId=${agent.id}`)
       .then((res) => res.json())
       .then((data) => {
-        console.log('data');
-        console.log(data);
         const scheduleTriggersData =
           data.triggers?.filter((t: any) => t.type === 'scheduled') || [];
         // Transform the generic trigger format to the expected schedule format

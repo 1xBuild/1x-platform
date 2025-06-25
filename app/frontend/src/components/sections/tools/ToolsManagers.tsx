@@ -25,7 +25,6 @@ export default function ToolsManager({ agent }: { agent: Agent }) {
 
   useEffect(() => {
     if (!agent?.id) return;
-    console.log(`[ToolsManager] Checking status for agentId: ${agent.id}`);
     fetch(`${SERVER_URL}/api/tools/crypto-panic?agentId=${agent.id}`)
       .then((res) => res.json())
       .then((data) => {

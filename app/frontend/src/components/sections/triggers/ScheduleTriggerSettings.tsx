@@ -48,10 +48,6 @@ export default function ScheduleTriggerSettings({
         if (secretsResponse.ok) {
           const secretsData = await secretsResponse.json();
           const secretsList = secretsData.secrets || [];
-          console.log(
-            '🔍 [ScheduleTrigger] Loaded secrets on mount:',
-            secretsList,
-          );
           setSecrets(secretsList);
         }
       } catch (error) {
@@ -74,17 +70,11 @@ export default function ScheduleTriggerSettings({
   };
 
   const handleSecretsChange = (newSecrets: string[]) => {
-    console.log('🔄 [ScheduleTrigger] Secrets changed:', newSecrets);
     setSecrets(newSecrets);
   };
 
   const handleSave = async () => {
     if (!agent?.id) return;
-
-    console.log('💾 [ScheduleTrigger] Starting save');
-    console.log('📋 Current secrets:', secrets);
-    console.log('✅ Has all required secrets:', hasAllRequiredSecrets());
-    console.log('⏰ Schedule config:', { schedule, timezone, message });
 
     if (!hasAllRequiredSecrets()) {
       toast.error('Please set all required secrets before saving');
