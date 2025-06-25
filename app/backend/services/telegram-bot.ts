@@ -590,40 +590,6 @@ export class TelegramBot {
     }, delay);
   }
 
-  private async shouldAnswer(
-    currentMessageText: string,
-    history: string[],
-  ): Promise<ShouldAnswerResponse> {
-    const promptValues = {
-      current_message: currentMessageText,
-      history_message_1: history[0] || '',
-      history_message_2: history[1] || '',
-      history_message_3: history[2] || '',
-    };
-
-    const filledPrompt = parseTemplate(
-      p33lyShouldAnswerPromptTemplate,
-      promptValues,
-    );
-
-    try {
-      console.log('🤖 Asking LLM if P33ly should answer...');
-      const response =
-        await openaiService.createJsonCompletion<ShouldAnswerResponse>(
-          filledPrompt,
-          // config.openai.model, // Or your preferred model for this task
-          // You might want to use a faster/cheaper model for this if available
-        );
-      console.log(
-        `🤖 LLM decision: ${response.answer}, Reason: ${response.reason}`,
-      );
-      return response;
-    } catch (error) {
-      console.error('Error getting LLM decision for shouldAnswer:', error);
-      return { answer: 'no', reason: 'Error in LLM decision process.' }; // Default to no on error
-    }
-  }
-
   /**
    * Send a direct message to a specific chat without handling responses
    * This is used by the manager for scheduled messages and other automated messages
