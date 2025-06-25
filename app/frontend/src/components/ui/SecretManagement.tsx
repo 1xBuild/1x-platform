@@ -287,26 +287,26 @@ export default function SecretManagement({
         <CardContent className="space-y-4">
           {/* Required Secrets */}
           {requiredSecrets.length > 0 && (
-            <div className="space-y-4">
+            <form className="space-y-4">
               <h4 className="text-sm font-medium text-muted-foreground">
                 Required Secrets
               </h4>
               {requiredSecrets.map((secretKey) =>
                 renderSecretField(secretKey, true),
               )}
-            </div>
+            </form>
           )}
 
           {/* Optional Secrets */}
           {optionalSecrets.length > 0 && (
-            <div className="space-y-4">
+            <form className="space-y-4">
               <h4 className="text-sm font-medium text-muted-foreground">
                 Optional Secrets
               </h4>
               {optionalSecrets.map((secretKey) =>
                 renderSecretField(secretKey, false),
               )}
-            </div>
+            </form>
           )}
         </CardContent>
       </Card>
