@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { SERVER_URL } from '@/config';
 
-import SecretManagement from '@/components/ui/SecretManagement';
+import SecretManagement from '@/components/SecretManagement';
 
 interface ScheduleTriggerSettingsProps {
   agent: Agent;
