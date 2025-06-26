@@ -8,6 +8,7 @@ import { errorHandler } from './middlewares/error.middleware';
 import { notFoundHandler } from './middlewares/not-found.middleware';
 import { createApiLimiter } from './config/rateLimiter';
 import './services/telegram-bot-manager';
+import { agentService } from './services/agent';
 
 // Initialize express app
 const app = express();
@@ -32,6 +33,11 @@ app.use('/api', routes);
 // --- Middlewares ---
 app.use(notFoundHandler);
 app.use(errorHandler);
+
+// TODO: delete when we will have a proper template for the main agent
+(async () => {
+  await agentService.getOrCreateMainAgent();
+})();
 
 function shutdown() {
   console.log('🛑 Shutting down gracefully...');
