@@ -1,5 +1,5 @@
 import * as cron from 'node-cron';
-import { listScheduledTriggers } from '../../database/db';
+import { listScheduledTriggers, getTriggerById } from '../../database/db';
 import { lettaMessageAdapter } from '../letta/letta-messages';
 import { telegramBotManager } from '../telegram-bot-manager';
 import { config } from '../../config';
@@ -115,14 +115,28 @@ class ScheduledTriggerManager {
    * Execute a scheduled trigger
    */
   private async executeTrigger(trigger: any, message: string) {
-    console.log(
-      `[ScheduledTrigger] Executing trigger ${trigger.id} for agent ${trigger.agent_id}`,
-    );
+    // get fresh trigger data from database to ensure we have the latest enabled status
+    const freshTrigger = getTriggerById(trigger.id);
+
+    if (!freshTrigger) {
+      console.log(
+        `📅 [ScheduledTrigger] Trigger ${trigger.id} no longer exists in database. Removing from scheduler.`,
+      );
+      this.removeScheduledTrigger(trigger.id);
+      return;
+    }
+
+    if (!freshTrigger.enabled) {
+      console.log(
+        `📅 [ScheduledTrigger] Skipping trigger ${trigger.id} - trigger is disabled in database.`,
+      );
+      return;
+    }
 
     // ✅ Dependency Check: Only execute if telegram bot is running
-    if (!telegramBotManager.isRunning(trigger.agent_id)) {
+    if (!telegramBotManager.isRunning(freshTrigger.agent_id)) {
       console.log(
-        `📅 [ScheduledTrigger] Skipping trigger ${trigger.id} - telegram bot is not running for agent ${trigger.agent_id}. Will retry on next schedule.`,
+        `📅 [ScheduledTrigger] Skipping trigger ${trigger.id} - telegram bot is not running for agent ${freshTrigger.agent_id}. Will retry on next schedule.`,
       );
       return;
     }
@@ -130,7 +144,7 @@ class ScheduledTriggerManager {
     try {
       // Send message to main agent (Letta)
       const stream = await lettaMessageAdapter.sendStreamMessage(
-        config.letta.agentId || trigger.agent_id,
+        config.letta.agentId || freshTrigger.agent_id,
         {
           role: 'system',
           content: message,
@@ -140,7 +154,10 @@ class ScheduledTriggerManager {
       const response = await lettaMessageAdapter.processStream(stream);
 
       // Send response to Telegram group (bot is confirmed running)
-      await telegramBotManager.sendMessageToGroup(trigger.agent_id, response);
+      await telegramBotManager.sendMessageToGroup(
+        freshTrigger.agent_id,
+        response,
+      );
 
       console.log(
         `[ScheduledTrigger] Successfully executed trigger ${trigger.id}`,
