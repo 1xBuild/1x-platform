@@ -19,7 +19,7 @@ def CryptoPanicTool(
         currencies (Optional[str]): Comma-separated list of currency codes to filter news by (e.g., 'BTC,ETH').
         regions (Optional[str]): Region code to filter news by (e.g., 'en', 'fr', 'es'). Default is 'en'.
         filter (Optional[str]): Filter news by type (e.g., 'rising', 'hot', 'bullish', 'bearish', 'important', 'saved', 'lol').
-        kind (Optional[str]): Type of news to retrieve: 'news', 'media', or 'all'. Default is 'all'.
+        kind (Optional[str]): Type of news to retrieve: 'news' or 'media'. Default is 'news'.
         public (Optional[bool]): Set to true for public usage mode (non-user-specific news).
     Returns:
         dict: The JSON response from the CryptoPanic API.
