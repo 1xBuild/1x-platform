@@ -330,7 +330,8 @@ export class TelegramBot {
       // Use shouldAnswer from current trigger config
       if (
         currentTelegramTrigger &&
-        currentTelegramTrigger.config.shouldAnswer
+        currentTelegramTrigger.config.shouldAnswer &&
+        currentTelegramTrigger.config.shouldAnswer.enabled
       ) {
         // Add current message to history
         if (ctx.message && 'text' in ctx.message && ctx.from) {
