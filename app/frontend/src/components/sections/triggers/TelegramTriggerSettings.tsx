@@ -41,8 +41,6 @@ export default function TelegramTriggerSettings({
 
   const requiredSecrets = ['TELEGRAM_BOT_TOKEN'];
   const optionalSecrets = [
-    'TELEGRAM_BOT_ID',
-    'TELEGRAM_CHAT_ID',
     'TELEGRAM_RESPOND_TO_MENTIONS',
     'TELEGRAM_RESPOND_TO_GENERIC',
   ];
