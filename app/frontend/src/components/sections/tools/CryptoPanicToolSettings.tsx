@@ -30,7 +30,9 @@ export default function CryptoPanicToolSettings({
       });
       if (!response.ok) throw new Error(response.statusText);
       setConnected((prev) => ({ ...prev, CryptoPanic: checked }));
-      toast.success(`CryptoPanic ${checked ? 'enabled' : 'disabled'} with success !`);
+      toast.success(
+        `CryptoPanic ${checked ? 'enabled' : 'disabled'} with success !`,
+      );
     } catch (err) {
       toast.error('Impossible to update CryptoPanic status');
     } finally {

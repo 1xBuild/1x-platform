@@ -3,15 +3,12 @@ import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import { config } from './config/index';
-import { discordBot } from './services/discord-bot';
-import { telegramBotManager } from './services/telegram-bot-manager';
 import routes from './routes/index';
 import { errorHandler } from './middlewares/error.middleware';
 import { notFoundHandler } from './middlewares/not-found.middleware';
 import { createApiLimiter } from './config/rateLimiter';
+import './services/telegram-bot-manager';
 import { agentService } from './services/agent';
-import { startScheduledTriggerWorker } from './services/scheduled-trigger-worker';
-// import { analystAgent } from './services/analyst-agent';
 
 // Initialize express app
 const app = express();
@@ -37,36 +34,10 @@ app.use('/api', routes);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-// Main function to initialize all bots services
-async function initServices() {
-  try {
-    console.log('🚀 Starting bots services...');
-
-    // Initialize the main agent
-    const mainAgentId = await agentService.getOrCreateMainAgent();
-    console.log(`🤖 Main agent ID: ${mainAgentId}`);
-
-    // Set mainAgentId for analystAgent and start it // TODO: Uncomment this to enable analystAgent
-    // await analystAgent.setMainAgentId(mainAgentId);
-    // const analystAgentId = await analystAgent.getOrCreateAnalystAgent();
-    // console.log(`🤖 Analyst agent ID: ${analystAgentId}`);
-    // analystAgent.start();
-
-    // Initialize the telegram bot
-    await telegramBotManager.start(mainAgentId);
-
-    // Start timers
-    discordBot.startRandomEventTimer();
-
-    // Start scheduled trigger worker
-    startScheduledTriggerWorker();
-
-    console.log(`✅ All services initialized successfully!`);
-  } catch (error) {
-    console.error('❌ Error initializing services:', error);
-    process.exit(1);
-  }
-}
+// TODO: delete when we will have a proper template for the main agent
+(async () => {
+  await agentService.getOrCreateMainAgent();
+})();
 
 function shutdown() {
   console.log('🛑 Shutting down gracefully...');
@@ -80,5 +51,4 @@ process.on('SIGTERM', shutdown);
 // Start the server
 app.listen(PORT, () => {
   console.log(`🌐 Server listening on port ${PORT}`);
-  initServices();
 });

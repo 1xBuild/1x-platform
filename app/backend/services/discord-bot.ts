@@ -10,11 +10,7 @@ import {
 } from 'discord.js';
 import { config } from '../config/index';
 import { agentService } from './agent';
-import {
-  sendMessage,
-  sendTimerMessage,
-  MessageType,
-} from './message-service';
+import { sendMessage, sendTimerMessage, MessageType } from './message-service';
 import * as LettaTypes from '@letta-ai/letta-client/api/types';
 export class DiscordBot {
   private client: Client;
@@ -199,6 +195,7 @@ export class DiscordBot {
       // Construct MessagePayload
       const payload: LettaTypes.MessageCreate = {
         content: finalContent,
+        // @ts-ignore working on the old version of the letta client
         senderId: message.author.id,
         name: message.author.username,
         role: 'user',
@@ -217,6 +214,7 @@ export class DiscordBot {
       // Construct MessagePayload
       const payload: LettaTypes.MessageCreate = {
         content: Ccontent,
+        // @ts-ignore working on the old version of the letta client
         senderId: message.author.id,
         name: message.author.username,
         role: 'user',
@@ -271,6 +269,7 @@ export class DiscordBot {
       }
       const payload: LettaTypes.MessageCreate = {
         content: message.content,
+        // @ts-ignore working on the old version of the letta client
         senderId: message.author.id,
         name: message.author.username,
         role: 'user',

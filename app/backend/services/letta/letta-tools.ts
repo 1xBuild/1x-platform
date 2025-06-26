@@ -14,7 +14,11 @@ class LettaToolsManager {
   /**
    * List all tools, optionally filtered by name.
    */
-  public async listTools(params?: { name?: string; limit?: number; cursor?: string }) {
+  public async listTools(params?: {
+    name?: string;
+    limit?: number;
+    cursor?: string;
+  }) {
     try {
       return await this.lettaClient.tools.list(params);
     } catch (error) {

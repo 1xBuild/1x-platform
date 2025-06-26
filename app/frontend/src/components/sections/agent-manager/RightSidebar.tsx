@@ -13,9 +13,7 @@ interface RightSidebarProps {
   agent?: Agent | null;
 }
 
-export default function RightSidebar({
-  agent,
-}: RightSidebarProps) {
+export default function RightSidebar({ agent }: RightSidebarProps) {
   const model = agent?.details?.model || '';
 
   const rightSidebarSections = [
@@ -38,7 +36,7 @@ export default function RightSidebar({
           </Select>
         ),
       disabled: false,
-    }
+    },
   ];
 
   return (
@@ -59,9 +57,7 @@ export default function RightSidebar({
               </div>
             </CardHeader>
             <CardContent className="pt-0">
-              {section.content && (
-                section.content({ agent, model })
-              )}
+              {section.content && section.content({ agent, model })}
             </CardContent>
           </Card>
         ))}
