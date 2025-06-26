@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.1.0](https://github.com/1xBuild/thep33l/compare/v2.0.3...v2.1.0) (2025-06-26)
+
+
+### Features
+
+* **agent:** initialize main agent on server startup ([2c7732c](https://github.com/1xBuild/thep33l/commit/2c7732c3c2c739f1dc0ae4b1084251fcc44e83f3))
+* **database:** add Railway deployment guide and configure persistent SQLite storage ([3b307b6](https://github.com/1xBuild/thep33l/commit/3b307b69497663a0b852b542127ce6a545201cf6))
+* delete stale secrets management file ([608f170](https://github.com/1xBuild/thep33l/commit/608f1707d06c5cc15f83a4ecd482525d5204b7a6))
+
+
+### Bug Fixes
+
+* .http file ([5762b91](https://github.com/1xBuild/thep33l/commit/5762b91b12e5e7399d8529128f627c03ff8bf986))
+* add TypeScript ignore comments for compatibility with old letta client ([37115d2](https://github.com/1xBuild/thep33l/commit/37115d2f7fe11b538da86a06f09914b67e619d56))
+* auto update the trigger after a secret update (so no need to restart the bot) ([b7463f1](https://github.com/1xBuild/thep33l/commit/b7463f16ec4e8633c6b4b4e133d80a2d4c805a7a))
+* **cryptopanic:** update 'kind' parameter documentation to reflect valid options ([d3920f0](https://github.com/1xBuild/thep33l/commit/d3920f0b26ca03fbf3acaf851e4913364b9d4101))
+* **hooks:** clear bot statuses and secret keys when agentId is falsy ([66f1b4c](https://github.com/1xBuild/thep33l/commit/66f1b4cdbc256b59ab5d53b17caacf84119305b5))
+* **scheduled-trigger:** add auto save on switch click ([42cbca9](https://github.com/1xBuild/thep33l/commit/42cbca9e817df980347305b7d9027c6973c228fa))
+* **scheduled-trigger:** skip execution for disabled triggers ([6e09535](https://github.com/1xBuild/thep33l/commit/6e09535719a634f3dcc7e978783b5481e618f782))
+* **telegram-trigger-settings:** improve auto-save on should answer filter ([7845359](https://github.com/1xBuild/thep33l/commit/7845359d06eac5649be018d6202e92c224d5cfd0))
+* **triggers:** clear stale triggers when agentId is falsy ([617f7ea](https://github.com/1xBuild/thep33l/commit/617f7ea9650d59c354ce5192c22f0614bcb82113))
+
 ### [2.0.3](https://github.com/1xBuild/thep33l/compare/v2.0.2...v2.0.3) (2025-06-12)
 
 ### Bug Fixes
