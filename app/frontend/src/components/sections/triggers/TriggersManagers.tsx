@@ -7,7 +7,6 @@ import { Agent } from '@/types/types';
 import TelegramTriggerSettings from './TelegramTriggerSettings';
 import ScheduleTriggerSettings from './ScheduleTriggerSettings';
 import { SERVER_URL } from '@/config';
-import { Switch } from '@/components/ui/switch';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 
 const availableTriggers = [
@@ -28,8 +27,8 @@ export default function TriggersManager({ agent }: { agent: Agent }) {
   );
   const [selectedTrigger, setSelectedTrigger] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [scheduledTriggers, setScheduledTriggers] = useState<any[]>([]);
-  const [fetchingTriggers, setFetchingTriggers] = useState(false);
+  const [_scheduledTriggers, setScheduledTriggers] = useState<any[]>([]);
+  const [_fetchingTriggers, setFetchingTriggers] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [triggerToDelete, setTriggerToDelete] = useState<any | null>(null);
   const [triggerStatuses, setTriggerStatuses] = useState<
@@ -120,38 +119,12 @@ export default function TriggersManager({ agent }: { agent: Agent }) {
           message: t.config.message,
           schedule: t.config.schedule,
           timezone: t.config.timezone,
+          secrets: t.config.secrets || {},
         }));
         setScheduledTriggers(transformedTriggers);
       })
       .finally(() => setFetchingTriggers(false));
   }, [agent?.id, loading]);
-
-  const handleToggleTrigger = async (trigger: any, enabled: boolean) => {
-    // Update only the enabled state using generic trigger API
-    await fetch(`${SERVER_URL}/api/triggers`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        id: trigger.id,
-        agent_id: trigger.agent_id,
-        type: 'schedule',
-        enabled,
-        config: {
-          schedule: trigger.schedule,
-          timezone: trigger.timezone,
-          message: trigger.message,
-        },
-      }),
-    });
-    setScheduledTriggers((prev) =>
-      prev.map((t) => (t.id === trigger.id ? { ...t, enabled } : t)),
-    );
-  };
-
-  const handleDeleteTrigger = async (trigger: any) => {
-    setDeleteDialogOpen(true);
-    setTriggerToDelete(trigger);
-  };
 
   const confirmDeleteTrigger = async () => {
     if (!triggerToDelete) return;
@@ -185,6 +158,7 @@ export default function TriggersManager({ agent }: { agent: Agent }) {
           schedule: t.config.schedule,
           timezone: t.config.timezone,
           message: t.config.message,
+          secrets: t.config.secrets || {},
         }));
         setScheduledTriggers(transformedTriggers);
       })
@@ -248,61 +222,13 @@ export default function TriggersManager({ agent }: { agent: Agent }) {
 
       <Separator className="my-6" />
 
-      {/* Scheduled Triggers List - only show when Schedule is selected */}
-      {selectedTrigger === 'Schedule' && (
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Scheduled triggers</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {fetchingTriggers ? (
-              <div>Loading triggers...</div>
-            ) : scheduledTriggers.length === 0 ? (
-              <div className="text-muted-foreground">
-                No scheduled triggers.
-              </div>
-            ) : (
-              <div className="flex flex-col gap-2">
-                {scheduledTriggers.map((trigger) => (
-                  <div
-                    key={trigger.id}
-                    className="flex items-center gap-4 p-2 border rounded"
-                  >
-                    <span
-                      className={`inline-block w-2 h-2 rounded-full ${trigger.enabled ? 'bg-green-500' : 'bg-red-500'}`}
-                    />
-                    <span className="font-mono text-xs">
-                      {trigger.schedule}
-                    </span>
-                    <span className="flex-1 truncate">{trigger.message}</span>
-                    <Switch
-                      checked={trigger.enabled}
-                      onCheckedChange={(checked) =>
-                        handleToggleTrigger(trigger, checked)
-                      }
-                    />
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => handleDeleteTrigger(trigger)}
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
       {/* Trigger Settings Panel */}
       {showTriggers && selectedTrigger && (
         <Card>
           <CardHeader>
             <CardTitle>
               {selectedTrigger === 'Schedule'
-                ? 'Add a new Scheduled Trigger (UTC time)'
+                ? 'Scheduled Trigger'
                 : `${selectedTrigger} Settings`}
             </CardTitle>
           </CardHeader>

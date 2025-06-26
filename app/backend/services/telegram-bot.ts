@@ -3,8 +3,6 @@ import { message } from 'telegraf/filters';
 import { config } from '../config/index';
 import { agentService } from './agent';
 import { sendMessage, sendTimerMessage, MessageType } from './message-service';
-import { openaiService } from './openai';
-import { p33lyShouldAnswerPromptTemplate, parseTemplate } from '../data/prompt';
 import * as LettaTypes from '@letta-ai/letta-client/api/types';
 import { getTriggersByAgentId, GenericTrigger } from '../database/db';
 import {
@@ -138,6 +136,17 @@ export class TelegramBot {
         error instanceof Error ? error.message : String(error);
       throw new Error(`Failed to start Telegram bot: ${originalError}`);
     }
+  }
+
+  /**
+   * Update the Telegram secrets
+   * @param secrets - The new secrets to update
+   */
+  public updateTelegramSecrets(secrets: Record<string, string>): void {
+    this.telegramSecrets = {
+      ...this.telegramSecrets,
+      ...secrets,
+    };
   }
 
   /**
@@ -321,7 +330,8 @@ export class TelegramBot {
       // Use shouldAnswer from current trigger config
       if (
         currentTelegramTrigger &&
-        currentTelegramTrigger.config.shouldAnswer
+        currentTelegramTrigger.config.shouldAnswer &&
+        currentTelegramTrigger.config.shouldAnswer.enabled
       ) {
         // Add current message to history
         if (ctx.message && 'text' in ctx.message && ctx.from) {

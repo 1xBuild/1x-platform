@@ -41,8 +41,6 @@ export default function TelegramTriggerSettings({
 
   const requiredSecrets = ['TELEGRAM_BOT_TOKEN'];
   const optionalSecrets = [
-    'TELEGRAM_BOT_ID',
-    'TELEGRAM_CHAT_ID',
     'TELEGRAM_RESPOND_TO_MENTIONS',
     'TELEGRAM_RESPOND_TO_GENERIC',
   ];
@@ -90,23 +88,28 @@ export default function TelegramTriggerSettings({
     return requiredSecrets.every((key) => secrets.includes(key));
   };
 
-  const handleSave = async () => {
+  const saveTriggerConfig = async (
+    enabled?: boolean,
+    shouldAnswerEnabledOverride?: boolean,
+  ) => {
     if (!agent?.id) {
       toast.error('No agent selected');
-      return;
+      return false;
     }
-
-    setLoading(true);
 
     try {
       const triggerData = {
         id: telegramTrigger?.id,
         agent_id: agent.id,
         type: 'telegram',
-        enabled: connected['Telegram'] || false,
+        enabled:
+          enabled !== undefined ? enabled : connected['Telegram'] || false,
         config: {
           shouldAnswer: {
-            enabled: shouldAnswerEnabled,
+            enabled:
+              shouldAnswerEnabledOverride !== undefined
+                ? shouldAnswerEnabledOverride
+                : shouldAnswerEnabled,
             instruction: shouldAnswerInstruction,
           },
           secrets: Object.fromEntries(
@@ -123,8 +126,36 @@ export default function TelegramTriggerSettings({
         body: JSON.stringify(triggerData),
       });
 
-      if (!response.ok) throw new Error('Failed to save trigger');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update trigger');
+      }
 
+      // Refresh trigger state from database to ensure UI is in sync
+      const triggersResponse = await fetch(
+        `${SERVER_URL}/api/triggers?agentId=${agent.id}`,
+      );
+      if (triggersResponse.ok) {
+        const triggersData = await triggersResponse.json();
+        const updatedTelegramTrigger = triggersData.triggers?.find(
+          (t: any) => t.type === 'telegram',
+        );
+        if (updatedTelegramTrigger) {
+          setTelegramTrigger(updatedTelegramTrigger);
+        }
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error saving trigger config:', error);
+      throw error;
+    }
+  };
+
+  const handleSave = async () => {
+    setLoading(true);
+    try {
+      await saveTriggerConfig();
       toast.success('Telegram settings saved successfully');
     } catch (error) {
       toast.error('Failed to save Telegram settings');
@@ -146,58 +177,7 @@ export default function TelegramTriggerSettings({
     console.log('⏳ Starting telegram switch operation...');
     setLoading(true);
     try {
-      // Save the trigger configuration - this should handle bot start/stop automatically
-      const triggerData = {
-        id: telegramTrigger?.id,
-        agent_id: agent.id,
-        type: 'telegram',
-        enabled: checked,
-        config: {
-          shouldAnswer: {
-            enabled: shouldAnswerEnabled,
-            instruction: shouldAnswerInstruction,
-          },
-          secrets: Object.fromEntries(
-            [...requiredSecrets, ...optionalSecrets]
-              .filter((key) => secrets.includes(key))
-              .map((key) => [key, key]),
-          ),
-        },
-      };
-
-      console.log('📤 Sending trigger data:', triggerData);
-
-      const response = await fetch(`${SERVER_URL}/api/triggers`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(triggerData),
-      });
-
-      console.log('📥 Response status:', response.status);
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.log('❌ Response error:', errorData);
-        throw new Error(errorData.message || 'Failed to update trigger');
-      }
-
-      console.log('✅ Trigger updated successfully, refreshing state...');
-
-      // Refresh trigger state from database to ensure UI is in sync
-      const triggersResponse = await fetch(
-        `${SERVER_URL}/api/triggers?agentId=${agent.id}`,
-      );
-      if (triggersResponse.ok) {
-        const triggersData = await triggersResponse.json();
-        console.log('📥 Refreshed triggers data:', triggersData);
-        const updatedTelegramTrigger = triggersData.triggers?.find(
-          (t: any) => t.type === 'telegram',
-        );
-        if (updatedTelegramTrigger) {
-          console.log('🔄 Updating local state with:', updatedTelegramTrigger);
-          setTelegramTrigger(updatedTelegramTrigger);
-        }
-      }
+      await saveTriggerConfig(checked);
 
       // Notify parent to refresh both trigger and bot status
       onStatusChange?.();
@@ -216,6 +196,19 @@ export default function TelegramTriggerSettings({
     } finally {
       console.log('🏁 Setting loading to false');
       setLoading(false);
+    }
+  };
+
+  const handleShouldAnswerSwitch = async (checked: boolean) => {
+    setShouldAnswerEnabled(checked);
+
+    // Auto-save when should answer filter is toggled
+    try {
+      await saveTriggerConfig(undefined, checked);
+      toast.success('Should answer filter updated successfully');
+    } catch (error) {
+      toast.error('Failed to update should answer filter');
+      console.error('Error updating should answer filter:', error);
     }
   };
 
@@ -262,7 +255,7 @@ export default function TelegramTriggerSettings({
             <Switch
               id="shouldAnswer"
               checked={shouldAnswerEnabled}
-              onCheckedChange={setShouldAnswerEnabled}
+              onCheckedChange={handleShouldAnswerSwitch}
             />
             <Label htmlFor="shouldAnswer">Enable should answer filter</Label>
           </div>
