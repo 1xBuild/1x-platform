@@ -126,34 +126,6 @@ export default function TriggersManager({ agent }: { agent: Agent }) {
       .finally(() => setFetchingTriggers(false));
   }, [agent?.id, loading]);
 
-  const handleToggleTrigger = async (trigger: any, enabled: boolean) => {
-    // Update only the enabled state using generic trigger API
-    await fetch(`${SERVER_URL}/api/triggers`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        id: trigger.id,
-        agent_id: trigger.agent_id,
-        type: 'schedule',
-        enabled,
-        config: {
-          schedule: trigger.schedule,
-          timezone: trigger.timezone,
-          message: trigger.message,
-          secrets: trigger.secrets || {},
-        },
-      }),
-    });
-    setScheduledTriggers((prev) =>
-      prev.map((t) => (t.id === trigger.id ? { ...t, enabled } : t)),
-    );
-  };
-
-  const handleDeleteTrigger = async (trigger: any) => {
-    setDeleteDialogOpen(true);
-    setTriggerToDelete(trigger);
-  };
-
   const confirmDeleteTrigger = async () => {
     if (!triggerToDelete) return;
     await fetch(`${SERVER_URL}/api/triggers`, {
