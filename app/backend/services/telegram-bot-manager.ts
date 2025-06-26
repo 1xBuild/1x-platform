@@ -367,6 +367,21 @@ export class TelegramBotManager {
       isRunning: this.isRunning(agentId),
     }));
   }
+
+  /**
+   * Update the Telegram secrets
+   * @param agentId - The agent ID
+   * @param secrets - The new secrets to update
+   */
+  public updateTelegramSecrets(
+    agentId: string,
+    secrets: Record<string, string>,
+  ): void {
+    const bot = this.activeBots.get(agentId);
+    if (bot) {
+      bot.updateTelegramSecrets(secrets);
+    }
+  }
 }
 
 export const telegramBotManager = new TelegramBotManager();
