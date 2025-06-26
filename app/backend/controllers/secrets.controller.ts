@@ -7,6 +7,7 @@ import {
   upsertBot,
   getUserSecret,
 } from '../database/db';
+import { telegramBotManager } from '../services/telegram-bot-manager';
 
 // New endpoint to manage secrets
 export const getUserSecretsController = (req: Request, res: Response) => {
@@ -78,6 +79,7 @@ export const setUserSecretController = (req: Request, res: Response) => {
 
   try {
     setUserSecret(userId, key, value);
+    telegramBotManager.updateTelegramSecrets(userId, { [key]: value });
     res.json({ success: true });
     return;
   } catch (err) {

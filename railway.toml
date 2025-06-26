@@ -1,0 +1,11 @@
+[build]
+builder = "nixpacks"
+
+[deploy]
+healthcheckPath = "/api/health"
+restartPolicyType = "always"
+
+# Configure persistent storage for SQLite database
+[[deploy.volumes]]
+mountPath = "/app/data"
+name = "sqlite-data" 
