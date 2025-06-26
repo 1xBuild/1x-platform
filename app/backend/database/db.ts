@@ -6,7 +6,11 @@ import { IAgent } from '../types';
 import { SecretManager } from '../services/secret-manager';
 
 // Ensure the database directory exists
-const dbDir = path.join(process.cwd(), './data');
+// Use Railway volume mount path if available, otherwise fallback to local development path
+const dbDir = process.env.RAILWAY_ENVIRONMENT_NAME
+  ? '/app/data'
+  : path.join(process.cwd(), './data');
+
 if (!fs.existsSync(dbDir)) {
   fs.mkdirSync(dbDir, { recursive: true });
 }
