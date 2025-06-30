@@ -9,7 +9,7 @@ import { IApiErrorResponse } from '../types';
 export const authController = {
   login: async (req: Request, res: Response) => {
     const { id, password } = req.body;
-    if (id === 'Rick' && password === 'ricksanchez') {
+    if (id === 'allie' && password === 'alliegrace') {
       res.json({ success: true });
     }
     const errorResponse: IApiErrorResponse = {
