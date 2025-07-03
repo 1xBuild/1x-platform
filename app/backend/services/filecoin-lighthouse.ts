@@ -6,13 +6,15 @@ function getLighthouseKeys(agentId: string) {
   const apiKey = getUserSecret(agentId, 'LIGHTHOUSE_API_KEY');
   const publicKey = getUserSecret(agentId, 'LIGHTHOUSE_PUBLIC_KEY');
   const privateKey = getUserSecret(agentId, 'LIGHTHOUSE_PRIVATE_KEY');
-  if (!apiKey || !publicKey || !privateKey) {
+  const jwt = getUserSecret(agentId, 'LIGHTHOUSE_JWT');
+  if (!apiKey || !publicKey) {
     throw new Error('Missing Lighthouse credentials in user secrets');
   }
   return {
     apiKey: String(apiKey),
     publicKey: String(publicKey),
-    privateKey: String(privateKey),
+    privateKey: privateKey ? String(privateKey) : undefined,
+    jwt: jwt ? String(jwt) : undefined,
   };
 }
 
@@ -29,26 +31,30 @@ export const filecoinLighthouseService = {
     filename: string,
     agentId: string,
   ) {
-    const { apiKey, publicKey, privateKey } = getLighthouseKeys(agentId);
+    const { apiKey, publicKey, privateKey, jwt } = getLighthouseKeys(agentId);
     if (!fileBuffer || !filename)
       throw new Error('File buffer and filename are required');
     const safeFilename = String(filename);
     const safeBuffer = new Uint8Array(fileBuffer);
-    // 1. Get auth message
-    const {
-      data: { message },
-    } = await lighthouse.getAuthMessage(publicKey);
-    if (!message) throw new Error('Lighthouse auth message is missing');
-    // 2. Sign
-    const signer = new ethers.Wallet(privateKey);
-    const signedMessage = await signer.signMessage(message);
+    let signedMessage: string | undefined = undefined;
+    if (!jwt) {
+      if (!privateKey) throw new Error('Missing private key for signing');
+      // 1. Get auth message
+      const {
+        data: { message },
+      } = await lighthouse.getAuthMessage(publicKey);
+      if (!message) throw new Error('Lighthouse auth message is missing');
+      // 2. Sign
+      const signer = new ethers.Wallet(privateKey);
+      signedMessage = await signer.signMessage(message);
+    }
     // 3. Upload
     const file = new File([safeBuffer], safeFilename);
     const response = await lighthouse.uploadEncrypted(
       file,
       apiKey,
       publicKey,
-      signedMessage,
+      jwt || signedMessage!,
     );
     // Handle possible array response
     const fileData = Array.isArray(response.data)
@@ -78,6 +84,7 @@ export const filecoinLighthouseService = {
       data: { message },
     } = await lighthouse.getAuthMessage(publicKey);
     if (!message) throw new Error('Lighthouse auth message is missing');
+    if (!privateKey) throw new Error('Missing private key for signing');
     // 2. Sign
     const signer = new ethers.Wallet(privateKey);
     const signedMessage = await signer.signMessage(message);
@@ -108,21 +115,29 @@ export const filecoinLighthouseService = {
    * @returns {Promise<Buffer>} - The decrypted file data
    */
   async downloadDecryptedFile(cid: string, agentId: string) {
-    const { apiKey, publicKey, privateKey } = getLighthouseKeys(agentId);
+    const { apiKey, publicKey, privateKey, jwt } = getLighthouseKeys(agentId);
     if (!cid) throw new Error('CID is required');
     const safeCid = String(cid);
-    // 1. Get auth message
-    const {
-      data: { message },
-    } = await lighthouse.getAuthMessage(publicKey);
-    if (!message) throw new Error('Lighthouse auth message is missing');
-    // 2. Sign
-    const signer = new ethers.Wallet(privateKey);
-    const signedMessage = await signer.signMessage(message);
+    let signedMessage: string | undefined = undefined;
+    if (!jwt) {
+      if (!privateKey) throw new Error('Missing private key for signing');
+      // 1. Get auth message
+      const {
+        data: { message },
+      } = await lighthouse.getAuthMessage(publicKey);
+      if (!message) throw new Error('Lighthouse auth message is missing');
+      // 2. Sign
+      const signer = new ethers.Wallet(privateKey);
+      signedMessage = await signer.signMessage(message);
+    }
     // 3. Fetch encryption key
     const {
       data: { key },
-    } = await lighthouse.fetchEncryptionKey(safeCid, publicKey, signedMessage);
+    } = await lighthouse.fetchEncryptionKey(
+      safeCid,
+      publicKey,
+      jwt || signedMessage!,
+    );
     if (!key) throw new Error('Lighthouse decryption failed: missing key');
     // 4. Download and decrypt
     const file = await lighthouse.decryptFile(safeCid, String(key));
