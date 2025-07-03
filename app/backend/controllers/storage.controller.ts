@@ -44,7 +44,10 @@ export async function create(req: Request, res: Response): Promise<void> {
 
     res.json({ success: true, file: result });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({
+      success: false,
+      error: err instanceof Error ? err.message : String(err),
+    });
   }
 }
 
@@ -65,7 +68,10 @@ export async function createJSON(req: Request, res: Response): Promise<void> {
 
     res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({
+      success: false,
+      error: err instanceof Error ? err.message : String(err),
+    });
   }
 }
 
