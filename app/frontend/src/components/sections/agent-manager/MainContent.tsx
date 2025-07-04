@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import TriggersManager from '../triggers/TriggersManagers';
 import ToolsManager from '../tools/ToolsManagers';
+import KnowledgeManager from '../knowledge/KnowledgeManager';
 
 interface MainContentProps {
   agent?: Agent | null;
@@ -25,6 +26,9 @@ export default function MainContent({
   }
   if (selectedSection === 'tools' && agent) {
     return <ToolsManager agent={agent} />;
+  }
+  if (selectedSection === 'knowledge' && agent) {
+    return <KnowledgeManager agent={agent} />;
   }
 
   const systemPrompt = agent?.details?.systemPrompt || '';

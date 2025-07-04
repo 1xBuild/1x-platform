@@ -52,6 +52,13 @@ export function useSecrets(agentId?: string) {
     [agentId, fetchSecrets],
   );
 
+  const hasSecretKey = useCallback(
+    (key: string) => {
+      return secretKeys.includes(key);
+    },
+    [secretKeys],
+  );
+
   const deleteSecret = useCallback(
     async (key: string): Promise<boolean> => {
       if (!agentId) return false;
@@ -86,6 +93,7 @@ export function useSecrets(agentId?: string) {
   return {
     secretKeys,
     loading,
+    hasSecretKey,
     setSecret,
     deleteSecret,
     fetchSecrets,
