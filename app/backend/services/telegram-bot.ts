@@ -194,11 +194,11 @@ export class TelegramBot {
     }
     const history = this.messageHistory.get(chatId)!;
 
-    // Determine if the sender is P33ly (the bot)
+    // Determine if the sender is the bot
     const sender =
       this.telegramSecrets.TELEGRAM_BOT_ID &&
       senderId === this.telegramSecrets.TELEGRAM_BOT_ID
-        ? 'P33ly'
+        ? '(You)'
         : `User_${senderId}`;
 
     history.push({ text: message, sender });
