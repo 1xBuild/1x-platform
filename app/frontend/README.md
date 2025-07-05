@@ -8,7 +8,7 @@ This admin frontend lets you manage AI agents through a modern React interface (
 
 ## Main Features
 
-- **Secure login** (ID: Rick, PW: ricksanchez)
+- **Secure login** (ID: hello, PW: world)
 - **Protected routing** (`/admin` accessible only if authenticated)
 - **UI components**: shadcn/ui, Tailwind
 - **Logout button** (top right on all protected pages)
@@ -37,9 +37,17 @@ src/
 
 ## Authentication
 
-- Login via `/login` (ID: Rick, PW: ricksanchez)
+- Login via `/login` (ID: hello, PW: world)
 - Authentication stored in `localStorage` (`isAuthenticated`)
 - Logout: clears auth and redirects to `/login`
+
+---
+
+## Connecting to the Backend
+
+- The frontend is designed to connect to the backend API (see `app/backend/`).
+- To enable full functionality, ensure the backend is running and accessible.
+- Update API endpoints in the frontend config if needed (see `src/config.ts`).
 
 ---
 
@@ -62,14 +70,8 @@ pnpm dev
 
 ---
 
-## Evolving TODO
+## More Info
 
-- [ ] Connect backend API
-- [ ] Dynamic agent management
-- [ ] Unit tests
-- [ ] Detailed documentation
-- [ ] CI/CD, lint, formatting
+- [Global README](../../readme.md) – Monorepo overview
+- [Backend README](../backend/README.md) – API, bots, and agent management
 
----
-
-_This README will evolve as the project grows._
