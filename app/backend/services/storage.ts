@@ -27,12 +27,22 @@ export const storageService = {
     return getStorageEntry(id);
   },
 
-  async uploadJSON(agentId: string, content: string, filename: string) {
+  async uploadJSON(
+    agentId: string,
+    content: string,
+    filename: string,
+    publicKey: string,
+    signedMessage: string,
+  ) {
+    // @ts-ignore
     const { cid, url } = await filecoinLighthouseService.uploadEncryptedJSON(
       content,
       filename,
       agentId,
+      publicKey,
+      signedMessage,
     );
+    console.log('uploadJSON : ', cid, url);
     const id = createStorageEntry({
       agent_id: agentId,
       filename,
@@ -40,6 +50,7 @@ export const storageService = {
       url,
       encryption: 'lighthouse',
     });
+    console.log('uploadJSON : ', id);
     return getStorageEntry(id);
   },
 

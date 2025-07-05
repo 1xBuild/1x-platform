@@ -54,7 +54,13 @@ export async function create(req: Request, res: Response): Promise<void> {
 export async function createJSON(req: Request, res: Response): Promise<void> {
   try {
     const { agentId, filename, content } = req.body;
-    if (!agentId || !filename || !content) {
+    let publicKey = req.body.publicKey;
+    let signedMessage = req.body.signedMessage;
+    if (!publicKey || !signedMessage) {
+      publicKey = await getUserSecret(agentId, 'LIGHTHOUSE_PUBLIC_KEY');
+      signedMessage = await getUserSecret(agentId, 'LIGHTHOUSE_JWT');
+    }
+    if (!agentId || !filename || !content || !publicKey || !signedMessage) {
       res
         .status(400)
         .json({ success: false, error: 'Missing required fields' });
@@ -64,6 +70,8 @@ export async function createJSON(req: Request, res: Response): Promise<void> {
       agentId,
       JSON.stringify(content),
       filename,
+      publicKey,
+      signedMessage,
     );
 
     res.json({ success: true });
@@ -102,6 +110,7 @@ export async function getLighthouseJwt(
       success: false,
       error: 'Missing agentId, address, or signature',
     });
+    return;
   }
   try {
     // Exchange signature for JWT
@@ -121,6 +130,7 @@ export async function getLighthouseJwt(
         success: false,
         error: 'Failed to obtain JWT from Lighthouse',
       });
+      return;
     }
     // Store JWT in user secrets
     setUserSecret(agentId, 'LIGHTHOUSE_JWT', jwt);
@@ -129,6 +139,32 @@ export async function getLighthouseJwt(
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : String(error),
+    });
+  }
+}
+
+export async function getLighthouseSignMessage(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  const { address } = req.query;
+  if (!address) {
+    res.status(400).json({
+      success: false,
+      error: 'Missing address',
+    });
+    return;
+  }
+  try {
+    const response = await axios.get(
+      `https://encryption.lighthouse.storage/api/message/${address}`,
+    );
+    // The API returns an array of messages, use the first one
+    res.json({ message: response.data[0].message });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      error: err instanceof Error ? err.message : String(err),
     });
   }
 }

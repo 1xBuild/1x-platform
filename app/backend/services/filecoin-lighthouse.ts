@@ -1,20 +1,17 @@
 import { getUserSecret } from '../database/db';
 import lighthouse from '@lighthouse-web3/sdk';
-import { ethers } from 'ethers';
 
 function getLighthouseKeys(agentId: string) {
   const apiKey = getUserSecret(agentId, 'LIGHTHOUSE_API_KEY');
   const publicKey = getUserSecret(agentId, 'LIGHTHOUSE_PUBLIC_KEY');
-  const privateKey = getUserSecret(agentId, 'LIGHTHOUSE_PRIVATE_KEY');
   const jwt = getUserSecret(agentId, 'LIGHTHOUSE_JWT');
-  if (!apiKey || !publicKey) {
+  if (!apiKey || !publicKey || !jwt) {
     throw new Error('Missing Lighthouse credentials in user secrets');
   }
   return {
     apiKey: String(apiKey),
     publicKey: String(publicKey),
-    privateKey: privateKey ? String(privateKey) : undefined,
-    jwt: jwt ? String(jwt) : undefined,
+    jwt: String(jwt),
   };
 }
 
@@ -31,30 +28,18 @@ export const filecoinLighthouseService = {
     filename: string,
     agentId: string,
   ) {
-    const { apiKey, publicKey, privateKey, jwt } = getLighthouseKeys(agentId);
+    const { apiKey, publicKey, jwt } = getLighthouseKeys(agentId);
     if (!fileBuffer || !filename)
       throw new Error('File buffer and filename are required');
     const safeFilename = String(filename);
     const safeBuffer = new Uint8Array(fileBuffer);
-    let signedMessage: string | undefined = undefined;
-    if (!jwt) {
-      if (!privateKey) throw new Error('Missing private key for signing');
-      // 1. Get auth message
-      const {
-        data: { message },
-      } = await lighthouse.getAuthMessage(publicKey);
-      if (!message) throw new Error('Lighthouse auth message is missing');
-      // 2. Sign
-      const signer = new ethers.Wallet(privateKey);
-      signedMessage = await signer.signMessage(message);
-    }
     // 3. Upload
     const file = new File([safeBuffer], safeFilename);
     const response = await lighthouse.uploadEncrypted(
       file,
       apiKey,
       publicKey,
-      jwt || signedMessage!,
+      jwt,
     );
     // Handle possible array response
     const fileData = Array.isArray(response.data)
@@ -75,37 +60,45 @@ export const filecoinLighthouseService = {
    * @param {string} agentId - The agent uploading
    * @returns {Promise<{cid: string, url: string}>}
    */
-  async uploadEncryptedJSON(json: string, filename: string, agentId: string) {
-    const { apiKey, publicKey, privateKey } = getLighthouseKeys(agentId);
+  async uploadEncryptedJSON(
+    json: string,
+    filename: string,
+    agentId: string,
+    publicKey: string,
+    signedMessage: string,
+  ) {
+    console.log('uploadEncryptedJSON : ', json, filename, agentId);
+    const { apiKey } = getLighthouseKeys(agentId);
+    console.log('apiKey : ', apiKey);
+    console.log('publicKey : ', publicKey);
+    console.log('signedMessage : ', signedMessage);
     if (!json || !filename) throw new Error('JSON and filename are required');
     const safeFilename = String(filename);
-    // 1. Get auth message
-    const {
-      data: { message },
-    } = await lighthouse.getAuthMessage(publicKey);
-    if (!message) throw new Error('Lighthouse auth message is missing');
-    if (!privateKey) throw new Error('Missing private key for signing');
-    // 2. Sign
-    const signer = new ethers.Wallet(privateKey);
-    const signedMessage = await signer.signMessage(message);
+    console.log('safeFilename : ', safeFilename);
     // 3. Upload
-    const response = await lighthouse.textUploadEncrypted(
-      json,
-      apiKey,
-      publicKey,
-      signedMessage,
-      safeFilename,
-    );
-    // Handle possible array response
-    const fileData = Array.isArray(response.data)
-      ? response.data[0]
-      : response.data;
-    if (!fileData || !fileData.Hash)
-      throw new Error('Lighthouse upload failed: missing CID');
-    return {
-      cid: String(fileData.Hash),
-      url: `https://gateway.lighthouse.storage/ipfs/${fileData.Hash}`,
-    };
+    try {
+      const response = await lighthouse.textUploadEncrypted(
+        json,
+        apiKey,
+        publicKey,
+        signedMessage,
+        safeFilename,
+      );
+      console.log('response : ', response);
+      // Handle possible array response
+      const fileData = Array.isArray(response.data)
+        ? response.data[0]
+        : response.data;
+      console.log('fileData : ', fileData);
+      if (!fileData || !fileData.Hash)
+        throw new Error('Lighthouse upload failed: missing CID');
+      return {
+        cid: String(fileData.Hash),
+        url: `https://gateway.lighthouse.storage/ipfs/${fileData.Hash}`,
+      };
+    } catch (error) {
+      console.log('error : ', error);
+    }
   },
 
   /**
@@ -115,29 +108,16 @@ export const filecoinLighthouseService = {
    * @returns {Promise<Buffer>} - The decrypted file data
    */
   async downloadDecryptedFile(cid: string, agentId: string) {
-    const { apiKey, publicKey, privateKey, jwt } = getLighthouseKeys(agentId);
+    const { apiKey, publicKey, jwt } = getLighthouseKeys(agentId);
     if (!cid) throw new Error('CID is required');
     const safeCid = String(cid);
-    let signedMessage: string | undefined = undefined;
-    if (!jwt) {
-      if (!privateKey) throw new Error('Missing private key for signing');
-      // 1. Get auth message
-      const {
-        data: { message },
-      } = await lighthouse.getAuthMessage(publicKey);
-      if (!message) throw new Error('Lighthouse auth message is missing');
-      // 2. Sign
-      const signer = new ethers.Wallet(privateKey);
-      signedMessage = await signer.signMessage(message);
-    }
     // 3. Fetch encryption key
-    const {
-      data: { key },
-    } = await lighthouse.fetchEncryptionKey(
+    const response = await lighthouse.fetchEncryptionKey(
       safeCid,
       publicKey,
-      jwt || signedMessage!,
+      jwt,
     );
+    const { key } = response.data;
     if (!key) throw new Error('Lighthouse decryption failed: missing key');
     // 4. Download and decrypt
     const file = await lighthouse.decryptFile(safeCid, String(key));

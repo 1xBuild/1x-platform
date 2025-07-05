@@ -8,12 +8,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Agent } from '@/types/types';
 import { useSecrets } from '@/hooks/useSecrets';
 import { SERVER_URL } from '@/config';
+import { ethers } from 'ethers';
 
-const FILECOIN_REQUIRED_SECRETS = [
-  'LIGHTHOUSE_API_KEY',
-  'LIGHTHOUSE_PUBLIC_KEY',
-  'LIGHTHOUSE_PRIVATE_KEY',
-];
+const FILECOIN_REQUIRED_SECRETS = ['LIGHTHOUSE_API_KEY'];
 
 const availableKnowledgeProviders = [
   { name: 'Filecoin/Lighthouse', disabled: false },
@@ -24,6 +21,14 @@ interface KnowledgeFile {
   filename: string;
   created_at: string;
   url: string;
+}
+
+// Add type for window.ethereum
+
+declare global {
+  interface Window {
+    ethereum?: any;
+  }
 }
 
 export default function KnowledgeManager({ agent }: { agent: Agent }) {
@@ -38,6 +43,8 @@ export default function KnowledgeManager({ agent }: { agent: Agent }) {
   const [viewedContent, setViewedContent] = useState<string | null>(null);
   const [viewedFilename, setViewedFilename] = useState<string | null>(null);
   const [viewing, setViewing] = useState(false);
+  const [savedPublicKey, setSavedPublicKey] = useState('');
+  const [savedSignedMessage, setSavedSignedMessage] = useState('');
 
   // Secrets hook
   const {
@@ -101,6 +108,8 @@ export default function KnowledgeManager({ agent }: { agent: Agent }) {
         body: JSON.stringify({
           agentId: agent.id,
           filename: `knowledge-${Date.now()}.json`,
+          publicKey: savedPublicKey,
+          signedMessage: savedSignedMessage,
           content: { text: knowledge },
         }),
       });
@@ -127,6 +136,7 @@ export default function KnowledgeManager({ agent }: { agent: Agent }) {
       const res = await fetch(
         `${SERVER_URL}/api/storage/${file.id}?agentId=${agent.id}`,
       );
+      console.log('res : ', res);
       if (!res.ok) throw new Error('Failed to fetch file');
       // Try to parse as text or JSON
       const contentType = res.headers.get('Content-Type') || '';
@@ -144,6 +154,44 @@ export default function KnowledgeManager({ agent }: { agent: Agent }) {
       setViewing(false);
     }
   };
+
+  // Refactored Lighthouse JWT authentication logic
+  async function authenticateWithLighthouse(
+    agentId: string,
+    setSecret: (key: string, value: string) => Promise<void>,
+    setSaveMessage: (msg: string) => void,
+  ) {
+    try {
+      if (!window.ethereum) throw new Error('No wallet found');
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const publicKey = await signer.getAddress();
+      setSavedPublicKey(publicKey);
+      await setSecret('LIGHTHOUSE_PUBLIC_KEY', publicKey);
+      // 1. Get signable message from backend
+      const resMsg = await fetch(
+        `${SERVER_URL}/api/storage/lighthouse-sign-message?address=${publicKey}`,
+      );
+      if (!resMsg.ok) throw new Error('Failed to fetch signable message');
+      const { message } = await resMsg.json();
+      // 2. Ask user to sign with wallet
+      const signature = await signer.signMessage(message);
+      // 3. Exchange signature for JWT
+      const resJwt = await fetch(`${SERVER_URL}/api/storage/jwt`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ agentId, address: publicKey, signature }),
+      });
+      if (!resJwt.ok) throw new Error('Failed to exchange signature for JWT');
+      const { jwt } = await resJwt.json();
+      setSavedSignedMessage(jwt);
+      // 4. Store JWT as secret
+      await setSecret('LIGHTHOUSE_JWT', jwt);
+      setSaveMessage('Lighthouse JWT set successfully!');
+    } catch (err: any) {
+      setSaveMessage('Lighthouse authentication failed: ' + err.message);
+    }
+  }
 
   return (
     <div className="max-w-3xl mx-auto p-6 overflow-y-auto">
@@ -264,7 +312,7 @@ export default function KnowledgeManager({ agent }: { agent: Agent }) {
           </CardHeader>
           <CardContent>
             <div className="flex flex-col gap-4 mb-6">
-              {FILECOIN_REQUIRED_SECRETS.map((key) => (
+              {['LIGHTHOUSE_API_KEY'].map((key) => (
                 <div key={key} className="flex items-center gap-4">
                   <Badge variant={hasSecretKey(key) ? 'default' : 'secondary'}>
                     {key}
@@ -295,6 +343,41 @@ export default function KnowledgeManager({ agent }: { agent: Agent }) {
                   </Button>
                 </div>
               ))}
+              {/* JWT authentication button */}
+              <div className="flex items-center gap-4">
+                <Badge
+                  variant={
+                    hasSecretKey('LIGHTHOUSE_JWT') ? 'default' : 'secondary'
+                  }
+                >
+                  LIGHTHOUSE_JWT
+                </Badge>
+                {hasSecretKey('LIGHTHOUSE_JWT') ? (
+                  <span className="text-green-600">Set</span>
+                ) : (
+                  <span className="text-red-600">Missing</span>
+                )}
+                <Button
+                  size="sm"
+                  onClick={async () => {
+                    if (!agent?.id) return;
+                    setSaveMessage(null);
+                    await authenticateWithLighthouse(
+                      agent.id,
+                      // @ts-ignore
+                      setSecret,
+                      setSaveMessage,
+                    );
+                  }}
+                  disabled={
+                    !hasSecretKey('LIGHTHOUSE_API_KEY') ||
+                    !hasSecretKey('LIGHTHOUSE_JWT') ||
+                    loadingSecrets
+                  }
+                >
+                  Authenticate with Wallet
+                </Button>
+              </div>
             </div>
             <Textarea
               placeholder="Enter knowledge text here..."
