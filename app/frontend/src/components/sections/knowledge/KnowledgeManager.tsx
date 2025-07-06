@@ -370,9 +370,7 @@ export default function KnowledgeManager({ agent }: { agent: Agent }) {
                     );
                   }}
                   disabled={
-                    !hasSecretKey('LIGHTHOUSE_API_KEY') ||
-                    !hasSecretKey('LIGHTHOUSE_JWT') ||
-                    loadingSecrets
+                    !hasSecretKey('LIGHTHOUSE_API_KEY') || loadingSecrets
                   }
                 >
                   Authenticate with Wallet

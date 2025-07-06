@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import RightSidebar from './sections/agent-manager/RightSidebar';
+// import RightSidebar from './sections/agent-manager/RightSidebar';
 import Header from './sections/agent-manager/Header';
 import Sidebar from './sections/agent-manager/Sidebar';
 import MainContent from './sections/agent-manager/MainContent';
@@ -136,7 +136,7 @@ export default function AgentManager() {
               hasEdits={hasEdits}
             />
           </div>
-          <RightSidebar agent={agent} />
+          {/* <RightSidebar agent={agent} /> */}
         </div>
         {showUnsavedModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
