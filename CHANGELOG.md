@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.2.0](https://github.com/1xBuild/1x-platform/compare/v2.1.0...v2.2.0) (2025-07-06)
+
+
+### Features
+
+* **docs:** add README files for backend, frontend, and character sequence ([175edc6](https://github.com/1xBuild/1x-platform/commit/175edc6441e92f50f38a723466bb18cbad8e2267))
+* **filecoin:** add new open file tools to the agent (for filecoin) ([959f046](https://github.com/1xBuild/1x-platform/commit/959f0463e41da6fe9ae6e6b599114270db1064e8))
+* **project:** add project.json ([7aa5170](https://github.com/1xBuild/1x-platform/commit/7aa51708c1ac0bf200315b3a49ad544ab75e3f0e))
+* **storage:** add Lighthouse JWT handling and update storage routes ([3f0794e](https://github.com/1xBuild/1x-platform/commit/3f0794ef69ed1e3462f5c50e659bcfb9b8bbd6a9))
+* **storage:** add storage section in frontend ([feaa815](https://github.com/1xBuild/1x-platform/commit/feaa815001bba5d1a782440a8adaea342a4c27f1))
+* **storage:** implement storage service with CRUD and Filecoin ([1bab7d9](https://github.com/1xBuild/1x-platform/commit/1bab7d9e9195f3cb5a9886a09c106bccbc4e69bc))
+* **storage:** replace Lighthouse PK by JWT ([60e5ac4](https://github.com/1xBuild/1x-platform/commit/60e5ac42159607a3e64a4be539888b0cc313b1af))
+
+
+### Bug Fixes
+
+* **auth:** update login credentials ([5882b29](https://github.com/1xBuild/1x-platform/commit/5882b29621b0c51fec33b7ec948e5c69e7e1cbcd))
+* **auth:** update login credentials ([93fdf08](https://github.com/1xBuild/1x-platform/commit/93fdf089dc050fc62f6481905fbe18b2d53d22c5))
+* **filecoin-lighthouse:** add polyfill for crypto global object in Railway environment ([cf5ce2d](https://github.com/1xBuild/1x-platform/commit/cf5ce2dcdf13170d03bec5bde7ba6eea12e1573e))
+* **storage:** improve error handling in storage controller ([f6baf9c](https://github.com/1xBuild/1x-platform/commit/f6baf9c4cb715adcbcab02628dccefa469f76c8a))
+
 ## [2.1.0](https://github.com/1xBuild/thep33l/compare/v2.0.3...v2.1.0) (2025-06-26)
 
 

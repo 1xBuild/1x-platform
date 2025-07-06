@@ -1,7 +1,7 @@
 {
   "name": "thep33l-root",
   "private": true,
-  "version": "2.1.0",
+  "version": "2.2.0",
   "type": "module",
   "scripts": {
     "build": "pnpm --filter app-backend run build",
