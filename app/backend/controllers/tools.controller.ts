@@ -50,7 +50,7 @@ export const getCryptoPanicStatus = async (req: Request, res: Response) => {
 };
 
 // Attach/detach OpenFile tool
-export const enableOpenFileTool = async (req, res) => {
+export const enableOpenFileTool = async (req: Request, res: Response) => {
   const { enabled, agentId } = req.body;
   try {
     if (enabled) {
@@ -71,12 +71,11 @@ export const enableOpenFileTool = async (req, res) => {
 };
 
 // Get OpenFile tool status
-export const getOpenFileToolStatus = async (req, res) => {
+export const getOpenFileToolStatus = async (req: Request, res: Response) => {
   const agentId = req.query.agentId || req.body.agentId;
   if (!agentId) {
-    return res
-      .status(400)
-      .json({ success: false, error: 'agentId is required' });
+    res.status(400).json({ success: false, error: 'agentId is required' });
+    return;
   }
   try {
     const isEnabled = await openFileToolManager.isRunning(agentId);
@@ -86,5 +85,6 @@ export const getOpenFileToolStatus = async (req, res) => {
       success: false,
       error: err instanceof Error ? err.message : String(err),
     });
+    return;
   }
 };
