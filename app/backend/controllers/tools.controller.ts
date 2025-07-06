@@ -74,9 +74,8 @@ export const enableOpenFileTool = async (req: Request, res: Response) => {
 export const getOpenFileToolStatus = async (req: Request, res: Response) => {
   const agentId = req.query.agentId || req.body.agentId;
   if (!agentId) {
-    return res
-      .status(400)
-      .json({ success: false, error: 'agentId is required' });
+    res.status(400).json({ success: false, error: 'agentId is required' });
+    return;
   }
   try {
     const isEnabled = await openFileToolManager.isRunning(agentId);
@@ -86,5 +85,6 @@ export const getOpenFileToolStatus = async (req: Request, res: Response) => {
       success: false,
       error: err instanceof Error ? err.message : String(err),
     });
+    return;
   }
 };
