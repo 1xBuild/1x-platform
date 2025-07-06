@@ -6,6 +6,7 @@ import triggersRoutes from './triggers.routes';
 import toolsRoutes from './tools.routes';
 import secretsRoutes from './secrets.routes';
 import botsRoutes from './bots.routes';
+import storageRoutes from './storage.routes';
 
 const router = express.Router();
 
@@ -16,5 +17,6 @@ router.use('/triggers', triggersRoutes);
 router.use('/tools', toolsRoutes);
 router.use('/secrets', secretsRoutes);
 router.use('/bots', botsRoutes);
+router.use('/storage', storageRoutes);
 
 export default router;

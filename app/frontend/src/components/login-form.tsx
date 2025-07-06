@@ -18,7 +18,7 @@ export function LoginForm({
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (id === 'Rick' && pw === 'ricksanchez') {
+    if (id === 'hello' && pw === 'world') {
       localStorage.setItem('isAuthenticated', 'true');
       navigate('/admin');
     } else {
@@ -43,7 +43,7 @@ export function LoginForm({
                 <Input
                   id="id"
                   type="text"
-                  placeholder="Rick"
+                  placeholder="hello"
                   value={id}
                   onChange={(e) => setId(e.target.value)}
                   required
@@ -54,7 +54,7 @@ export function LoginForm({
                 <Input
                   id="password"
                   type="password"
-                  placeholder="ricksanchez"
+                  placeholder="world"
                   value={pw}
                   onChange={(e) => setPw(e.target.value)}
                   required

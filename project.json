@@ -1,0 +1,14 @@
+{
+  "name": "1xPlatform",
+  "tagline": "The privacy preserving AI agent platform",
+  "description": "1xPlatform allows to create and manage AI agents. It adopts a modular approach using Triggers, Storage and Tools. It focuses on integrating privacy preserving tools like Filecoin for memory and storage",
+  "team": [
+    {
+      "name": "Bertrand",
+      "email": "bertrandrigal.pro@gmail.com"
+    }
+  ],
+  "demo_url": "https://https://1x-platform.vercel.app/",
+  "video_url": "https://www.veed.io/view/a45de834-12c9-41c8-ab93-81506696f175?panel=share",
+  "technologies": ["Filecoin", "Letta", "Node", "React"]
+}

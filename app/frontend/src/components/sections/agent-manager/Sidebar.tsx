@@ -66,7 +66,7 @@ export default function Sidebar({
       label: 'Knowledge',
       icon: Brain,
       description: 'Add your documents and data',
-      disabled: true,
+      disabled: false,
     },
   ];
 

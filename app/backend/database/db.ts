@@ -95,6 +95,19 @@ db.exec(`
     FOREIGN KEY(agent_id) REFERENCES agents(id)
   )
 `);
+// --- STORAGE TABLE ---
+db.exec(`
+  CREATE TABLE IF NOT EXISTS storage (
+    id TEXT PRIMARY KEY,
+    agent_id TEXT NOT NULL,
+    filename TEXT NOT NULL,
+    cid TEXT NOT NULL,
+    url TEXT NOT NULL,
+    encryption TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )
+`);
 
 export default db;
 
@@ -480,4 +493,72 @@ export function listScheduledTriggers(): GenericTrigger[] {
     enabled: !!row.enabled,
     config: JSON.parse(row.config),
   }));
+}
+
+// --- STORAGE LOGIC ---
+export interface StorageRecord {
+  id: string;
+  agent_id: string;
+  filename: string;
+  cid: string;
+  url: string;
+  encryption: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export function createStorageEntry(
+  entry: Omit<StorageRecord, 'id' | 'created_at' | 'updated_at'>,
+): string {
+  const id = uuidv4();
+  const stmt = db.prepare(`
+    INSERT INTO storage (id, agent_id, filename, cid, url, encryption)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `);
+  stmt.run(
+    id,
+    entry.agent_id,
+    entry.filename,
+    entry.cid,
+    entry.url,
+    entry.encryption,
+  );
+  return id;
+}
+
+export function getStorageEntry(id: string): StorageRecord | null {
+  const stmt = db.prepare('SELECT * FROM storage WHERE id = ?');
+  const row = stmt.get(id) as StorageRecord | undefined;
+  return row || null;
+}
+
+export function updateStorageEntry(
+  id: string,
+  updates: Partial<Omit<StorageRecord, 'id' | 'created_at' | 'updated_at'>>,
+): void {
+  const fields = Object.keys(updates)
+    .map((key) => `${key} = ?`)
+    .join(', ');
+  const values = Object.values(updates);
+  if (!fields) return;
+  const stmt = db.prepare(`
+    UPDATE storage SET ${fields}, updated_at = CURRENT_TIMESTAMP WHERE id = ?
+  `);
+  stmt.run(...values, id);
+}
+
+export function deleteStorageEntry(id: string): void {
+  const stmt = db.prepare('DELETE FROM storage WHERE id = ?');
+  stmt.run(id);
+}
+
+export function listStorageEntries(agent_id?: string): StorageRecord[] {
+  const stmt = agent_id
+    ? db.prepare(
+        'SELECT * FROM storage WHERE agent_id = ? ORDER BY created_at DESC',
+      )
+    : db.prepare('SELECT * FROM storage ORDER BY created_at DESC');
+  return agent_id
+    ? (stmt.all(agent_id) as StorageRecord[])
+    : (stmt.all() as StorageRecord[]);
 }
