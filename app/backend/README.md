@@ -1,289 +1,109 @@
-<a href="https://docs.letta.com/">
-  <img alt="Stateful AI agent Discord chatbot template built with Letta" src="/assets/discord_chatbot_header_2x.png">
-  <h1 align="center">Letta Bot Example</h1>
-</a>
+# Backend – API, Bots, and Agent Management
 
-<p align="center">
-  Deploy your own AI chatbot using <a href="https://docs.letta.com/">Letta</a> to create agents that can learn over time.
-</p>
-
-<div align="center">
-|
-  <a href="#-features">Features</a> · 
-  <a href="#-whats-included">What's included</a> · 
-  <a href="#%EF%B8%8F-quickstart">Quickstart</a> · 
-  <a href="#-running-the-app-locally">Running the app locally</a>
-|
-</div>
-
-<div align="center">
-<h3>One-click deploy with Railway</h3>
-<a href="https://railway.com/template/C__ceE?referralCode=kdR8zc"><img src="https://railway.com/button.svg" alt="Deploy on Railway"/></a></div>
-</div>
-
-###
-
-> [!NOTE]
-> You must have a Letta server running to use this app. Follow this [quickstart guide](https://docs.letta.com/quickstart) to run your local Letta server.
-
-> [!NOTE]
-> You must also have a Discord app to use this app. Follow these [instructions](#-create-your-discord-app-and-set-your-variables) to create your Discord app.
-
-## 📺 Video overview (watch on YouTube)
-
-[![AI agents + Discord! Make a Discord chatbot with long-term memory using Letta](https://img.youtube.com/vi/HDyCAV-xuMw/0.jpg)](https://www.youtube.com/watch?v=HDyCAV-xuMw)
-
-## ✨ Features
-
-- 🧠 [Letta](https://github.com/letta-ai/letta)
-
-  - Formerly known as **MemGPT**, Letta is an open-source framework designed for building **stateful LLM applications**. Our Discord bot example showcases powerful core features of Letta.
-
-- Discord Bot
-
-  - Interacts with your Discord server to send and receive messages.
-
-    <img width="400" alt="image" src="https://github.com/user-attachments/assets/a09ce294-6cec-477f-ac60-f4b52493af67" />
-
-  - Interacts with you through Direct Messages (DMs) and send and receive messages.
-
-    <img width="400" alt="image" src="https://github.com/user-attachments/assets/0eabe8fa-556b-436f-9fbc-496f198ef482" />
-
-## ⚠️ CRITICAL SECURITY WARNING
-
-> **🚨 IMPORTANT: This application currently has NO user authentication system!**
->
-> The current implementation has critical security vulnerabilities:
->
-> - **Any user can access any other user's encrypted secrets**
-> - **No authorization checks on secret management endpoints**
-> - **Agent triggers can be modified by unauthorized users**
->
-> **DO NOT USE IN PRODUCTION** without implementing proper user authentication and authorization.
->
-> ### Required Security Fixes Before Production:
->
-> 1. **Implement user authentication system** (JWT, OAuth, etc.)
-> 2. **Add authorization middleware** to verify user ownership of:
->    - Secret access (`/api/triggers/secrets`)
->    - Trigger management (`/api/triggers`)
->    - Agent operations
-> 3. **Verify user ownership** in all controller functions
-> 4. **Add session management** and proper logout functionality
->
-> ### Current Vulnerable Endpoints:
->
-> - `GET /api/triggers/secrets` - Lists any user's secret keys
-> - `POST /api/triggers/secrets` - Can set secrets for any user
-> - `DELETE /api/triggers/secrets` - Can delete any user's secrets
-> - `POST /api/triggers` - Can modify any agent's triggers
->
-> **Security fixes are marked with `TODO: CRITICAL SECURITY` comments throughout the codebase.**
-
-## 📦 What's included
-
-- [Letta TypeScript SDK](https://github.com/letta-ai/letta-node)
-
-  - The Letta TypeScript library provides convenient access to the Letta API.
-
-- [Discord.js](https://discord.js.org/)
-
-  - Discord.js is a Node.js library that allows you to interact with the [Discord API](https://discord.com/developers/docs/intro), making it easy to build bot applications.
-
-- [Express JS](https://expressjs.com)
-
-  - Express JS is a minimal and flexible web framework for Node.js. We use Express to create a web server that accepts HTTP requests and interacts with the **Letta server** to generate responses. Express is also used to interact with the **Discord API**.
-
-- [TypeScript](https://www.typescriptlang.org)
-
-  - TypeScript enhances our codebase with **static typing, improved maintainability, and better developer tooling**, reducing potential runtime errors.
+This is the backend for 1xPlatform: a Node.js/Express server that manages AI agents, exposes a REST API, and integrates with both Discord and Telegram bots using [Letta](https://github.com/letta-ai/letta).
 
 ---
 
-# ⚡️ Quickstart
+## Features
 
-### 📋 What you need before starting
+- **Letta Integration**: Stateful LLM agent framework
+- **Bot Support**: Connects agents to Discord and Telegram
+- **REST API**: Endpoints for agent, secret, tool, and trigger management
+- **Extensible**: Add new tools, triggers, and integrations
 
-- [Node.js](https://nodejs.org/en/download/)
-- [npm](https://www.npmjs.com/get-npm)
-- [Docker](https://docs.docker.com/get-docker/)
-- [Discord App](https://discord.com/developers/applications)
-- [LocalTunnel](https://github.com/localtunnel/localtunnel)
+---
 
-# 🚀 Running the app locally
+## Architecture Overview
 
-## 💻 Set up your local Letta server
+- **Express API**: Handles HTTP requests for agent, secret, tool, and trigger management
+- **Bot Services**: Runs both Discord and Telegram bots, relaying messages to/from Letta agents
+- **Database**: Local SQLite for persistent data
+- **Config**: Centralized, type-safe config (see `config/`)
 
-Follow the [quickstart guide](https://docs.letta.com/quickstart) to run your local Letta server.
-You can run your own Letta server using [Letta Desktop](https://docs.letta.com/quickstart/desktop) or [Docker](https://docs.letta.com/quickstart/docker).
-By default, the Letta server will run on `http://localhost:8283`.
+---
 
-## 👉 Set up app
+## Security Warning
 
-1️⃣ Clone the repository and install dependencies:
+> **WIP: This backend currently has NO authentication or authorization!**
+>
+> - Any user can access or modify any agent, secret, or trigger
+> - Do NOT use in production without implementing security (see TODOs in code)
 
-```bash
-# Clone the repository
-git clone https://github.com/letta-ai/letta-discord-bot-example.git
+---
 
-# Navigate to the project directory
-cd letta-discord-bot-example
+## Quickstart
 
-# Install dependencies
-npm install
+1. **Install dependencies**
 
-# Set environment variables
-cp .env.template .env
-```
+   ```bash
+   pnpm install
+   ```
 
-2️⃣ Update the `.env` file with your Letta variables
+2. **Configure environment**
 
-## 👾 Create your Discord app and set your variables
+   - Copy `.env.template` to `.env` and fill in required values (Letta, Discord, Telegram, etc.)
+   - See config docs and comments for details
 
-1️⃣ Create a new Discord application [here](https://discord.com/developers/applications).
+3. **Run the backend**
 
-<img width="475" alt="image" src="https://github.com/user-attachments/assets/b57ec05b-5381-43f4-afc4-824a84abdd55" />
+   ```bash
+   pnpm start
+   # or
+   node server.js
+   ```
 
-2️⃣ Under `Settings` -> `General Information` of your Discord app, copy your Discord application's `Application ID` and `Public Key`, and paste them in your `.env` file.
+4. **Bots**
+   - The backend will launch both Discord and Telegram bots if configured
+   - See `services/discord-bot.ts` and `services/telegram-bot.ts`
 
-<img width="1302" alt="image" src="https://github.com/user-attachments/assets/56e55a8e-6322-48a7-9b36-afbf538db359" />
+---
 
-3️⃣ Under `Settings` -> `Bot` of your Discord app, copy your Discord bot's `Token`, and paste it in your `.env` file.
+## Directory Structure
 
-<img width="1426" alt="image" src="https://github.com/user-attachments/assets/f3ba4098-c976-427c-8b3d-1811d93d2b71" />
+- `controllers/` – API endpoint logic
+- `services/` – Bot logic, Letta integration, tools, triggers
+- `routes/` – Express route definitions
+- `middlewares/` – Error handling, validation, etc.
+- `database/` – SQLite setup
+- `config/` – Centralized config and validation
+- `data/` – Local DB and prompt data
+- `tests/` – HTTP and unit tests
 
-4️⃣ Enable the Privileged Gateway Intents
+---
 
-<img width="1667" alt="image" src="https://github.com/user-attachments/assets/68978702-42d0-4630-9b83-56e3a7ce6e14" />
+## Environment Variables
 
-5️⃣ Under `Settings` -> `Installation`, under `Guild Install` set up `scopes` and `permissions`
+- `LETTA_*` – Letta server and agent config
+- `DISCORD_*` – Discord bot config
+- `TELEGRAM_*` – Telegram bot config
+- See `.env.template` for all options
 
-<img width="1057" alt="image" src="https://github.com/user-attachments/assets/73921af7-7478-4b51-b388-ff30b9844d2f" />
+---
 
-6️⃣ Install Discord Bot on your server; copy and paste `Link` on your browser.
+## API Endpoints
 
-<img width="2130" alt="image" src="https://github.com/user-attachments/assets/c6e22db7-7bde-4d34-ab67-074ee5c048b0" />
+- `/api/agents` – Manage agents
+- `/api/secrets` – Manage secrets
+- `/api/tools` – Manage tools
+- `/api/triggers` – Manage triggers
+- `/api/bots` – Bot status and management
 
-### ⚙️ Environment variables
+---
 
-Environment variables can be controlled by setting them in your `.env` file or by setting them in your deployment environment.
+## Development & Testing
 
-The Discord bot now uses a centralized configuration system with Zod validation for all environment variables. This ensures that all configuration values are properly typed and validated at startup, preventing runtime issues due to misconfigured values.
+- Use the HTTP files in `tests/` to try endpoints
+- See code comments for extension points
 
-#### Configuration System
+---
 
-The configuration system is implemented in `src/config.ts` and provides:
+## More Info
 
-- Type safety for all configuration values
-- Default values for optional configuration
-- Validation of required configuration values
-- Grouped configuration by category (letta, discord, timer, etc.)
-- Centralized access to all configuration values
+- [Global README](../../readme.md) – Monorepo overview
+- [Frontend README](../frontend/README.md) – Admin dashboard
 
-To access the configuration values in your code:
+---
 
-```typescript
-import { config } from './config';
+## License
 
-// Examples:
-const lettaToken = config.letta.token;
-const discordToken = config.discord.token;
-const timerEnabled = config.timer.enabled;
-```
-
-The following environment variables can be set in the `.env` file:
-
-- `LETTA_TOKEN`: The password of your Letta server (if you self-deployed a server). Not applicable if you are not using a password (see [docs](https://docs.letta.com/guides/server/docker#password-protection-advanced)).
-- `LETTA_BASE_URL`: The base URL of your Letta server. This is usually `http://localhost:8283`.
-- `LETTA_AGENT_ID`: The ID of the Letta agent to use for the bot.
-- `LETTA_USE_SENDER_PREFIX`: If true, includes a prefix on every message sent to the agent. This prefix includes information about the Discord user who sent the message.
-
-- `APP_ID`: The ID of your Discord application.
-- `DISCORD_TOKEN`: The bot token for your Discord bot.
-- `PUBLIC_KEY`: The public key for your Discord bot.
-- `DISCORD_CHANNEL_ID`: Set this if you want the bot to only respond to messages (listen) in a specific channel.
-- `DISCORD_SERVER_NAME`: The name of your Discord server.
-- `DISCORD_ADMIN_NAME`: The Discord username of the server admin (without @).
-- `DISCORD_BOT_NAME`: The name of your Discord bot that will be used in prompts.
-- `RESPOND_TO_DMS`: If true, the bot will respond to DMs. If false, the bot will ignore them.
-- `RESPOND_TO_MENTIONS`: Whether or not to respond to mentions.
-- `RESPOND_TO_BOTS`: Whether or not to respond to bots.
-- `RESPOND_TO_GENERIC`: Whether or not to respond to generic messages.
-- `SURFACE_ERRORS`: If true, will send errors as messages in Discord. Otherwise, errors will only be visible in the logs.
-
-- `PORT`: The port to run the app on. Default is `3001`.
-
-- `ENABLE_TIMER`: Enable or disable the timer feature (will randomly trigger an agent input/event at a certain interval, defaults to true). Note that the timer feature requires `DISCORD_CHANNEL_ID` to be set (so that the agent knows where to send a message to if the timer is fired).
-- `TIMER_INTERVAL_MINUTES`: Maximum interval range in minutes for the random timer (defaults to every 15 minutes).
-- `FIRING_PROBABILITY`: Probability of the timer firing (0.0 to 1.0), defaults to 0.1 (10%).
-
-- `MAIN_DATA_SOURCE_NAME`: The name of the main data source for RAG functionality.
-- `MAIN_DATA_SOURCE_FILE_PATH`: The file path to the main data source.
-- `EMBEDDING_CONFIG`: The embedding model configuration.
-- `MODEL_CONFIG`: The LLM model configuration.
-
-- `MESSAGE_REPLY_TRUNCATE_LENGTH`: Maximum length for truncated message replies.
-
-For more settings view the [`.env.template`](/.env.template) file provided.
-
-### 👾 Create your Letta agent
-
-You can connect an existing agent to Discord (by using its `LETTA_AGENT_ID`), or you can create a brand new agent specifically to use as a Discord bot.
-
-If you create a new agent, we'd recommend adding some information (e.g. inside of the `human` or `persona` memory block) that explains how to interact with Discord. For example, placing the following text in `human`:
-
-```
-I can use this space in my core memory to take notes on the users that I am interacting with.
-So far, all I know that is that I am connected to a Discord server.
-I can see messages that other users send on this server, as long as they are directed at me (with a mention or a reply).
-I should also remember that if I want to "at" a user, I need to use the <@discord-id> format in my message response.
-This will render the user tag in a dynamic way on Discord, vs any other reference to a user (eg their username) will just result in plaintext.
-```
-
-Additionally, if you would like to give your chatbot/agent the ability to "ignore" (not reply) to certain messages, you can add a custom tool like this to your agent (for information on how to add a custom tool, see [our docs](https://docs.letta.com/guides/agents/tools#custom-tools)):
-
-```python
-def ignore():
-    """
-    Not every message warrants a reply (especially if the message isn't directed at you). Call this tool to ignore the message.
-    """
-    return
-```
-
-The ability for an agent to "ignore" messages can be crucial if you connect your agent to an active Discord channel with many participants, especially if you set `RESPOND_TO_GENERIC` to `true` (in which case the agent will "see" every single message in a channel, even messages not directed at the agent itself).
-
-## 🚀 Run app
-
-To run the app locally, simply do:
-
-```bash
-npm start
-```
-
-This will spin up the Discord bot service, which will listen for events on Discord, and when an event happens (e.g. a message is sent in a channel), it will send an appropriate message to the Letta server, check for a response from the Letta server, and potentially send back a reply message on Discord.
-
-We have also prepared a one-click deploy option to easily deploy this repo on Railway.
-Simply click the deploy link, enter your environment variables (including your Letta server address and Letta agent ID), and your Discord bot will be ready to go (and live 24/7):
-
-<a href="https://railway.com/template/C__ceE?referralCode=kdR8zc"><img src="https://railway.com/button.svg" alt="Deploy on Railway"/></a>
-
-## 🛠️ Development vs Production
-
-The bot uses the `NODE_ENV` environment variable to distinguish between development and production modes:
-
-- **Development (`NODE_ENV=development`)**: Certain features (like confirmation buttons) remain enabled for easier testing and repeated use. Use this mode when developing or debugging locally.
-- **Production (`NODE_ENV=production`)**: Some features (like confirmation buttons) are disabled after use to prevent accidental double-confirmation and ensure a smooth user experience.
-
-Set `NODE_ENV` in your `.env` file or deployment environment as needed.
-
-## 🧪 Testing Daily Routine Progression
-
-You can test the daily program progression logic using the special command:
-
-```
-!testProgram
-```
-
-- This command will run the daily routine logic for your user: it checks if the day should advance (after 9am and on a new date), updates the program if needed, and sends the current day's workout as an embed.
-- To simulate a new day, change your system date/time to tomorrow (after 9am) and run `!testProgram` again.
-- The bot will reply with whether the day was advanced or not, and show the correct workout for the current day.
+MIT (or project-specific)
