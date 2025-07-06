@@ -1,5 +1,17 @@
 import { getUserSecret } from '../database/db';
 import lighthouse from '@lighthouse-web3/sdk';
+import { webcrypto } from 'crypto';
+
+// Polyfill for crypto global object in Railway environment
+if (typeof global !== 'undefined' && !global.crypto) {
+  try {
+    global.crypto = webcrypto as any;
+  } catch (error) {
+    // Fallback if webcrypto is not available
+    const crypto = require('crypto');
+    global.crypto = crypto;
+  }
+}
 
 function getLighthouseKeys(agentId: string) {
   const apiKey = getUserSecret(agentId, 'LIGHTHOUSE_API_KEY');
