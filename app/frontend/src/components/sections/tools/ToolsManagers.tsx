@@ -5,9 +5,13 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Agent } from '@/types/types';
 import CryptoPanicToolSettings from './CryptoPanicToolSettings';
+import OpenFileToolSettings from './OpenFileToolSettings';
 import { SERVER_URL } from '@/config';
 
-const availableTools = [{ name: 'CryptoPanic', disabled: false }];
+const availableTools = [
+  { name: 'CryptoPanic', disabled: false },
+  { name: 'OpenFile', disabled: false },
+];
 
 export default function ToolsManager({ agent }: { agent: Agent }) {
   const showTools = availableTools.length > 0;
@@ -29,6 +33,12 @@ export default function ToolsManager({ agent }: { agent: Agent }) {
       .then((res) => res.json())
       .then((data) => {
         setConnected((prev) => ({ ...prev, CryptoPanic: !!data.enabled }));
+      });
+    // Fetch OpenFile tool status
+    fetch(`${SERVER_URL}/api/tools/open-file?agentId=${agent.id}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setConnected((prev) => ({ ...prev, OpenFile: !!data.enabled }));
       });
   }, [agent?.id]);
 
@@ -104,6 +114,15 @@ export default function ToolsManager({ agent }: { agent: Agent }) {
           <CardContent>
             {selectedTool === 'CryptoPanic' ? (
               <CryptoPanicToolSettings
+                agent={agent}
+                connected={connected}
+                setConnected={setConnected}
+                loading={loading}
+                setLoading={setLoading}
+              />
+            ) : null}
+            {selectedTool === 'OpenFile' ? (
+              <OpenFileToolSettings
                 agent={agent}
                 connected={connected}
                 setConnected={setConnected}
