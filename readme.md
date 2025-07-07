@@ -85,7 +85,7 @@ pnpm start:frontend # start the frontend
 ## Live Demo - the telegram community manager
 
 - Invite `nouny_aibot` to a Telegram group and give it admin rights so it can answer.
-- Access the admin at the address: [https://1x-platform.vercel.app](1x-platform.vercel.app)
+- Access the admin at the address: [1x-platform.vercel.app](https://1x-platform.vercel.app)
 - You can directly edit the persona or even add a scheduled trigger to wake up the agent (ex: send the news every morning at 10am)
 
 ![image](https://github.com/user-attachments/assets/2e3a65b9-06d7-4d3b-8286-3b25525d4982)
